@@ -201,10 +201,55 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
 .prog-row-done td{opacity:0.5;text-decoration:line-through;}
 .prog-row-done td:last-child{opacity:1;text-decoration:none;}
 
+/* DARK MODE */
+body.dark-mode {
+  --blue:#4A90D9;--blue2:#5BA3E8;--blue-pale:#1A2A3A;--blue-mid:#4A80C4;
+  --green:#2ECC71;--green-pale:#0D2A1A;--green2:#27AE60;
+  --red:#E74C3C;--red-pale:#2A0D0D;--red2:#E74C3C;
+  --amber:#F39C12;--amber-pale:#2A1A00;--amber2:#E67E22;
+  --gray:#E0E6EE;--gray-mid:#8F9BAA;--gray-light:#1E2530;--gray-border:#2E3A4A;
+  --white:#1A222D;--bg:#121820;
+}
+body.dark-mode .card{background:#1E2530;border-color:#2E3A4A}
+body.dark-mode .card-header{background:#16202A;border-color:#2E3A4A}
+body.dark-mode .field input,body.dark-mode .field select{background:#16202A;color:#E0E6EE;border-color:#2E3A4A}
+body.dark-mode .hist-item,body.dark-mode .proto-card{background:#1E2530;border-color:#2E3A4A}
+body.dark-mode .modal{background:#1E2530}
+body.dark-mode table.dtab th,body.dark-mode .cape-table th{background:#16202A}
+body.dark-mode .stat-card{background:#1E2530;border-color:#2E3A4A}
+body.dark-mode .med-item{background:#1E2530;border-color:#2E3A4A}
+
+/* PROGRESS BAR */
+.form-progress{background:#E0E4EA;height:4px;border-radius:2px;overflow:hidden;margin:0 20px 0}
+.form-progress-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--blue2));border-radius:2px;transition:width 0.4s ease;width:0%}
+.progress-label{font-size:10px;color:rgba(255,255,255,0.6);padding:0 20px 6px;text-align:right}
+
+/* KEYBOARD SHORTCUT HINTS */
+.kbd{display:inline-block;font-size:10px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:3px;padding:1px 5px;font-family:var(--mono);margin-left:6px;vertical-align:middle}
+
+/* DARK MODE TOGGLE */
+.dark-toggle{position:fixed;bottom:20px;right:20px;width:40px;height:40px;border-radius:50%;background:var(--blue);color:white;border:none;cursor:pointer;font-size:18px;box-shadow:var(--shadow-lg);z-index:500;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.dark-toggle:hover{transform:scale(1.1);background:var(--blue2)}
+
+/* TOAST NOTIFICATIONS */
+.toast-container{position:fixed;bottom:70px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:8px}
+.toast{padding:10px 16px;border-radius:var(--radius);font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);animation:slideIn 0.3s ease,fadeOut 0.3s ease 2.7s forwards;max-width:300px}
+.toast.success{background:#0B5E3C;color:white}
+.toast.error{background:#8B1A1A;color:white}
+.toast.info{background:var(--blue);color:white}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0;pointer-events:none}}
+
+/* VALIDATION ERRORS */
+.field-error{font-size:11px;color:var(--red2);margin-top:3px;display:none}
+.field.has-error .field-error{display:block}
+.field.has-error input,.field.has-error select{border-color:var(--red2)!important;background:#FEF5F5!important}
+
 /* PRINT STYLES */
 @media print{
   .no-print{display:none!important}
   body{background:white}
+  body.dark-mode{background:white;color:black}
 }
 </style>
 <!-- SheetJS for Excel import -->
@@ -228,14 +273,26 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
     <button class="tab-btn active" onclick="showPage('protocole',this)">&#9998; Protocole</button>
     <button class="tab-btn" onclick="showPage('medecins',this)">&#128100; Médecins</button>
     <button class="tab-btn" onclick="showPage('historique',this)">&#128196; Historique</button>
-    <button class="tab-btn" onclick="showPage('pharmacie',this)">&#128138; Gestion Médicaments</button>
-    <button class="tab-btn" onclick="showPage('apercu',this)">&#128065; Aperçu &amp; Impression</button>
+    <button class="tab-btn" onclick="showPage('pharmacie',this)">&#128138; Pharmacie Centrale</button>
+    <button class="tab-btn" onclick="showPage('apercu',this)">&#128065; Aperçu</button>
     <button class="tab-btn" onclick="showPage('preparation',this)">&#9881; Préparation</button>
-    <button class="tab-btn" onclick="showPage('support',this)">&#128138; Ordonnance Support</button>
-    <button class="tab-btn" onclick="showPage('stats',this)">&#128200; Statistiques</button>
+    <button class="tab-btn" onclick="showPage('support',this)">&#128138; Support</button>
+    <button class="tab-btn" onclick="showPage('stats',this)">&#128200; Stats</button>
     <button class="tab-btn" onclick="showPage('programme',this)">&#128197; Programme</button>
+    <button class="tab-btn" onclick="showPage('patients',this)">&#128101; Patients</button>
+  </div>
+  <div id="nav-progress-wrap" class="no-print" style="padding:3px 20px 5px;display:none">
+    <div style="display:flex;justify-content:space-between;margin-bottom:2px">
+      <span style="font-size:10px;color:rgba(255,255,255,0.55)" id="progress-label-text">Formulaire vide</span>
+      <span style="font-size:10px;color:rgba(255,255,255,0.55)" id="progress-pct">0%</span>
+    </div>
+    <div class="form-progress"><div class="form-progress-bar" id="form-progress-bar"></div></div>
   </div>
 </nav>
+<!-- Toast container -->
+<div class="toast-container no-print" id="toast-container"></div>
+<!-- Dark mode toggle -->
+<button class="dark-toggle no-print" onclick="toggleDarkMode()" title="Mode sombre / clair" id="dark-btn">🌙</button>
 
 <!-- ===== PAGE : PROTOCOLE ===== -->
 <div id="page-protocole" class="page active">
@@ -258,10 +315,26 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
             <option value="F">Féminin</option>
           </select>
         </div>
+        <div class="field"><label>Nationalité</label>
+          <select id="nationalite" onchange="update()" style="border:1.5px solid var(--gray-border);border-radius:var(--radius);padding:8px 10px;font-size:14px;font-family:var(--font);width:100%;background:white;outline:none">
+            <option value="Sénégalais">🇸🇳 Sénégalais</option>
+            <option value="Étranger">🌍 Étranger</option>
+          </select>
+        </div>
+        <div class="field"><label>Contact (téléphone)</label><input id="tel-patient" type="tel" placeholder="ex: 77 123 45 67" oninput="update()" style="letter-spacing:0.03em"></div>
+        <div class="field"><label>Ligne de traitement</label>
+          <select id="ligne-traitement" onchange="update()" style="border:1.5px solid var(--gray-border);border-radius:var(--radius);padding:8px 10px;font-size:14px;font-family:var(--font);width:100%;background:white;outline:none">
+            <option value="">— Ligne —</option>
+            <option value="I">Ligne I</option>
+            <option value="II">Ligne II</option>
+            <option value="III">Ligne III</option>
+            <option value="IV">Ligne IV</option>
+          </select>
+        </div>
         <div class="field"><label>N° Dossier</label><input id="dossier" type="text" placeholder="ex: 539/24" oninput="update()"></div>
       </div>
       <div class="fg g4">
-        <div class="field"><label>ID Cubix</label><input id="cubix" type="text" placeholder="ex: 122/24" oninput="update()" style="letter-spacing:0.03em"></div>
+        <div class="field"><label>ID Cubix</label><input id="cubix" type="text" placeholder="ex: 122456" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,6);update()" style="letter-spacing:0.1em;font-family:var(--mono)"></div>
         <div class="field">
           <label>N° séquentiel (Code Gratuite)</label>
           <input id="num-seq" type="number" placeholder="ex: 155" min="1" oninput="genCodeGratuite()">
@@ -270,7 +343,7 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
           <label>Code Gratuite <span style="color:var(--blue);font-size:10px">(auto)</span></label>
           <input id="codegratuite" type="text" readonly style="background:var(--blue-pale);color:var(--blue);font-weight:600;font-family:var(--mono)" placeholder="ex: 155M24">
         </div>
-        <div class="field"><label>Date du protocole</label><input id="date-protocole" type="date" oninput="genCodeGratuite()"></div>
+        <div class="field"><label>Date du protocole</label><input id="date-protocole" type="date" onchange="genCodeGratuite()" oninput="genCodeGratuite()"></div>
       </div>
       <div class="fg g2">
         <div class="field"><label>Indication</label>
@@ -282,7 +355,7 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
           </select>
         </div>
         <div class="field"><label>Médecin traitant</label>
-          <select id="medecin-select" onchange="update()">
+          <select id="medecin-select" onchange="localStorage.setItem('chncak_last_medecin',this.value);update()">
             <option value="">— Choisir un médecin —</option>
           </select>
         </div>
@@ -291,7 +364,7 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
         <div class="field"><label>Localisation / Diagnostic</label><input id="localisation" type="text" placeholder="ex: ADK côlon stade IV" oninput="update()"></div>
         <div class="field">
           <label>Antécédents médicaux</label>
-          <select id="atcd-select" onchange="onAtcdChange()" style="width:100%;padding:9px 11px;font-size:14px;font-family:var(--font);border:1.5px solid var(--gray-border);border-radius:var(--radius);background:white;color:var(--gray);outline:none;transition:border-color 0.15s">
+          <select id="atcd-select" onchange="onAtcdChange()" tabindex="0" style="width:100%;padding:9px 11px;font-size:14px;font-family:var(--font);border:1.5px solid var(--gray-border);border-radius:var(--radius);background:white;color:var(--gray);outline:none;transition:border-color 0.15s">
             <option value="RAS">RAS</option>
             <option value="HTA">HTA</option>
             <option value="DIABETE">DIABETE</option>
@@ -414,6 +487,31 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
         <label>Cure N° :</label>
         <input id="cure-num" type="number" value="1" min="1" max="20" oninput="update()">
       </div>
+
+      <!-- DATE RDV PROCHAIN -->
+      <div style="background:var(--amber-pale);border:1px solid var(--amber2);border-radius:var(--radius);padding:10px 16px;margin-top:10px;display:flex;flex-wrap:wrap;align-items:center;gap:12px">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:220px">
+          <span style="font-size:14px">&#128197;</span>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--amber);text-transform:uppercase;letter-spacing:0.05em">Date du prochain rendez-vous</div>
+            <div style="font-size:10px;color:var(--amber);opacity:0.8">Calculée auto selon le rythme du protocole</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <input type="date" id="date-rdv"
+            style="padding:7px 10px;font-size:13px;border:1.5px solid var(--amber2);border-radius:var(--radius);background:white;color:var(--gray);font-family:var(--font);outline:none"
+            oninput="saveRdv()">
+          <button onclick="calcRdvAuto()" title="Calculer automatiquement"
+            style="padding:7px 12px;background:var(--amber2);color:white;border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+            &#9654; Auto
+          </button>
+          <button onclick="saveRdvAndConfirm()"
+            style="padding:7px 12px;background:var(--green2);color:white;border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+            &#10003; Enregistrer RDV
+          </button>
+        </div>
+        <div id="rdv-display" style="font-size:13px;font-weight:700;color:var(--amber);min-width:120px;text-align:center"></div>
+      </div>
     </div>
   </div>
 
@@ -439,6 +537,9 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
         Imprimer (2 exemplaires)
       </button>
       <button class="btn-secondary" onclick="printDoc(false)">1 exemplaire</button>
+      <button class="btn-secondary" onclick="printBonRDV()" style="background:var(--amber-pale);color:var(--amber);border-color:var(--amber2)">
+        &#128197; Bon de Rendez-vous
+      </button>
       <button class="btn-secondary" onclick="saveToHistory()" id="btn-save">&#128190; Sauvegarder</button>
     </div>
     <p style="text-align:center;font-size:11px;color:var(--gray-mid);margin-top:8px">Format A4 imprimable — Ctrl+P / Cmd+P</p>
@@ -484,7 +585,7 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
   <div class="card">
     <div class="card-header">
       <div class="card-num" style="background:#6B3FA0">&#128138;</div>
-      <h2>Gestion des Médicaments</h2>
+      <h2>Pharmacie Centrale</h2>
     </div>
     <div class="card-body">
       <p style="font-size:13px;color:var(--gray-mid);margin-bottom:14px">
@@ -498,7 +599,22 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
           <h2 style="color:#4A2A80">Catalogue médicaments — Flacons & Prix</h2>
         </div>
         <div class="card-body" style="padding:12px">
-          <p style="font-size:12px;color:var(--gray-mid);margin-bottom:10px">Renseignez les présentations disponibles (flacon en mg) et le prix unitaire par flacon.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+            <p style="font-size:12px;color:var(--gray-mid);margin:0">Renseignez les présentations disponibles (flacon en mg) et le prix unitaire par flacon.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <label style="padding:8px 14px;background:var(--green2);color:white;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
+                &#128229; Importer Excel
+                <input type="file" accept=".xlsx,.xls,.csv" onchange="importCatalogExcel(this)" style="display:none">
+              </label>
+              <button onclick="exportCatalogExcel()" style="padding:8px 14px;background:white;color:var(--green);border:1.5px solid var(--green2);border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+                &#128228; Exporter Excel
+              </button>
+              <button onclick="downloadCatalogTemplate()" style="padding:8px 14px;background:var(--blue-pale);color:var(--blue);border:1.5px solid var(--blue-mid);border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+                &#128462; Télécharger modèle
+              </button>
+            </div>
+          </div>
+          <div id="catalog-import-msg" style="display:none;padding:8px 12px;border-radius:var(--radius);font-size:12px;margin-bottom:10px"></div>
           <div style="overflow-x:auto">
             <table style="width:100%;border-collapse:collapse;font-size:13px" id="catalog-table">
               <thead>
@@ -614,11 +730,14 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
         <h2 style="font-size:15px;font-weight:600;color:var(--blue)">&#9881; Fiche de Préparation</h2>
         <p style="font-size:12px;color:var(--gray-mid);margin-top:2px" id="prep-subtitle">Sélectionnez un protocole pour générer la fiche de préparation.</p>
       </div>
-      <button id="prep-print-btn" onclick="printPreparation()" disabled
-        style="padding:10px 20px;background:var(--blue);color:white;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;opacity:0.5">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        Imprimer fiche
-      </button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+
+        <button id="prep-print-btn" onclick="printPreparation()" disabled
+          style="padding:10px 18px;background:var(--blue);color:white;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:not-allowed;display:flex;align-items:center;gap:8px;opacity:0.5;transition:all 0.2s">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Imprimer fiche
+        </button>
+      </div>
     </div>
 
     <!-- Empty state -->
@@ -664,13 +783,23 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
   <div style="max-width:820px;margin:0 auto">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <div>
-        <h2 style="font-size:15px;font-weight:600;color:var(--blue)">&#128138; Ordonnance Médicaments de Support</h2>
-        <p style="font-size:12px;color:var(--gray-mid);margin-top:2px" id="support-subtitle">Sélectionnez un protocole pour générer l'ordonnance de support.</p>
+        <h2 style="font-size:15px;font-weight:600;color:var(--blue)">&#128138; Ordonnances de Support</h2>
+        <p style="font-size:12px;color:var(--gray-mid);margin-top:2px" id="support-subtitle">Sélectionnez un protocole pour générer les ordonnances.</p>
       </div>
-      <button id="support-print-btn" onclick="printSupport()" disabled
-        style="padding:10px 20px;background:var(--blue);color:white;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;opacity:0.5">
-        &#128424; Imprimer ordonnance
-      </button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="support-print-btn" onclick="printSupport()" disabled
+          style="padding:9px 14px;background:var(--blue);color:white;border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:not-allowed;opacity:0.5;display:flex;align-items:center;gap:6px;transition:all 0.2s">
+          &#128138; Ordonnance Support
+        </button>
+        <button id="kit-print-btn" onclick="printKitPerfusion()" disabled
+          style="padding:9px 14px;background:var(--green2);color:white;border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:not-allowed;opacity:0.5;display:flex;align-items:center;gap:6px;transition:all 0.2s">
+          &#128138; Kits Perfusion
+        </button>
+        <button id="postcchimio-print-btn" onclick="printPostChimio()" disabled
+          style="padding:9px 14px;background:#6B3FA0;color:white;border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:not-allowed;opacity:0.5;display:flex;align-items:center;gap:6px;transition:all 0.2s">
+          &#128138; Post-Chimio
+        </button>
+      </div>
     </div>
     <div id="support-empty" style="background:white;border:1px solid var(--gray-border);border-radius:var(--radius-lg);padding:60px;text-align:center;color:var(--gray-mid)">
       <div style="font-size:40px;margin-bottom:12px">&#128138;</div>
@@ -683,12 +812,134 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
 <!-- ===== PAGE : STATISTIQUES ===== -->
 <div id="page-stats" class="page">
   <div style="max-width:820px;margin:0 auto">
-    <h2 style="font-size:15px;font-weight:600;color:var(--blue);margin-bottom:16px">&#128200; Statistiques du Service</h2>
+
+    <!-- Header avec sélecteur période + bouton imprimer -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:10px">
+          <h2 style="font-size:15px;font-weight:600;color:var(--blue)">&#128200; Statistiques du Service</h2>
+          <button onclick="clearAllHistory()" style="padding:5px 12px;background:var(--red-pale);color:var(--red2);border:1px solid #F5AAAA;border-radius:var(--radius);font-size:11px;font-weight:600;cursor:pointer" title="Effacer tout l'historique">
+            🗑 Effacer historique
+          </button>
+        </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px;background:white;border:1.5px solid var(--gray-border);border-radius:var(--radius);padding:4px 10px">
+          <span style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;letter-spacing:0.05em">Période</span>
+          <select id="stats-period" onchange="renderStats()" style="border:none;outline:none;font-size:13px;font-family:var(--font);color:var(--gray);background:transparent;cursor:pointer;padding:4px 2px">
+            <option value="journalier">Aujourd'hui</option>
+            <option value="mensuel" selected>Ce mois</option>
+            <option value="trimestriel">Ce trimestre</option>
+            <option value="annuel">Cette année</option>
+            <option value="tout">Tout</option>
+          </select>
+        </div>
+        <button onclick="printRapport()" style="padding:9px 18px;background:var(--blue);color:white;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Imprimer rapport
+        </button>
+      </div>
+    </div>
+
     <div id="stats-content"></div>
   </div>
 </div>
 
 <!-- ===== PAGE : PROGRAMME ===== -->
+<!-- ===== PAGE : PATIENTS ===== -->
+<div id="page-patients" class="page">
+  <div style="max-width:900px;margin:0 auto">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+      <div>
+        <h2 style="font-size:15px;font-weight:600;color:var(--blue)">&#128101; Patients en cours de traitement</h2>
+        <p style="font-size:12px;color:var(--gray-mid);margin-top:2px" id="patients-subtitle">Liste des patients suivis au service</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="patients-search" placeholder="&#128269; Rechercher..." oninput="renderPatientsList()"
+          style="padding:7px 12px;font-size:12px;border:1.5px solid var(--gray-border);border-radius:var(--radius);outline:none;width:180px;font-family:var(--font)">
+        <label style="padding:8px 14px;background:var(--green2);color:white;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
+          &#128229; Importer Excel
+          <input type="file" accept=".xlsx,.xls,.csv" onchange="importPatients(this)" style="display:none">
+        </label>
+        <button onclick="exportPatients()" style="padding:8px 14px;background:white;color:var(--green);border:1.5px solid var(--green2);border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+          &#128228; Exporter
+        </button>
+        <button onclick="showAddPatientModal()" style="padding:8px 14px;background:var(--blue);color:white;border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+          &#43; Ajouter
+        </button>
+        <button onclick="downloadPatientsTemplate()" style="padding:8px 14px;background:var(--blue-pale);color:var(--blue);border:1.5px solid var(--blue-mid);border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+          &#128462; Modèle Excel
+        </button>
+      </div>
+    </div>
+
+    <div id="patients-import-msg" style="display:none;padding:8px 12px;border-radius:var(--radius);font-size:12px;margin-bottom:10px"></div>
+
+    <!-- Filtres rapides -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+      <button onclick="filterPatients('tous')" id="pf-tous" class="pf-btn pf-active" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--blue);background:var(--blue);color:white">Tous</button>
+      <button onclick="filterPatients('actif')" id="pf-actif" class="pf-btn" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--green2);background:white;color:var(--green)">En cours</button>
+      <button onclick="filterPatients('termine')" id="pf-termine" class="pf-btn" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--gray-mid);background:white;color:var(--gray-mid)">Terminé</button>
+      <button onclick="filterPatients('pause')" id="pf-pause" class="pf-btn" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--amber2);background:white;color:var(--amber)">En pause</button>
+    </div>
+
+    <!-- Table patients -->
+    <div class="card" style="padding:0;overflow:hidden">
+      <div id="patients-table-container" style="overflow-x:auto">
+        <div id="patients-list-content" style="min-height:200px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Ajouter/Modifier Patient -->
+<div class="modal-overlay" id="patient-modal" style="display:none" onclick="if(event.target===this)closePatientModal()">
+  <div class="modal" style="max-width:600px;width:95%">
+    <div class="modal-header">
+      <h3 id="patient-modal-title">Nouveau patient</h3>
+      <button class="modal-close" onclick="closePatientModal()">&#215;</button>
+    </div>
+    <div class="modal-body" style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field"><label>Prénom *</label><input id="pm-prenom" type="text" placeholder="Prénom"></div>
+      <div class="field"><label>Nom *</label><input id="pm-nom" type="text" placeholder="Nom"></div>
+      <div class="field"><label>Age</label><input id="pm-age" type="number" placeholder="ex: 45"></div>
+      <div class="field"><label>Sexe</label>
+        <select id="pm-sexe"><option value="F">Féminin</option><option value="M">Masculin</option></select>
+      </div>
+      <div class="field"><label>Contact</label><input id="pm-tel" type="tel" placeholder="77 xxx xx xx"></div>
+      <div class="field"><label>N° Dossier</label><input id="pm-dossier" type="text" placeholder="ex: 539/24"></div>
+      <div class="field"><label>Protocole</label>
+        <select id="pm-proto"><option value="">— Sélectionner —</option></select>
+      </div>
+      <div class="field"><label>Localisation</label><input id="pm-localisation" type="text" placeholder="ex: Cancer du sein T2N1"></div>
+      <div class="field"><label>Médecin</label>
+        <select id="pm-medecin"><option value="">— Sélectionner —</option></select>
+      </div>
+      <div class="field"><label>Cure en cours / Total</label>
+        <div style="display:flex;gap:6px">
+          <input id="pm-cure" type="number" placeholder="Cure N°" min="1" style="width:50%">
+          <input id="pm-total-cures" type="number" placeholder="Total" min="1" style="width:50%">
+        </div>
+      </div>
+      <div class="field"><label>Date début traitement</label><input id="pm-date-debut" type="date"></div>
+      <div class="field"><label>Statut</label>
+        <select id="pm-statut">
+          <option value="actif">En cours</option>
+          <option value="termine">Terminé</option>
+          <option value="pause">En pause</option>
+        </select>
+      </div>
+      <div class="field" style="grid-column:1/-1"><label>Observations</label>
+        <textarea id="pm-obs" rows="2" placeholder="Notes cliniques..." style="width:100%;padding:8px;border:1.5px solid var(--gray-border);border-radius:var(--radius);font-family:var(--font);font-size:13px;resize:vertical"></textarea>
+      </div>
+    </div>
+    <div style="padding:12px 16px;display:flex;justify-content:flex-end;gap:8px;border-top:1px solid var(--gray-border)">
+      <button onclick="closePatientModal()" class="btn-secondary">Annuler</button>
+      <button onclick="savePatient()" class="btn-primary">&#10003; Enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <div id="page-programme" class="page">
   <div style="max-width:900px;margin:0 auto">
 
@@ -791,6 +1042,26 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
       <div class="card-body" id="prog-week-overview"></div>
     </div>
 
+    <!-- LISTE DES RENDEZ-VOUS -->
+    <div class="card" style="margin-top:14px;border:1.5px solid var(--amber2)">
+      <div class="card-header" style="background:var(--amber-pale);justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="card-num" style="background:var(--amber2)">&#128197;</div>
+          <h2 style="color:var(--amber)">Patients avec rendez-vous programmés</h2>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" id="rdv-search" placeholder="Rechercher..." oninput="renderRdvList()"
+            style="padding:5px 10px;font-size:12px;border:1px solid var(--amber2);border-radius:var(--radius);outline:none;width:160px">
+          <button onclick="actualiserRdv(this)" style="padding:5px 10px;background:var(--amber2);color:white;border:none;border-radius:var(--radius);font-size:12px;cursor:pointer">
+            &#8635; Actualiser
+          </button>
+        </div>
+      </div>
+      <div class="card-body" style="padding:0">
+        <div id="rdv-list-content"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -819,6 +1090,8 @@ const DOSE_LIMITS = {
   'CYCLOPHOSPHAMIDE':{max:1800,warn:1500},
   'ÉPIRUBICINE':{max:150,warn:120,cumul:900},
   'CISPLATINE':{max:200,warn:150},
+  'CISPLATINE HEBDO':{max:120,warn:100},
+  'TAXOL HEBDO':{max:350,warn:300},
   'TAXOL (Paclitaxel)':{max:350,warn:300},
   'CARBOPLATINE AUC5':{max:900,warn:750},
   'CARBOPLATINE AUC2':{max:900,warn:750},
@@ -1131,6 +1404,31 @@ const PROTOCOLS = [
       {t:'r',label:'Réhydratation 500 cc SSI 0.9%',dur:'30 mn'},
     ]
   },
+  {
+    id:'cddp_hebdo', name:'CDDP HEBDO', rythme:'J1=J8',
+    detail:'Cisplatine 40 mg/m² J1, J8 (concomitant radiothérapie — RCC col utérin)',
+    badge:'J1=J8', badgeClass:'b14',
+    drugs:[
+      {t:'r',label:'Réhydratation 1000 cc SSI 0.9%',dur:'45 mn'},
+      {name:'Hydrocortisone',fix:200,unit:'mg',sol:'10 cc SSI',dur:'5 mn',ryt:'J1 = J8'},
+      {name:'Kytril',fix:3,unit:'mg',sol:'15 cc SSI 0.9%',dur:'2 mn',ryt:'J1 = J8'},
+      {t:'r',label:'Réhydratation 500 cc SSI 0.9%',dur:'30 mn'},
+      {name:'CISPLATINE HEBDO',mgm2:40,unit:'mg',sol:'250 cc SSI 0.9%',dur:'60 mn',ryt:'J1 = J8',hl:true},
+      {t:'r',label:'Réhydratation 1000 cc SSI 0.9%',dur:'45 mn'},
+    ]
+  },
+  {
+    id:'taxol_hebdo', name:'TAXOL HEBDO', rythme:'J1=J28',
+    detail:'Paclitaxel 80 mg/m² J1, J8, J15 — toutes les 4 semaines',
+    badge:'J1=J28', badgeClass:'b28',
+    drugs:[
+      {t:'r',label:'Réhydratation 500 cc SSI 0.9%',dur:'30 mn'},
+      {name:'Hydrocortisone',fix:200,unit:'mg',sol:'10 cc SSI',dur:'5 mn',ryt:'J1, J8, J15'},
+      {name:'Kytril',fix:3,unit:'mg',sol:'15 cc SSI 0.9%',dur:'2 mn',ryt:'J1, J8, J15'},
+      {name:'TAXOL HEBDO',mgm2:80,unit:'mg',sol:'250 cc SSI 0.9%',dur:'60 mn',ryt:'J1, J8, J15',hl:true,note:'Tubulure non-PVC obligatoire'},
+      {t:'r',label:'Réhydratation 500 cc SSI 0.9%',dur:'30 mn'},
+    ]
+  },
 ];
 
 /* ============================================================
@@ -1172,7 +1470,15 @@ function showPage(id,btn){
   if(id==='preparation') renderPreparation();
   if(id==='support') renderSupport();
   if(id==='stats') renderStats();
-  if(id==='programme'){initProgramme();renderProgramme();}
+  if(id==='programme'){
+    initProgramme();
+    renderProgramme();
+    // Force the page visible BEFORE rendering the RDV list
+    const progPage = document.getElementById('page-programme');
+    if(progPage) progPage.style.display = 'block';
+    renderRdvList();
+  }
+  if(id==='patients'){setTimeout(renderPatientsList,50);}
 }
 
 /* ============================================================
@@ -1484,6 +1790,9 @@ function update(){
   if(document.getElementById('page-apercu').classList.contains('active')) renderApercu();
   if(document.getElementById('page-preparation').classList.contains('active')) renderPreparation();
   if(document.getElementById('page-support').classList.contains('active')) renderSupport();
+  // Auto-update RDV display if date-rdv is already filled
+  const rdvVal = document.getElementById('date-rdv')?.value;
+  if(rdvVal) updateRdvDisplay(rdvVal);
 }
 
 /* ============================================================
@@ -1525,9 +1834,10 @@ function renderCapeTable(proto){
 ============================================================ */
 function populateMedecinSelect(){
   const sel=document.getElementById('medecin-select');
-  const cur=sel.value;
+  const cur=sel.value||localStorage.getItem('chncak_last_medecin')||'';
   sel.innerHTML='<option value="">— Choisir un médecin —</option>'+
     medecins.map(m=>`<option value="${m.name}"${cur===m.name?' selected':''}>${m.name}${m.grade?' ('+m.grade+')':''}</option>`).join('');
+  if(cur) sel.value=cur;
 }
 
 function renderMedecins(){
@@ -1867,14 +2177,14 @@ function renderPreparation(){
     content.style.display = 'none';
     btn.disabled = true; btn.style.opacity='0.5'; btn.style.cursor='not-allowed';
     subtitle.textContent = 'Sélectionnez un protocole pour générer la fiche de préparation.';
+
     return;
   }
 
   empty.style.display   = 'none';
   content.style.display = '';
   btn.disabled = false; btn.style.opacity='1'; btn.style.cursor='pointer';
-  const vbtn = document.getElementById('prep-validate-btn');
-  if(vbtn){ vbtn.disabled=false; vbtn.style.opacity='1'; vbtn.style.cursor='pointer'; }
+
 
   const prenom  = document.getElementById('prenom').value;
   const nom     = document.getElementById('nom').value;
@@ -2113,11 +2423,11 @@ function buildDocumentHTML(){
           ……………………………….<br><b>Service d'Oncologie - Radiothérapie</b>
         </div>
       </td>
-      <td style="vertical-align:top;text-align:right;font-size:9px;line-height:2;color:#000">
-        <b>CHNCAK …N°${dossier||'________'}</b><br>
+      <td style="vertical-align:top;text-align:right;font-size:9px;line-height:1.9;color:#000">
+        <b>N° Dossier : ${dossier||'________'}</b><br>
         <span style="font-size:8.5px">Date : <b>${dateProto}</b></span><br>
-        ${cubix?'<b>'+cubix+'</b><br>':''}
-        ${codegratuite?'<b>'+codegratuite+'</b>':''}
+        ${cubix?'<span style="font-size:8.5px">ID Cubix : <b>'+cubix+'</b></span><br>':''}
+        ${codegratuite?'<span style="font-size:8.5px">Code Gratuite : <b>'+codegratuite+'</b></span>':''}
       </td>
     </tr></table>
 
@@ -2220,11 +2530,11 @@ function printFromApercu(){
   frame.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:none;display:block';
   const fdoc=frame.contentDocument||frame.contentWindow.document;
   fdoc.open();fdoc.write(fullDoc);fdoc.close();
-  frame.onload=()=>{
+  setTimeout(()=>{
     try{frame.contentWindow.focus();frame.contentWindow.print();}
     catch(e){const b=new Blob([fullDoc],{type:'text/html'});window.open(URL.createObjectURL(b),'_blank');}
     setTimeout(()=>{frame.style.cssText='display:none;position:fixed;left:-9999px;width:0;height:0;border:none';},3000);
-  };
+  }, 400);
 }
 
 function validatePreparation(){
@@ -2281,7 +2591,6 @@ Cela déduira les flacons utilisés du stock.`)) return;
 
   let msg = '\u2705 Stock mis \u00e0 jour pour ' + updated + ' m\u00e9dicament(s).';
   if(warnings.length) msg += '\n\nAvertissements :\n' + warnings.join('\n');
-  alert(msg);
   alert(msg);
 
   // Refresh preparation page
@@ -2497,11 +2806,18 @@ function printPreparation(){
   frame.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:none;display:block';
   const fdoc = frame.contentDocument || frame.contentWindow.document;
   fdoc.open(); fdoc.write(html); fdoc.close();
-  frame.onload = () => {
-    try { frame.contentWindow.focus(); frame.contentWindow.print(); }
-    catch(e){ const b=new Blob([html],{type:'text/html'}); window.open(URL.createObjectURL(b),'_blank'); }
+  // Use setTimeout to let the iframe render before printing
+  setTimeout(() => {
+    try {
+      frame.contentWindow.focus();
+      frame.contentWindow.print();
+    } catch(e) {
+      // Fallback: open in new tab
+      const b = new Blob([html], {type:'text/html'});
+      window.open(URL.createObjectURL(b), '_blank');
+    }
     setTimeout(()=>{ frame.style.cssText='display:none;position:fixed;left:-9999px;width:0;height:0;border:none'; }, 3000);
-  };
+  }, 400);
 }
 
 /* ============================================================
@@ -2598,11 +2914,15 @@ function renderSupport(){
 
   if(!proto){
     empty.style.display=''; content.style.display='none';
-    btn.disabled=true; btn.style.opacity='0.5';
+    btn.disabled=true; btn.style.opacity='0.5'; btn.style.cursor='not-allowed';
+    const kb=document.getElementById('kit-print-btn'); if(kb){kb.disabled=true;kb.style.opacity='0.5';kb.style.cursor='not-allowed';}
+    const pb=document.getElementById('postcchimio-print-btn'); if(pb){pb.disabled=true;pb.style.opacity='0.5';pb.style.cursor='not-allowed';}
     return;
   }
   empty.style.display='none'; content.style.display='';
-  btn.disabled=false; btn.style.opacity='1';
+  btn.disabled=false; btn.style.opacity='1'; btn.style.cursor='pointer';
+  const kb2=document.getElementById('kit-print-btn'); if(kb2){kb2.disabled=false;kb2.style.opacity='1';kb2.style.cursor='pointer';}
+  const pb2=document.getElementById('postcchimio-print-btn'); if(pb2){pb2.disabled=false;pb2.style.opacity='1';pb2.style.cursor='pointer';}
 
   const prenom = document.getElementById('prenom').value;
   const nom    = document.getElementById('nom').value;
@@ -2702,11 +3022,350 @@ function printSupport(){
   frame.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:none;display:block';
   const fdoc = frame.contentDocument||frame.contentWindow.document;
   fdoc.open(); fdoc.write(html); fdoc.close();
-  frame.onload = ()=>{
+  setTimeout(()=>{
     try{ frame.contentWindow.focus(); frame.contentWindow.print(); }
     catch(e){ const b=new Blob([html],{type:'text/html'}); window.open(URL.createObjectURL(b),'_blank'); }
     setTimeout(()=>{ frame.style.cssText='display:none;position:fixed;left:-9999px;width:0;height:0;border:none'; },3000);
+  }, 400);
+}
+
+/* ============================================================
+   ORDONNANCE KITS PERFUSION
+============================================================ */
+function printKitPerfusion(){
+  const proto  = PROTOCOLS.find(p=>p.id===selId);
+  if(!proto) return;
+  const prenom = document.getElementById('prenom').value||'';
+  const nom    = document.getElementById('nom').value||'';
+  const age    = document.getElementById('age').value||'';
+  const med    = document.getElementById('medecin-select').value||'DR ________________';
+  const dp     = document.getElementById('date-protocole').value;
+  const dateStr= dp ? dp.split('-').reverse().join('/') : '___/___/______';
+
+  // ── Calcul exact des solutés par protocole ──
+  // Compter les poches SSI et G5% directement dans les drugs du protocole
+  let ssiQty = 0, g5Qty = 0;
+  proto.drugs.forEach(d => {
+    const sol = (d.sol||'') + (d.label||'');
+    // SSI 0.9%
+    if(sol.includes('SSI')) {
+      // Extract volume — count each poche (not les petits volumes < 50 cc = juste diluant)
+      const vol = parseInt(sol.match(/(\d+)\s*cc/)?.[1]||'0');
+      if(vol >= 100 || d.t === 'r') ssiQty++;
+    }
+    // G5%
+    if(sol.includes('G5%')) {
+      const vol = parseInt(sol.match(/(\d+)\s*cc/)?.[1]||'0');
+      if(vol >= 100) g5Qty++;
+    }
+  });
+  // Minimums de sécurité
+  if(ssiQty === 0) ssiQty = 2;
+  if(g5Qty  === 0 && proto.drugs.some(d=>(d.sol||'').includes('G5%'))) g5Qty = 1;
+
+  // ── Magnésium et Calcium ──
+  const hasMg = proto.drugs.some(d => d.name && d.name.includes('Magnésium'));
+  const hasCa = proto.drugs.some(d => d.name && d.name.includes('Calcium'));
+
+  // Perfuseurs = 1 par poche + 1 spare
+  const perfQty = ssiQty + g5Qty + 1;
+  const cathQty = 1;
+  // Seringues : 1 par médicament injectable fixe + 2 spare
+  const serQty  = proto.drugs.filter(d=>!d.t && (d.fix||d.mgm2||d.carbo||d.avastin)).length + 2;
+
+  // ── Build item lines dynamically ──
+  const buildItems = (numStyle) => {
+    const sep = numStyle === 'dot' ? '.' : '-';
+    let n = 0;
+    const line = (label, qty, extra='') => {
+      n++;
+      return `
+      <div style="display:flex;align-items:baseline;margin-bottom:16px">
+        <span style="min-width:20px;font-weight:600;font-size:10px">${n}${sep}</span>
+        <span style="flex:1;font-size:10px">${label} ………………………………………………</span>
+        <span style="white-space:nowrap;font-size:10px">N° <b>${qty}</b></span>
+      </div>
+      ${extra ? `<div style="font-size:9px;color:#555;margin-left:20px;margin-top:-12px;margin-bottom:10px;font-style:italic">${extra}</div>` : ''}`;
+    };
+
+    let html = '';
+    html += line('Sérum salé isotonique 0,9%', ssiQty);
+    html += line('Sérum glucosé 5%', g5Qty > 0 ? g5Qty : '—');
+    if(hasMg) html += line('Magnésium 10%', '2 amp', '2 ampoules dans 250 cc G5%');
+    if(hasCa) html += line('Calcium 10%',   '2 amp', '2 ampoules (avec Magnésium)');
+    html += line('Perfuseur', perfQty);
+    html += line('Cathéter bleu', cathQty);
+    html += line('Seringue 10 cc', serQty);
+    return html;
   };
+
+  // ── One bloc (called twice) ──
+  const bloc = (numStyle) => `
+  <div style="width:47%;display:inline-block;vertical-align:top">
+
+    <!-- EN-TÊTE -->
+    <table style="width:100%;border-collapse:collapse;margin-bottom:5px">
+      <tr>
+        <td style="width:38px;vertical-align:top">
+          <img src="${LOGO_B64}" style="width:36px;height:36px;object-fit:contain">
+        </td>
+        <td style="vertical-align:top;text-align:center;padding:0 3px">
+          <div style="font-size:7px;line-height:1.5;color:#000">
+            République du Sénégal<br><b>Un peuple-un but-une foi</b><br>
+            …………………………………<br>Ministère de la Santé et l'Action Sociale<br>
+            …………………………………<br>Direction Générale des Etablissements de Santé<br>
+            …………………………….<br>Direction des Etablissements Publics de Santé<br>
+            ………………………………<br><b>Centre Hospitalier National Cheikh Ahmadoul Khadim</b><br>
+            ……………………………….<br><b>Service d'Oncologie - Radiothérapie</b>
+          </div>
+        </td>
+        <td style="width:38px;vertical-align:top;text-align:right">
+          <img src="${LOGO_B64}" style="width:34px;height:34px;object-fit:contain;opacity:0.5">
+        </td>
+      </tr>
+    </table>
+
+    <!-- DATE -->
+    <div style="text-align:right;font-size:9px;margin-bottom:5px">Date : ${dateStr}</div>
+
+    <!-- PATIENT -->
+    <div style="border:1.5px solid #000;padding:5px 10px;margin-bottom:8px;font-size:9px;line-height:2">
+      <b>Prénom :</b> ${prenom.toUpperCase()}<br>
+      <b>Nom :</b> ${nom.toUpperCase()}<br>
+      <b>Age :</b> ${age} ans
+    </div>
+
+    <!-- PROTOCOLE (petit) -->
+    <div style="text-align:center;font-size:8px;color:#0A3D7A;margin-bottom:6px;font-style:italic">
+      Protocole : <b>${proto.name}</b>
+    </div>
+
+    <!-- TITRE -->
+    <div style="text-align:center;font-size:14px;font-weight:900;font-family:'Times New Roman',serif;
+                text-transform:uppercase;letter-spacing:0.06em;margin-bottom:14px;
+                border-bottom:1.5px solid #000;padding-bottom:5px">ORDONNANCE</div>
+
+    <!-- ITEMS -->
+    <div>${buildItems(numStyle)}</div>
+
+    <!-- SIGNATURE -->
+    <div style="text-align:right;margin-top:18px;font-size:10px;font-weight:bold">
+      Médecin traitant<br>
+      <span style="font-size:11px;display:block;margin-top:2px">${med}</span>
+      <div style="border-bottom:1px solid #000;margin-top:28px;width:140px;margin-left:auto"></div>
+    </div>
+  </div>`;
+
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8">
+<title>Ordonnance Kits Perfusion — ${proto.name} — ${prenom} ${nom}</title>
+<style>
+  @page{size:A4 landscape;margin:8mm 10mm}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Helvetica,sans-serif;color:#000;background:white}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head><body>
+<div style="display:flex;width:100%;gap:0">
+  ${bloc('dot')}
+  <div style="width:2%;border-left:1.5px dashed #aaa;margin:0 1.5%"></div>
+  ${bloc('dash')}
+</div>
+</body></html>`;
+
+  const frame = document.getElementById('print-frame');
+  frame.style.cssText='position:fixed;left:-9999px;top:0;width:297mm;height:210mm;border:none;display:block';
+  const fdoc=frame.contentDocument||frame.contentWindow.document;
+  fdoc.open();fdoc.write(html);fdoc.close();
+  setTimeout(()=>{
+    try{frame.contentWindow.focus();frame.contentWindow.print();}
+    catch(e){const b=new Blob([html],{type:'text/html'});window.open(URL.createObjectURL(b),'_blank');}
+    setTimeout(()=>{frame.style.cssText='display:none;position:fixed;left:-9999px;width:0;height:0;border:none';},3000);
+  },400);
+}
+
+/* ============================================================
+   ORDONNANCE POST-CHIMIOTHÉRAPIE
+============================================================ */
+function printPostChimio(){
+  const proto  = PROTOCOLS.find(p=>p.id===selId);
+  if(!proto) return;
+  const prenom = document.getElementById('prenom').value||'';
+  const nom    = document.getElementById('nom').value||'';
+  const age    = document.getElementById('age').value||'';
+  const med    = document.getElementById('medecin-select').value||'';
+  const dp     = document.getElementById('date-protocole').value;
+  const now    = new Date();
+  const dateStr= dp ? dp.split('-').reverse().join('/') :
+    `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+
+  // Items du nouveau modèle
+  const items = [
+    {num:1, drug:'BETAMETHASONE-GH',            qty:'N°1', instruction:'2 cp/j pdt 4 jours après chaque séance pdt tte la chimio'},
+    {num:2, drug:'Pantonex DR',                  qty:'N°1', instruction:'1 cp / le soir pdt tte la chimio'},
+    {num:3, drug:'Neufer sirop',                  qty:'N°1', instruction:'10 ml X 2/j pdt tte la chimio'},
+    {num:null, sep:'AU BESOIN'},
+    {num:4, drug:'Tracedol (cp)',                 qty:'N°1', instruction:'1cp x 3/j — SI DOULEURS'},
+    {num:5, drug:'Setronax',                      qty:'N°1', instruction:'1cp x 3/j 15 min avant les repas — SI VOMISSEMENTS'},
+    {num:6, drug:'ALPRAZ 0.5 mg (cp)',            qty:'N°1', instruction:'1cp le soir /j — SI INSOMNIES'},
+    {num:7, drug:'DESYREL SIROP',                 qty:'N°1', instruction:'1 cas X 2/j — SI ANXIÉTÉ'},
+    {num:8, drug:'DUFALAC SACHET',                qty:'N°1', instruction:'1 Sachet X 3/j — SI CONSTIPATIONS'},
+    {num:9, drug:'SMECTA SACHET',                 qty:'N°1', instruction:'1 sachet x 3/j — SI DIARRHÉE'},
+    {num:10,drug:'Adna Bain de bouche',           qty:'N°1', instruction:'1 application X 2 j — SI STOMATITE'},
+  ];
+
+  const itemHTML = items.map(it => {
+    if(it.sep) return `
+      <div style="background:#F0F0F0;border-radius:3px;padding:3px 10px;margin:10px 0 8px;font-size:10px;font-weight:700;letter-spacing:0.08em;color:#555;text-align:center">
+        ${it.sep}
+      </div>`;
+    return `
+      <div style="margin-bottom:9px;page-break-inside:avoid">
+        <div style="display:flex;align-items:baseline">
+          <span style="min-width:20px;font-size:10px;font-weight:600">${it.num}.</span>
+          <span style="font-size:10px;font-weight:bold;text-decoration:underline">${it.drug}</span>
+          <span style="font-size:10px;flex:1;margin-left:2px">……………………………………</span>
+          <span style="font-size:10px;white-space:nowrap;font-weight:700">${it.qty}</span>
+        </div>
+        <div style="font-size:9px;color:#444;margin-left:20px;margin-top:1px;font-style:italic">${it.instruction}</div>
+      </div>`;
+  }).join('');
+
+  const html=`<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8">
+<title>Ordonnance Post-Chimio — ${prenom} ${nom}</title>
+<style>
+  @page{size:A4;margin:10mm 12mm}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#000;background:white}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+</style>
+</head><body>
+
+<table style="width:100%;border-collapse:collapse;min-height:92vh">
+<tr>
+
+  <!-- COLONNE GAUCHE -->
+  <td style="width:30%;vertical-align:top;padding-right:10px;border-right:1px solid #ccc;font-size:8px;line-height:1.7">
+
+    <!-- Logo + En-tête officiel -->
+    <div style="text-align:center;margin-bottom:8px">
+      <img src="${LOGO_B64}" style="width:50px;height:50px;object-fit:contain">
+    </div>
+    <div style="font-size:7px;text-align:center;line-height:1.6;margin-bottom:8px;border-bottom:1px solid #ddd;padding-bottom:8px">
+      République du Sénégal<br><b>Un peuple-un but-une foi</b><br>
+      …………………………………<br>Ministère de la Santé et l'Action Sociale<br>
+      …………………………………<br>Direction Générale des Etablissements de Santé<br>
+      …………………………….<br>Direction des Etablissements Publics de Santé<br>
+      ………………………………<br><b>Centre Hospitalier National Cheikh Ahmadoul Khadim</b><br>
+      ……………………………….<br><b>Service d'Oncologie - Radiothérapie</b>
+    </div>
+
+    <!-- Personnel -->
+    <div style="border-bottom:1px solid #eee;padding-bottom:6px;margin-bottom:6px">
+      <div style="font-weight:bold;font-size:8px;color:#0A3D7A;margin-bottom:3px">Oncologue-Radiothérapeute</div>
+      <div style="font-style:italic">Dr. Maimouna Mané</div>
+      <div style="font-size:7px;color:#666">Poste : 14323</div>
+      <div style="margin-top:3px;font-style:italic">Dr M. Fallou Sall</div>
+      <div style="font-style:italic">Dr Moussa Diallo</div>
+    </div>
+
+    <div style="border-bottom:1px solid #eee;padding-bottom:6px;margin-bottom:6px">
+      <div style="font-weight:bold;font-size:8px;color:#0A3D7A;margin-bottom:3px">Chirurgien-oncologue</div>
+      <div style="font-style:italic">Dr P.S. Dieng</div>
+    </div>
+
+    <div style="border-bottom:1px solid #eee;padding-bottom:6px;margin-bottom:6px">
+      <div style="font-weight:bold;font-size:8px;color:#0A3D7A;margin-bottom:3px">Médecin généraliste</div>
+      <div style="font-style:italic">Dr Modou Sene</div>
+    </div>
+
+    <div style="border-bottom:1px solid #eee;padding-bottom:6px;margin-bottom:6px">
+      <div style="font-weight:bold;font-size:8px;color:#0A3D7A;margin-bottom:3px">Major</div>
+      <div style="font-style:italic">Serigne Mor Samb Guèye</div>
+    </div>
+
+    <div style="border-bottom:1px solid #eee;padding-bottom:6px;margin-bottom:6px">
+      <div style="font-weight:bold;font-size:8px;color:#0A3D7A;margin-bottom:3px">Infirmière</div>
+      <div style="font-style:italic">Diouma S. Diallo</div>
+      <div style="font-style:italic">Khady Ndiaye Leye</div>
+      <div style="font-style:italic">Mame Diarra B. Niang</div>
+    </div>
+
+    <div style="border-bottom:1px solid #eee;padding-bottom:6px;margin-bottom:6px">
+      <div style="font-weight:bold;font-size:8px;color:#0A3D7A;margin-bottom:3px">Assistante-Infirmière</div>
+      <div style="font-style:italic">Fatoumata Faye</div>
+      <div style="font-style:italic">Daouda Lassana Coulibaly</div>
+      <div style="font-style:italic">Binta Sow</div>
+    </div>
+
+    <div style="border-bottom:1px solid #eee;padding-bottom:6px;margin-bottom:6px">
+      <div style="font-weight:bold;font-size:8px;color:#0A3D7A;margin-bottom:3px">Physique médicale</div>
+      <div style="font-style:italic">Dr. Magatte Diagne</div>
+      <div style="font-style:italic">Dr Adji Yaram Diop</div>
+      <div style="font-style:italic">Mouhamad Diaw</div>
+    </div>
+
+    <div>
+      <div style="font-weight:bold;font-size:8px;color:#0A3D7A;margin-bottom:3px">Secrétariat</div>
+      <div style="font-style:italic">Ndeye Aminata Fall</div>
+      <div style="font-style:italic">Ngagne Ngom</div>
+      <div style="font-size:7px;color:#666">Poste : 14321</div>
+      <div style="margin-top:4px;font-size:7.5px">☎ 77 099 69 57</div>
+      <div style="font-size:7.5px">77 099 69 66</div>
+      <div style="font-size:7.5px">TÉL FIXE : 339783751</div>
+      <div style="margin-top:6px;font-weight:bold;font-size:8px;color:#0A3D7A;text-align:center">À RENOUVELER</div>
+    </div>
+  </td>
+
+  <!-- COLONNE DROITE -->
+  <td style="vertical-align:top;padding-left:14px">
+
+    <!-- Date + Patient -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+      <div style="font-size:12px;line-height:2.2">
+        <b>Prénom :</b> <span style="border-bottom:1px solid #000;display:inline-block;min-width:120px;padding:0 4px">${prenom.toUpperCase()}</span><br>
+        <b>Nom :</b> <span style="border-bottom:1px solid #000;display:inline-block;min-width:130px;padding:0 4px">${nom.toUpperCase()}</span>
+        &nbsp;&nbsp;<b>Age :</b> <span style="border-bottom:1px solid #000;display:inline-block;min-width:40px;padding:0 4px">${age}</span> ans
+      </div>
+      <div style="text-align:right;font-size:11px">
+        Date : ……/……/${dateStr.split('/')[2]||'2025'}
+      </div>
+    </div>
+
+    <!-- Titre -->
+    <div style="text-align:center;font-size:15px;font-weight:900;font-family:'Times New Roman',serif;text-decoration:underline;letter-spacing:0.04em;margin-bottom:14px;padding-bottom:4px;border-bottom:2px solid #000">
+      ORDONNANCE POST CHIMIO
+    </div>
+
+    <!-- Médicaments -->
+    ${itemHTML}
+
+    <!-- Signature -->
+    <div style="text-align:right;margin-top:16px;font-size:11px;font-weight:bold">
+      ${med ? med : 'Le Médecin traitant'}
+      <div style="border-bottom:1px solid #000;margin-top:30px;width:160px;margin-left:auto"></div>
+    </div>
+
+    <!-- Pied -->
+    <div style="position:fixed;bottom:10mm;right:14mm;font-size:8px;color:#888">
+      Email : onco.chn.cak@gmail.com
+    </div>
+  </td>
+</tr>
+</table>
+
+</body></html>`;
+
+  const frame=document.getElementById('print-frame');
+  frame.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:none;display:block';
+  const fdoc=frame.contentDocument||frame.contentWindow.document;
+  fdoc.open();fdoc.write(html);fdoc.close();
+  setTimeout(()=>{
+    try{frame.contentWindow.focus();frame.contentWindow.print();}
+    catch(e){const b=new Blob([html],{type:'text/html'});window.open(URL.createObjectURL(b),'_blank');}
+    setTimeout(()=>{frame.style.cssText='display:none;position:fixed;left:-9999px;width:0;height:0;border:none';},3000);
+  },400);
 }
 
 /* ============================================================
@@ -2989,11 +3648,11 @@ function printProgramme(){
   frame.style.cssText='position:fixed;left:-9999px;top:0;width:297mm;height:210mm;border:none;display:block';
   const fdoc=frame.contentDocument||frame.contentWindow.document;
   fdoc.open();fdoc.write(html);fdoc.close();
-  frame.onload=()=>{
+  setTimeout(()=>{
     try{frame.contentWindow.focus();frame.contentWindow.print();}
     catch(e){const b=new Blob([html],{type:'text/html'});window.open(URL.createObjectURL(b),'_blank');}
     setTimeout(()=>{frame.style.cssText='display:none;position:fixed;left:-9999px;width:0;height:0;border:none';},3000);
-  };
+  }, 400);
 }
 
 function exportProgrammeWord(){
@@ -3193,9 +3852,46 @@ function importFromWord(buffer){
 /* ============================================================
    STATISTIQUES DU SERVICE
 ============================================================ */
+function getStatsPeriod(){
+  const sel = document.getElementById('stats-period');
+  return sel ? sel.value : 'mensuel';
+}
+
+function filterByPeriod(items, period){
+  const now = new Date();
+  return items.filter(h => {
+    const d = new Date(h.dateTs);
+    if(period === 'journalier'){
+      return d.toDateString() === now.toDateString();
+    } else if(period === 'mensuel'){
+      return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+    } else if(period === 'trimestriel'){
+      const q = Math.floor(now.getMonth()/3);
+      return Math.floor(d.getMonth()/3)===q && d.getFullYear()===now.getFullYear();
+    } else if(period === 'annuel'){
+      return d.getFullYear()===now.getFullYear();
+    }
+    return true; // 'tout'
+  });
+}
+
+function periodLabel(period){
+  const now = new Date();
+  const months = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const q = Math.floor(now.getMonth()/3)+1;
+  if(period==='journalier') return `Rapport journalier — ${now.toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}`;
+  if(period==='mensuel')    return `Rapport mensuel — ${months[now.getMonth()]} ${now.getFullYear()}`;
+  if(period==='trimestriel') return `Rapport trimestriel — T${q} ${now.getFullYear()}`;
+  if(period==='annuel')     return `Rapport annuel — ${now.getFullYear()}`;
+  return 'Rapport global — Toutes périodes';
+}
+
 function renderStats(){
-  const hist    = historique;
-  const sorties = JSON.parse(localStorage.getItem('chncak_sorties')||'[]');
+  const period  = getStatsPeriod();
+  const allHist = historique;
+  const allSorties = JSON.parse(localStorage.getItem('chncak_sorties')||'[]');
+  const hist    = filterByPeriod(allHist, period);
+  const sorties = filterByPeriod(allSorties, period);
   const el      = document.getElementById('stats-content');
 
   if(!hist.length && !sorties.length){
@@ -3210,10 +3906,7 @@ function renderStats(){
   // ── KPIs ──
   const total      = hist.length;
   const patients   = new Set(hist.map(h=>h.nom+h.prenom)).size;
-  const thisMonth  = hist.filter(h=>{
-    const d=new Date(h.dateTs); const n=new Date();
-    return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();
-  }).length;
+  const thisMonth  = hist.filter(h=>{ const d=new Date(h.dateTs); const n=new Date(); return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear(); }).length;
   const nbSorties  = sorties.length;
 
   // ── Protocol counts ──
@@ -3238,12 +3931,22 @@ function renderStats(){
         const m = detail.match(/^(.+?):\s*(\d+)\s*flacon/);
         if(m){
           const mol=m[1].trim(), fl=parseInt(m[2]);
-          molCount[mol]   = (molCount[mol]||0)+1;    // nb préparations
-          molFlacons[mol] = (molFlacons[mol]||0)+fl;  // nb flacons total
+          molCount[mol]   = (molCount[mol]||0)+1;
+          molFlacons[mol] = (molFlacons[mol]||0)+fl;
         }
       });
     }
   });
+  // Fallback: count molecule usage from historique protocol drugs
+  if(!Object.keys(molCount).length){
+    hist.forEach(h=>{
+      const proto = PROTOCOLS.find(p=>p.id===h.protoId||p.name===h.protoName);
+      if(!proto) return;
+      proto.drugs.filter(d=>d.name&&!d.t).forEach(d=>{
+        molCount[d.name] = (molCount[d.name]||0)+1;
+      });
+    });
+  }
 
   const topProtos   = Object.entries(protoCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const topMedecins = Object.entries(medecinCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
@@ -3258,6 +3961,11 @@ function renderStats(){
   const MOL_COLORS = ['#0A3D7A','#0B5E3C','#6B3FA0','#8B1A1A','#7A4B00','#185FA5','#C0392B','#2E86AB','#A23B72','#16A085'];
 
   el.innerHTML = `
+    <!-- Bandeau période -->
+    <div style="background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;border-radius:var(--radius-lg);padding:10px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:13px;font-weight:600">&#128200; ${periodLabel(period)}</div>
+      <div style="font-size:11px;opacity:0.8">Généré le ${new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})} à ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div>
+    </div>
     <!-- KPI Cards -->
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
       <div class="stat-card" style="border-left:4px solid var(--blue)">
@@ -3454,7 +4162,1200 @@ function renderStats(){
   `;
 }
 
-function printDoc(double){ printFromApercu(); }
+/* ============================================================
+   GESTION RENDEZ-VOUS
+============================================================ */
+// RDV storage: [{id, prenom, nom, age, dossier, proto, medecin, dateRdv, dateProto, cureNum}]
+/* ============================================================
+   GESTION PATIENTS EN COURS DE TRAITEMENT
+============================================================ */
+let patientsFilter = 'tous';
+
+function getPatients(){ return JSON.parse(localStorage.getItem('chncak_patients')||'[]'); }
+function savePatients(list){ localStorage.setItem('chncak_patients', JSON.stringify(list)); }
+
+function showAddPatientModal(editId){
+  const modal = document.getElementById('patient-modal');
+  const title = document.getElementById('patient-modal-title');
+  modal.dataset.editId = editId||'';
+
+  // Populate selects
+  const protoSel = document.getElementById('pm-proto');
+  protoSel.innerHTML = '<option value="">— Sélectionner —</option>' +
+    PROTOCOLS.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+  const medSel = document.getElementById('pm-medecin');
+  medSel.innerHTML = '<option value="">— Sélectionner —</option>' +
+    medecins.map(m=>`<option value="${m.name}">${m.name}</option>`).join('');
+
+  if(editId){
+    const p = getPatients().find(p=>p.id===editId);
+    if(p){
+      title.textContent = 'Modifier patient';
+      document.getElementById('pm-prenom').value     = p.prenom||'';
+      document.getElementById('pm-nom').value        = p.nom||'';
+      document.getElementById('pm-age').value        = p.age||'';
+      document.getElementById('pm-sexe').value       = p.sexe||'F';
+      document.getElementById('pm-tel').value        = p.tel||'';
+      document.getElementById('pm-dossier').value    = p.dossier||'';
+      document.getElementById('pm-proto').value      = p.protoId||'';
+      document.getElementById('pm-localisation').value = p.localisation||'';
+      document.getElementById('pm-medecin').value    = p.medecin||'';
+      document.getElementById('pm-cure').value       = p.cure||'';
+      document.getElementById('pm-total-cures').value= p.totalCures||'';
+      document.getElementById('pm-date-debut').value = p.dateDebut||'';
+      document.getElementById('pm-statut').value     = p.statut||'actif';
+      document.getElementById('pm-obs').value        = p.obs||'';
+    }
+  } else {
+    title.textContent = 'Nouveau patient';
+    ['pm-prenom','pm-nom','pm-age','pm-tel','pm-dossier','pm-localisation','pm-obs','pm-cure','pm-total-cures','pm-date-debut']
+      .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('pm-proto').value  = '';
+    document.getElementById('pm-medecin').value= '';
+    document.getElementById('pm-statut').value = 'actif';
+  }
+  modal.style.display = 'flex';
+}
+
+function closePatientModal(){
+  document.getElementById('patient-modal').style.display = 'none';
+}
+
+function savePatient(){
+  const editId = document.getElementById('patient-modal').dataset.editId;
+  const prenom = document.getElementById('pm-prenom').value.trim();
+  const nom    = document.getElementById('pm-nom').value.trim();
+  if(!prenom||!nom){ alert('Prénom et Nom obligatoires.'); return; }
+
+  const protoId = document.getElementById('pm-proto').value;
+  const proto   = PROTOCOLS.find(p=>p.id===protoId);
+
+  const entry = {
+    id:          editId || Date.now().toString(),
+    prenom, nom,
+    age:         document.getElementById('pm-age').value||'',
+    sexe:        document.getElementById('pm-sexe').value||'F',
+    tel:         document.getElementById('pm-tel').value||'',
+    dossier:     document.getElementById('pm-dossier').value||'',
+    protoId:     protoId||'',
+    proto:       proto?proto.name:document.getElementById('pm-proto').value||'',
+    localisation:document.getElementById('pm-localisation').value||'',
+    medecin:     document.getElementById('pm-medecin').value||'',
+    cure:        parseInt(document.getElementById('pm-cure').value)||1,
+    totalCures:  parseInt(document.getElementById('pm-total-cures').value)||0,
+    dateDebut:   document.getElementById('pm-date-debut').value||'',
+    statut:      document.getElementById('pm-statut').value||'actif',
+    obs:         document.getElementById('pm-obs').value||'',
+    updatedAt:   new Date().toISOString(),
+  };
+
+  const list = getPatients();
+  const idx  = list.findIndex(p=>p.id===entry.id);
+  if(idx>=0) list[idx]=entry; else list.push(entry);
+  savePatients(list);
+  closePatientModal();
+  renderPatientsList();
+}
+
+function deletePatient(id){
+  if(!confirm('Supprimer ce patient de la liste ?')) return;
+  savePatients(getPatients().filter(p=>p.id!==id));
+  renderPatientsList();
+}
+
+function filterPatients(f){
+  patientsFilter = f;
+  document.querySelectorAll('.pf-btn').forEach(b=>{
+    const active = b.id==='pf-'+f;
+    b.style.background = active ? (f==='actif'?'var(--green2)':f==='termine'?'var(--gray-mid)':f==='pause'?'var(--amber2)':'var(--blue)') : 'white';
+    b.style.color      = active ? 'white' : (f==='actif'?'var(--green)':f==='termine'?'var(--gray-mid)':f==='pause'?'var(--amber)':'var(--blue)');
+  });
+  // Reset all buttons first
+  ['pf-tous','pf-actif','pf-termine','pf-pause'].forEach(id=>{
+    const b=document.getElementById(id); if(!b) return;
+    b.style.background='white';
+    b.style.color=b.id==='pf-actif'?'var(--green)':b.id==='pf-termine'?'var(--gray-mid)':b.id==='pf-pause'?'var(--amber)':'var(--blue)';
+  });
+  const btn = document.getElementById('pf-'+f);
+  if(btn){ btn.style.background=f==='actif'?'var(--green2)':f==='termine'?'#888':f==='pause'?'var(--amber2)':'var(--blue)'; btn.style.color='white'; }
+  renderPatientsList();
+}
+
+function renderPatientsList(){
+  const el = document.getElementById('patients-list-content');
+  if(!el) return;
+  const q = (document.getElementById('patients-search')?.value||'').toLowerCase();
+  let list = getPatients();
+
+  if(patientsFilter!=='tous') list=list.filter(p=>p.statut===patientsFilter);
+  if(q) list=list.filter(p=>(p.prenom+' '+p.nom+' '+p.proto+' '+p.medecin+' '+p.dossier+' '+p.localisation).toLowerCase().includes(q));
+
+  const subtitle = document.getElementById('patients-subtitle');
+  if(subtitle) subtitle.textContent = `${list.length} patient(s) — ${getPatients().length} au total`;
+
+  if(!list.length){
+    el.innerHTML=`<div style="text-align:center;padding:40px;color:var(--gray-mid)">
+      <div style="font-size:36px;margin-bottom:10px">👥</div>
+      <div style="font-size:14px;font-weight:500">${q||patientsFilter!=='tous'?'Aucun résultat.':'Aucun patient enregistré.'}</div>
+      <div style="font-size:12px;margin-top:6px">${q||patientsFilter!=='tous'?'':'Importez votre fichier Excel ou ajoutez manuellement.'}</div>
+    </div>`;
+    return;
+  }
+
+  const statusBadge=(s)=>s==='actif'?'<span style="background:var(--green-pale);color:var(--green);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:600">● En cours</span>':
+    s==='termine'?'<span style="background:var(--gray-light);color:var(--gray-mid);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:600">✓ Terminé</span>':
+    '<span style="background:var(--amber-pale);color:var(--amber);border-radius:4px;padding:2px 7px;font-size:10px;font-weight:600">⏸ En pause</span>';
+
+  const rows = list.map((p,i)=>`
+    <tr style="${i%2===0?'background:#FAFBFD':'background:white'}">
+      <td style="padding:8px 12px;font-size:12px;font-weight:700;color:var(--blue)">${p.dossier||'—'}</td>
+      <td style="padding:8px 12px">
+        <div style="font-size:13px;font-weight:600">${p.prenom} ${p.nom}</div>
+        <div style="font-size:10px;color:var(--gray-mid)">${p.age?p.age+' ans':''}${p.sexe?' · '+p.sexe:''}</div>
+      </td>
+      <td style="padding:8px 12px;font-size:11px;color:var(--gray-mid)">${p.tel||'—'}</td>
+      <td style="padding:8px 12px">
+        <span style="background:var(--blue-pale);color:var(--blue);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600">${p.proto||'—'}</span>
+      </td>
+      <td style="padding:8px 12px;font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.localisation||''}">${p.localisation||'—'}</td>
+      <td style="padding:8px 12px;font-size:11px;text-align:center">
+        ${p.cure&&p.totalCures?`<b>${p.cure}</b>/${p.totalCures}`:(p.cure?`<b>${p.cure}</b>`:'—')}
+      </td>
+      <td style="padding:8px 12px;font-size:11px;color:var(--gray-mid)">${p.medecin||'—'}</td>
+      <td style="padding:8px 12px;font-size:11px">
+        ${p.dateDebut?new Date(p.dateDebut+'T00:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric'}):'—'}
+      </td>
+      <td style="padding:8px 12px">${statusBadge(p.statut||'actif')}</td>
+      <td style="padding:8px 12px;text-align:center;white-space:nowrap">
+        <button onclick="showAddPatientModal('${p.id}')"
+          style="background:var(--blue-pale);border:1px solid var(--blue-mid);border-radius:4px;color:var(--blue);font-size:11px;padding:3px 8px;cursor:pointer;margin-right:3px">
+          ✎
+        </button>
+        <button onclick="chargerPatientProtocole('${p.id}')"
+          style="background:var(--green-pale);border:1px solid var(--green2);border-radius:4px;color:var(--green);font-size:11px;padding:3px 8px;cursor:pointer;margin-right:3px"
+          title="Charger dans Protocole">
+          ▶
+        </button>
+        <button onclick="deletePatient('${p.id}')"
+          style="background:none;border:1px solid #F5AAAA;border-radius:4px;color:var(--red2);font-size:11px;padding:3px 8px;cursor:pointer">
+          ✕
+        </button>
+      </td>
+    </tr>`).join('');
+
+  el.innerHTML=`
+    <table style="width:100%;border-collapse:collapse;min-width:700px">
+      <thead>
+        <tr style="background:var(--blue-pale);position:sticky;top:0">
+          <th style="padding:8px 12px;font-size:10px;text-align:left;color:var(--blue);border-bottom:2px solid var(--blue-mid);white-space:nowrap">N° Dossier</th>
+          <th style="padding:8px 12px;font-size:10px;text-align:left;color:var(--blue);border-bottom:2px solid var(--blue-mid)">Patient</th>
+          <th style="padding:8px 12px;font-size:10px;text-align:left;color:var(--blue);border-bottom:2px solid var(--blue-mid)">Contact</th>
+          <th style="padding:8px 12px;font-size:10px;text-align:left;color:var(--blue);border-bottom:2px solid var(--blue-mid)">Protocole</th>
+          <th style="padding:8px 12px;font-size:10px;text-align:left;color:var(--blue);border-bottom:2px solid var(--blue-mid)">Localisation</th>
+          <th style="padding:8px 12px;font-size:10px;text-align:center;color:var(--blue);border-bottom:2px solid var(--blue-mid)">Cure</th>
+          <th style="padding:8px 12px;font-size:10px;text-align:left;color:var(--blue);border-bottom:2px solid var(--blue-mid)">Médecin</th>
+          <th style="padding:8px 12px;font-size:10px;text-align:left;color:var(--blue);border-bottom:2px solid var(--blue-mid)">Début</th>
+          <th style="padding:8px 12px;font-size:10px;text-align:left;color:var(--blue);border-bottom:2px solid var(--blue-mid)">Statut</th>
+          <th style="padding:8px 12px;font-size:10px;text-align:center;color:var(--blue);border-bottom:2px solid var(--blue-mid)">Actions</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function chargerPatientProtocole(id){
+  const p = getPatients().find(pt=>pt.id===id);
+  if(!p) return;
+  // Switch to protocole tab and fill fields
+  showPage('protocole', document.querySelector('.tab-btn'));
+  setTimeout(()=>{
+    if(p.prenom) document.getElementById('prenom').value=p.prenom;
+    if(p.nom)    document.getElementById('nom').value=p.nom;
+    if(p.age)    document.getElementById('age').value=p.age;
+    if(p.dossier)document.getElementById('dossier').value=p.dossier;
+    if(p.tel)    { const t=document.getElementById('tel-patient'); if(t) t.value=p.tel; }
+    if(p.protoId){ selId=p.protoId; document.querySelectorAll('.proto-card').forEach(c=>{c.classList.remove('selected');if(c.dataset.id===p.protoId)c.classList.add('selected');}); }
+    if(p.medecin){ const m=document.getElementById('medecin-select'); if(m) m.value=p.medecin; }
+    update();
+  }, 100);
+}
+
+function importPatients(input){
+  var file = input.files[0]; if(!file) return;
+  var msgEl = document.getElementById('patients-import-msg');
+  if(msgEl){ msgEl.style.display=''; msgEl.style.background='#EEF4FD'; msgEl.style.color='#0A3D7A'; msgEl.style.border='1px solid #B8D0F5'; msgEl.textContent='⏳ Lecture du fichier…'; }
+
+  if(!window.XLSX){
+    if(msgEl){ msgEl.style.background='#FDEAEA'; msgEl.style.color='#E74C3C'; msgEl.textContent='❌ Librairie XLSX non chargée. Vérifiez votre connexion.'; }
+    input.value=''; return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      var data = new Uint8Array(e.target.result);
+      var wb = XLSX.read(data, {type:'array', cellDates:true});
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var rows = XLSX.utils.sheet_to_json(ws, {defval:'', raw:false});
+
+      if(!rows.length){
+        if(msgEl){ msgEl.style.background='#FDEAEA'; msgEl.style.color='#E74C3C'; msgEl.textContent='❌ Fichier vide ou format incorrect.'; }
+        input.value=''; return;
+      }
+
+      // Normalize a string for comparison
+      function norm(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'').trim(); }
+
+      // Get column key by exact normalized match (not substring)
+      var allKeys = Object.keys(rows[0]);
+      function getCol(){
+        var keys = Array.prototype.slice.call(arguments);
+        // First pass: exact match
+        for(var ki=0; ki<allKeys.length; ki++){
+          var nk = norm(allKeys[ki]);
+          for(var j=0; j<keys.length; j++){
+            if(nk === norm(keys[j])) return allKeys[ki];
+          }
+        }
+        // Second pass: substring match (for columns like 'nom du protocole' matching 'protocole')
+        for(var ki=0; ki<allKeys.length; ki++){
+          var nk = norm(allKeys[ki]);
+          for(var j=0; j<keys.length; j++){
+            if(nk.indexOf(norm(keys[j]))>=0) return allKeys[ki];
+          }
+        }
+        return null;
+      }
+
+      // Map columns — matches your exact file structure
+      var cPrenom   = getCol('prenom','firstname');
+      var cNom      = getCol('nom','lastname','surname');
+      var cAge      = getCol('age');
+      var cSexe     = getCol('sexe','genre','sex');
+      var cContact  = getCol('contact','tel','phone','mobile');
+      var cAntcd    = getCol('antecedent','atcd');
+      var cLocal    = getCol('localisation','cancer','diagnostic');
+      var cIndic    = getCol('indication','chimio');
+      var cCode     = getCol('code');
+      var cId       = getCol('id','dossier','num');
+      var cCubix    = getCol('cubix','icicubix');
+      var cNat      = getCol('nationalite','nationality');
+      var cProto    = getCol('protocole','protocol','nomduprotocole');
+      var cLigne    = getCol('ligne');
+      var cCure     = getCol('numerocure','curenum','cureencours');
+      var cTotal    = getCol('nombrecure','totalcure','cureafaire');
+      var cMed      = getCol('medecin','docteur','medecintraitant');
+      var cRdv      = getCol('rendezvous','rdv','daterendez');
+
+      function val(row, col){ return col ? (row[col]||'').toString().trim() : ''; }
+
+      function parseDate(v){
+        if(!v || v==='') return '';
+        if(v instanceof Date){ return v.toISOString().split('T')[0]; }
+        var s = v.toString().trim();
+        // Already ISO
+        if(s.match(/^\d{4}-\d{2}-\d{2}/)) return s.substring(0,10);
+        // dd/mm/yyyy
+        var m1 = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if(m1) return m1[3]+'-'+m1[2].padStart(2,'0')+'-'+m1[1].padStart(2,'0');
+        // Excel serial number (XLSX with raw:false returns strings like "2026-05-09")
+        return '';
+      }
+
+      var list = getPatients();
+      var added=0, updated=0, errors=[];
+
+      rows.forEach(function(row, i){
+        var prenom = val(row, cPrenom);
+        var nom    = val(row, cNom);
+        if(!prenom && !nom){ errors.push('Ligne '+(i+2)+': vide'); return; }
+
+        var protoName = val(row, cProto).toUpperCase();
+        var proto = null;
+        for(var pi=0; pi<PROTOCOLS.length; pi++){
+          if(PROTOCOLS[pi].name.toUpperCase()===protoName||PROTOCOLS[pi].id.toUpperCase()===protoName){
+            proto=PROTOCOLS[pi]; break;
+          }
+        }
+
+        var dossier  = val(row, cId);
+        var dateRdv  = parseDate(val(row, cRdv));
+        var sexeRaw  = val(row, cSexe).toUpperCase();
+
+        var entry = {
+          id:          (Date.now()+i).toString(),
+          prenom:      prenom,
+          nom:         nom,
+          age:         val(row, cAge),
+          sexe:        sexeRaw.charAt(0)==='M' ? 'M' : 'F',
+          tel:         val(row, cContact),
+          dossier:     dossier,
+          cubix:       val(row, cCubix),
+          code:        val(row, cCode),
+          nationalite: val(row, cNat),
+          antecedents: val(row, cAntcd),
+          localisation:val(row, cLocal)||val(row, cIndic),
+          protoId:     proto ? proto.id : '',
+          proto:       proto ? proto.name : protoName,
+          medecin:     val(row, cMed),
+          ligne:       val(row, cLigne),
+          cure:        parseInt(val(row, cCure))||1,
+          totalCures:  parseFloat(val(row, cTotal))||0,
+          dateRdv:     dateRdv,
+          dateDebut:   '',
+          statut:      'actif',
+          obs:         '',
+          updatedAt:   new Date().toISOString(),
+        };
+
+        var exists = -1;
+        for(var ei=0; ei<list.length; ei++){
+          if((dossier && list[ei].dossier===dossier)||(list[ei].prenom===prenom&&list[ei].nom===nom)){
+            exists=ei; break;
+          }
+        }
+        if(exists>=0){ var oldId=list[exists].id; list[exists]=entry; list[exists].id=oldId; updated++; }
+        else { list.push(entry); added++; }
+      });
+
+      savePatients(list);
+
+      // Sync RDV dates into chncak_rdv
+      var rdvList = getRdvList();
+      var rdvAdded = 0;
+      list.forEach(function(p){
+        if(!p.dateRdv || p.dateRdv.length<8) return;
+        var exists2 = -1;
+        for(var ri=0; ri<rdvList.length; ri++){
+          if((p.dossier&&rdvList[ri].dossier===p.dossier)||(rdvList[ri].prenom===p.prenom&&rdvList[ri].nom===p.nom)){
+            exists2=ri; break;
+          }
+        }
+        var rdvEntry = {
+          id:      exists2>=0 ? rdvList[exists2].id : (Date.now()+rdvAdded),
+          prenom:  p.prenom, nom: p.nom, age: p.age||'',
+          dossier: p.dossier||'', cubix: p.cubix||'', tel: p.tel||'',
+          proto:   p.proto||'', protoId: p.protoId||'',
+          medecin: p.medecin||'', cureNum: p.cure||'',
+          ligne:   p.ligne||'', dateRdv: p.dateRdv, dateProto: '',
+          dateTs:  new Date(p.dateRdv+'T00:00:00').getTime(), sc: 0,
+        };
+        if(exists2>=0) rdvList[exists2] = rdvEntry;
+        else { rdvList.push(rdvEntry); rdvAdded++; }
+      });
+      rdvList.sort(function(a,b){ return (a.dateRdv||'').localeCompare(b.dateRdv||''); });
+      saveRdvList(rdvList);
+
+      var msg = '✅ '+added+' patient(s) ajouté(s), '+updated+' mis à jour'+(rdvAdded?' · '+rdvAdded+' RDV ajoutés':'')+(errors.length?' · ⚠ '+errors.length+' erreur(s)':'')+'.' ;
+      if(msgEl){ msgEl.style.background='#E4F5ED'; msgEl.style.color='#0B5E3C'; msgEl.style.border='1px solid #B0DCC5'; msgEl.textContent=msg; setTimeout(function(){ msgEl.style.display='none'; },8000); }
+      renderPatientsList();
+    } catch(err){
+      if(msgEl){ msgEl.style.background='#FDEAEA'; msgEl.style.color='#E74C3C'; msgEl.textContent='❌ Erreur: '+err.message; }
+      console.error('importPatients error:', err);
+    }
+    input.value='';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function showPatientsMsg(type,text){
+  const el=document.getElementById('patients-import-msg');
+  el.style.display=''; el.textContent=text;
+  if(type==='success'){el.style.background='var(--green-pale)';el.style.color='var(--green)';el.style.border='1px solid #B0DCC5';}
+  else if(type==='warn'){el.style.background='var(--amber-pale)';el.style.color='var(--amber)';el.style.border='1px solid #F0C060';}
+  else{el.style.background='var(--red-pale)';el.style.color='var(--red2)';el.style.border='1px solid #F5AAAA';}
+  setTimeout(()=>el.style.display='none',8000);
+}
+
+function exportPatients(){
+  const list=getPatients();
+  if(!list.length){alert('Aucun patient à exporter.');return;}
+  const rows=list.map(p=>({
+    'N° Dossier':p.dossier||'','Prénom':p.prenom,'Nom':p.nom,'Age':p.age||'','Sexe':p.sexe||'',
+    'Contact':p.tel||'','Protocole':p.proto||'','Localisation':p.localisation||'',
+    'Cure en cours':p.cure||'','Total cures':p.totalCures||'',
+    'Médecin':p.medecin||'','Date début':p.dateDebut||'',
+    'Statut':p.statut==='actif'?'En cours':p.statut==='termine'?'Terminé':'En pause',
+    'Observations':p.obs||'',
+  }));
+  const ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[10,14,14,5,6,14,18,24,8,8,18,12,12,20].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Patients');
+  XLSX.writeFile(wb,'Patients_CHNCAK_'+new Date().toISOString().split('T')[0]+'.xlsx');
+}
+
+function downloadPatientsTemplate(){
+  const template=[{
+    'N° Dossier':'539/24','Prénom':'Fatou','Nom':'Diallo','Age':45,'Sexe':'F',
+    'Contact':'77 123 45 67','Protocole':'FOLFOX4','Localisation':'Cancer colorectal T3N1M0',
+    'Cure en cours':3,'Total cures':6,'Médecin':'Dr M. Mane','Date début':'2024-01-15',
+    'Statut':'En cours','Observations':'Tolérance bonne',
+  },{
+    'N° Dossier':'540/24','Prénom':'Mamadou','Nom':'Sow','Age':58,'Sexe':'M',
+    'Contact':'76 987 65 43','Protocole':'GEMCITABINE','Localisation':'Cancer pancréas T2N0M0',
+    'Cure en cours':2,'Total cures':4,'Médecin':'Dr Fallou Sall','Date début':'2024-02-01',
+    'Statut':'En cours','Observations':'',
+  }];
+  const ws=XLSX.utils.json_to_sheet(template);
+  ws['!cols']=[10,14,14,5,6,14,18,24,8,8,18,12,12,20].map(w=>({wch:w}));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Patients');
+  XLSX.writeFile(wb,'Modele_Patients_CHNCAK.xlsx');
+}
+
+// Render patients when switching to tab
+
+function clearAllHistory(){
+  if(pwd === null) return;
+  if(pwd !== 'Onco@2026'){ alert('❌ Mot de passe incorrect.'); return; }
+  if(!confirm('⚠️ Effacer TOUT l\'historique des protocoles ?\n\nCette action est irréversible.\nLes données de stock et les médecins ne seront pas affectés.')) return;
+  historique = [];
+  localStorage.removeItem('chncak_historique');
+  // Also clear sorties if needed
+  const clearSorties = confirm('Effacer aussi l\'historique des sorties de stock ?');
+  if(clearSorties) localStorage.removeItem('chncak_sorties');
+  alert('✅ Historique effacé.');
+  renderStats();
+  renderHistory();
+}
+
+
+/* ============================================================
+   GESTION RENDEZ-VOUS
+============================================================ */
+// RDV storage: [{id, prenom, nom, age, dossier, proto, medecin, dateRdv, dateProto, cureNum}]
+function getRdvList(){ return JSON.parse(localStorage.getItem('chncak_rdv')||'[]'); }
+function saveRdvList(list){ localStorage.setItem('chncak_rdv', JSON.stringify(list)); }
+
+function calcRdvAuto(){
+  const proto = PROTOCOLS.find(p=>p.id===selId);
+  if(!proto){ alert('Sélectionnez d\'abord un protocole.'); return; }
+  const dp = document.getElementById('date-protocole').value;
+  if(!dp){ alert('Renseignez la date du protocole d\'abord.'); return; }
+  const cycleMap={'J1=J21':21,'J1=J14':14,'J1=J28':28,'J1=J15':15,'J1=J8':8};
+  const days = cycleMap[proto.rythme]||21;
+  const d = new Date(dp);
+  d.setDate(d.getDate()+days);
+  const rdvISO = d.toISOString().split('T')[0];
+  document.getElementById('date-rdv').value = rdvISO;
+  updateRdvDisplay(rdvISO);
+}
+
+function saveRdv(){
+  const val = document.getElementById('date-rdv').value;
+  updateRdvDisplay(val);
+}
+
+function updateRdvDisplay(isoDate){
+  const el = document.getElementById('rdv-display');
+  if(!el) return;
+  if(isoDate){
+    const d = new Date(isoDate+'T00:00:00');
+    const opts = {weekday:'short',day:'2-digit',month:'short',year:'numeric'};
+    el.textContent = '📅 ' + d.toLocaleDateString('fr-FR', opts);
+    el.style.color = 'var(--amber)';
+  } else {
+    el.textContent = '';
+  }
+}
+
+function saveRdvAndConfirm(){
+  const proto  = PROTOCOLS.find(p=>p.id===selId);
+  const rdvVal = document.getElementById('date-rdv').value;
+  const prenom = document.getElementById('prenom').value.trim();
+  const nom    = document.getElementById('nom').value.trim();
+  if(!prenom||!nom){ alert('Renseignez le prénom et le nom du patient.'); return; }
+  if(!rdvVal){ alert('Renseignez ou calculez d\'abord la date du RDV.'); return; }
+  if(!proto){ alert('Sélectionnez un protocole.'); return; }
+
+  const list = getRdvList();
+  // Remove existing RDV for same patient+protocole if exists
+  const existing = list.findIndex(r=>
+    r.prenom===prenom && r.nom===nom && r.protoId===selId
+  );
+  const entry = {
+    id:        Date.now(),
+    prenom,
+    nom,
+    age:       document.getElementById('age').value||'',
+    dossier:   document.getElementById('dossier').value||'',
+    cubix:     document.getElementById('cubix').value||'',
+    proto:     proto.name,
+    protoId:   selId,
+    medecin:   document.getElementById('medecin-select').value||'',
+    dateRdv:   rdvVal,
+    dateProto: document.getElementById('date-protocole').value||'',
+    cureNum:   document.getElementById('cure-num').value||'',
+    tel:       document.getElementById('tel-patient')?.value||'',
+    poids:     document.getElementById('poids')?.value||'',
+    taille:    document.getElementById('taille')?.value||'',
+    sc:        sc||0,
+    ligne:     document.getElementById('ligne-traitement')?.value||'',
+  };
+  if(existing >= 0) list[existing] = entry;
+  else list.push(entry);
+  list.sort((a,b)=>a.dateRdv.localeCompare(b.dateRdv));
+  saveRdvList(list);
+
+  // Visual feedback
+  const btn = event.target;
+  btn.textContent = '✓ RDV enregistré !';
+  btn.style.background = 'var(--green)';
+  setTimeout(()=>{ btn.textContent='✓ Enregistrer RDV'; btn.style.background='var(--green2)'; }, 2500);
+}
+
+function deleteRdv(id){
+  if(!confirm('Supprimer ce rendez-vous ?')) return;
+  const list = getRdvList().filter(r=>r.id!==id);
+  saveRdvList(list);
+  renderRdvList();
+}
+
+function reporterRdv(id){
+  const list = getRdvList();
+  const rdv  = list.find(r=>r.id===id);
+  if(!rdv) return;
+
+  // Show motif selection dialog
+  const motifs = ['Absence du patient','Problème d\'analyse','AEG (Altération état général)','Problème financier','Report médical','Autre'];
+  const motifHtml = motifs.map((m,i)=>`${i+1}. ${m}`).join('\n');
+  const choix = prompt(`⚠ Reporter le RDV de ${rdv.prenom} ${rdv.nom}\n\nMotif :\n${motifHtml}\n\nEntrez le numéro du motif (1-${motifs.length}) ou tapez le motif :`);
+  if(!choix) return;
+
+  const num = parseInt(choix);
+  const motif = (num>=1 && num<=motifs.length) ? motifs[num-1] : choix.trim();
+  if(!motif){ alert('Motif invalide.'); return; }
+
+  // New RDV date
+  const newDate = prompt(`Nouvelle date de RDV pour ${rdv.prenom} ${rdv.nom} :\n(Format : AAAA-MM-JJ, laissez vide pour ne pas replanifier)`, '');
+
+  const idx = list.findIndex(r=>r.id===id);
+  list[idx].motifReport  = motif;
+  list[idx].dateReport   = new Date().toISOString().split('T')[0];
+  list[idx].stockValide  = false;
+  if(newDate && newDate.match(/^\d{4}-\d{2}-\d{2}$/)){
+    list[idx].dateRdv = newDate;
+    list[idx].motifReport = motif + ' → Reporté au ' + newDate.split('-').reverse().join('/');
+  }
+  saveRdvList(list);
+  alert(`✅ Motif enregistré : ${motif}`);
+  renderRdvList();
+}
+
+function validateStockFromRdv(id){
+  const list  = getRdvList();
+  const rdv   = list.find(r=>r.id===id);
+  if(!rdv) return;
+  const proto = PROTOCOLS.find(p=>p.id===rdv.protoId);
+  if(!proto){ alert('Protocole introuvable dans la base.'); return; }
+
+  // Reconstruct SC from stored data or prompt
+  const rdvPoids  = parseFloat(rdv.poids||0);
+  const rdvTaille = parseFloat(rdv.taille||0);
+  let scVal    = rdv.sc || 0;
+  if(!scVal && rdvPoids && rdvTaille){
+    scVal = Math.sqrt((rdvPoids*rdvTaille)/3600);
+  }
+  if(!scVal){
+    const saisie = prompt(`Surface corporelle (m²) pour ${rdv.prenom} ${rdv.nom}\n(introuvable dans le RDV — saisissez la valeur) :`, '1.70');
+    scVal = parseFloat(saisie||'0');
+    if(!scVal){ alert('SC invalide, annulation.'); return; }
+  }
+
+  if(!confirm(`Valider la sortie stock pour :\n${rdv.prenom} ${rdv.nom} — ${rdv.proto}\nDate RDV : ${rdv.dateRdv}\n\nCela déduira les flacons du stock.`)) return;
+
+  const activeDrugs = proto.drugs.filter(d=>!d.t && (d.mgm2||d.carbo||d.avastin||d.fix));
+  let updated=0, warnings=[];
+
+  activeDrugs.forEach(d=>{
+    // Calculate dose
+    let doseVal = 0;
+    if(d.mgm2)  doseVal = Math.round(d.mgm2 * scVal);
+    else if(d.fix) doseVal = d.fix;
+    else if(d.carbo){ doseVal = Math.round((d.carbo||5)*(rdv.clairance||80+25)); }
+    if(!doseVal) return;
+
+    const drugName = d.name;
+    const catIdx   = catalog.findIndex(c=>c.name===drugName||c.dci===drugName);
+    if(catIdx===-1){ warnings.push(`${drugName}: non trouvé dans le catalogue`); return; }
+
+    const drug    = catalog[catIdx];
+    const dosages = (drug.dosages||[]).sort((a,b)=>b-a);
+    let remaining = doseVal;
+    let flaconsUsed = 0;
+    dosages.forEach(dos=>{ const n=Math.floor(remaining/dos); flaconsUsed+=n; remaining-=n*dos; });
+    if(remaining>0) flaconsUsed++;
+
+    const stockActuel = drug.qteStock||drug.stock||0;
+    if(stockActuel < flaconsUsed){
+      warnings.push(`⚠ ${drugName}: stock insuffisant (${stockActuel} flacons, besoin ${flaconsUsed})`);
+    }
+    catalog[catIdx].qteStock = Math.max(0, stockActuel - flaconsUsed);
+
+    // Record sortie
+    const sorties = JSON.parse(localStorage.getItem('chncak_sorties')||'[]');
+    sorties.push({
+      date:    rdv.dateRdv,
+      dateTs:  new Date(rdv.dateRdv+'T00:00:00').getTime(),
+      prenom:  rdv.prenom,
+      nom:     rdv.nom,
+      proto:   rdv.proto,
+      details: `${drugName}: ${flaconsUsed} flacon(s)`,
+      flacons: flaconsUsed,
+      mol:     drugName,
+    });
+    localStorage.setItem('chncak_sorties', JSON.stringify(sorties));
+    updated++;
+  });
+
+  saveCatalog();
+
+  // ── Auto-add/update patient dans la liste Patients ──
+  const patients = getPatients();
+  const pIdx = patients.findIndex(p=>
+    (p.dossier&&p.dossier===rdv.dossier&&rdv.dossier)||(p.prenom===rdv.prenom&&p.nom===rdv.nom)
+  );
+  const proto2 = PROTOCOLS.find(p=>p.id===rdv.protoId);
+  const patEntry = {
+    id:        pIdx>=0?patients[pIdx].id:Date.now().toString(),
+    prenom:rdv.prenom, nom:rdv.nom, age:rdv.age||'', sexe:rdv.sexe||'',
+    tel:rdv.tel||'', dossier:rdv.dossier||'', cubix:rdv.cubix||'',
+    protoId:rdv.protoId||'', proto:proto2?proto2.name:(rdv.proto||''),
+    medecin:rdv.medecin||'', ligne:rdv.ligne||'',
+    cure:parseInt(rdv.cureNum)||1, totalCures:0, statut:'actif',
+    dateDebut:rdv.dateProto||'', updatedAt:new Date().toISOString(),
+  };
+  if(pIdx>=0) patients[pIdx]={...patients[pIdx],...patEntry,id:patients[pIdx].id};
+  else patients.push(patEntry);
+  savePatients(patients);
+
+  // Mark RDV as validated
+  const idx = list.findIndex(r=>r.id===id);
+  if(idx>=0){ list[idx].stockValide=true; list[idx].dateValidation=new Date().toISOString(); }
+  saveRdvList(list);
+
+  let msg = `✅ Stock mis à jour pour ${updated} médicament(s) — ${rdv.prenom} ${rdv.nom}`;
+  if(warnings.length) msg += '\n\n' + warnings.join('\n');
+  alert(msg);
+  renderRdvList();
+}
+
+function actualiserRdv(btn){
+  try {
+    renderRdvList();
+    if(btn){
+      btn.style.background='var(--green2)';
+      btn.textContent='✓ OK';
+      setTimeout(()=>{ btn.style.background='var(--amber2)'; btn.innerHTML='&#8635; Actualiser'; }, 1500);
+    }
+  } catch(e) {
+    console.error('renderRdvList error:', e);
+    if(btn) btn.textContent='Erreur!';
+  }
+}
+
+function renderRdvList(){
+  var el = document.getElementById('rdv-list-content');
+  if(!el) return;
+  var q = '';
+  var srch = document.getElementById('rdv-search');
+  if(srch) q = srch.value.toLowerCase();
+
+  var list = getRdvList();
+  if(q) list = list.filter(function(r){
+    return (r.prenom+' '+r.nom+' '+(r.proto||'')+' '+(r.medecin||'')+' '+(r.dateRdv||'')).toLowerCase().indexOf(q)>=0;
+  });
+
+  if(!list.length){
+    el.innerHTML = '<div style="text-align:center;padding:30px;color:#888;font-size:13px">'
+      + '<div style="font-size:32px;margin-bottom:8px">📅</div>'
+      + (q ? 'Aucun RDV trouvé.' : 'Aucun rendez-vous. Enregistrez un RDV dans l\'onglet Protocole.')
+      + '</div>';
+    return;
+  }
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  var todayStr = today.toISOString().split('T')[0];
+
+  // KPI counts
+  var total=list.length, auj=0, semaine=0, passes=0;
+  list.forEach(function(r){
+    if(!r.dateRdv) return;
+    var d = new Date(r.dateRdv+'T00:00:00');
+    var diff = Math.round((d-today)/86400000);
+    if(diff===0) auj++;
+    else if(diff>0 && diff<=7) semaine++;
+    else if(diff<0) passes++;
+  });
+
+  // Build rows
+  var rowsHtml = '';
+  list.forEach(function(r){
+    var dateStr = r.dateRdv || '';
+    var rdvDate = dateStr ? new Date(dateStr+'T00:00:00') : null;
+    var diff = rdvDate ? Math.round((rdvDate-today)/86400000) : null;
+    var isPast  = diff!==null && diff<0;
+    var isToday = diff===0;
+    var diffTxt = diff===null ? '' : isToday ? '<b style="color:#0B5E3C">Aujourd\'hui</b>'
+                : isPast ? '<span style="color:#E74C3C">'+Math.abs(diff)+'j passé</span>'
+                : '<span style="color:#0A3D7A">Dans '+diff+'j</span>';
+    var bg = isToday?'#E4F5ED' : isPast?'#FEF5F5' : (diff!==null&&diff<=3?'#FFF3DC':'white');
+    var dateFmt = rdvDate ? rdvDate.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}) : dateStr;
+
+    var actionHtml = r.stockValide
+      ? '<span style="background:#E4F5ED;color:#0B5E3C;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:600">✓ Traité</span>'
+      : '<button onclick="validateStockFromRdv('+r.id+')" style="background:#E4F5ED;border:1px solid #0B5E3C;border-radius:4px;color:#0B5E3C;font-size:11px;padding:3px 7px;cursor:pointer">✓ Traité</button>';
+
+    rowsHtml += '<tr style="background:'+bg+';border-bottom:1px solid #eee">'
+      +'<td style="padding:8px 12px;font-size:12px;font-weight:700">'+dateFmt
+        +'<div style="font-size:10px;font-weight:400;margin-top:2px">'+diffTxt+'</div>'
+        +(r.motifReport?'<div style="font-size:9px;color:#E67E22;margin-top:2px">⚠ '+r.motifReport+'</div>':'')
+      +'</td>'
+      +'<td style="padding:8px 12px;font-size:13px;font-weight:600">'+(r.prenom||'')+' '+(r.nom||'')+'</td>'
+      +'<td style="padding:8px 12px;font-size:11px;color:#888">'+(r.age?r.age+' ans':'—')+'</td>'
+      +'<td style="padding:8px 12px"><span style="background:#EEF4FD;color:#0A3D7A;border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600">'+(r.proto||'—')+'</span>'
+        +(r.cureNum?'<span style="font-size:10px;color:#888;margin-left:4px">C'+r.cureNum+'</span>':'')+'</td>'
+      +'<td style="padding:8px 12px;font-size:11px;color:#888">'+(r.dossier||'—')+'</td>'
+      +'<td style="padding:8px 12px;font-size:11px;color:#0A3D7A">'+(r.medecin||'—')+'</td>'
+      +'<td style="padding:8px 12px;text-align:center">'
+        +'<div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap">'
+        +actionHtml
+        +'<button onclick="reporterRdv('+r.id+')" style="background:#FFF3DC;border:1px solid #E67E22;border-radius:4px;color:#E67E22;font-size:11px;padding:3px 7px;cursor:pointer">⚠ Reporter</button>'
+        +'<button onclick="deleteRdv('+r.id+')" style="background:none;border:1px solid #F5AAAA;border-radius:4px;color:#E74C3C;font-size:11px;padding:3px 7px;cursor:pointer">✕</button>'
+        +'</div>'
+      +'</td>'
+      +'</tr>';
+  });
+
+  var kpiHtml = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid #eee">'
+    +'<div style="padding:10px;text-align:center;border-right:1px solid #eee"><div style="font-size:20px;font-weight:700;color:#0A3D7A">'+total+'</div><div style="font-size:10px;color:#888;text-transform:uppercase">Total RDV</div></div>'
+    +'<div style="padding:10px;text-align:center;border-right:1px solid #eee"><div style="font-size:20px;font-weight:700;color:#0B5E3C">'+auj+'</div><div style="font-size:10px;color:#888;text-transform:uppercase">Aujourd\'hui</div></div>'
+    +'<div style="padding:10px;text-align:center;border-right:1px solid #eee"><div style="font-size:20px;font-weight:700;color:#E67E22">'+semaine+'</div><div style="font-size:10px;color:#888;text-transform:uppercase">Cette semaine</div></div>'
+    +'<div style="padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:#E74C3C">'+passes+'</div><div style="font-size:10px;color:#888;text-transform:uppercase">Passés</div></div>'
+    +'</div>';
+
+  var tableHtml = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;min-width:600px">'
+    +'<thead><tr style="background:#FFF3DC">'
+    +'<th style="padding:8px 12px;font-size:10px;text-align:left;color:#E67E22;border-bottom:2px solid #E67E22;white-space:nowrap">📅 Date RDV</th>'
+    +'<th style="padding:8px 12px;font-size:10px;text-align:left;color:#E67E22;border-bottom:2px solid #E67E22">Patient</th>'
+    +'<th style="padding:8px 12px;font-size:10px;text-align:left;color:#E67E22;border-bottom:2px solid #E67E22">Age</th>'
+    +'<th style="padding:8px 12px;font-size:10px;text-align:left;color:#E67E22;border-bottom:2px solid #E67E22">Protocole</th>'
+    +'<th style="padding:8px 12px;font-size:10px;text-align:left;color:#E67E22;border-bottom:2px solid #E67E22">Dossier</th>'
+    +'<th style="padding:8px 12px;font-size:10px;text-align:left;color:#E67E22;border-bottom:2px solid #E67E22">Médecin</th>'
+    +'<th style="padding:8px 12px;font-size:10px;text-align:center;color:#E67E22;border-bottom:2px solid #E67E22">Actions</th>'
+    +'</tr></thead>'
+    +'<tbody>'+rowsHtml+'</tbody>'
+    +'</table></div>';
+
+  el.innerHTML = kpiHtml + tableHtml;
+}
+
+function printBonRDV(){
+  const proto  = PROTOCOLS.find(p=>p.id===selId);
+  if(!proto) return;
+  const prenom  = document.getElementById('prenom').value||'';
+  const nom     = document.getElementById('nom').value||'';
+  const age     = document.getElementById('age').value||'';
+  const tel     = document.getElementById('tel-patient')?.value||'';
+  // Use the date-rdv field if filled, else auto-calculate
+  const rdvInput = document.getElementById('date-rdv')?.value;
+  let nextDate = '___/___/______';
+  if(rdvInput){
+    nextDate = rdvInput.split('-').reverse().join('/');
+  } else {
+    const dp = document.getElementById('date-protocole').value;
+    if(dp){
+      const cycleMap={'J1=J21':21,'J1=J14':14,'J1=J28':28,'J1=J15':15,'J1=J8':8};
+      const cycleDays = cycleMap[proto.rythme]||21;
+      const d = new Date(dp); d.setDate(d.getDate()+cycleDays);
+      nextDate = d.toLocaleDateString('fr-FR');
+    }
+  }
+
+  const dossier = document.getElementById('dossier').value||'';
+  const cubix   = document.getElementById('cubix').value||'';
+  const med     = document.getElementById('medecin-select').value||'';
+  const dp      = document.getElementById('date-protocole').value;
+  const dateStr = dp ? dp.split('-').reverse().join('/') : '___/___/______';
+
+  // Cost from pharma calc (if available)
+  const coutEl = document.getElementById('pharma-total-cout');
+  const montant = '25.000 Fr CFA';
+
+  const bloc = () => `
+  <div style="width:46%;display:inline-block;vertical-align:top;font-family:Arial,sans-serif">
+
+    <!-- EN-TÊTE vertical comme le modèle -->
+    <table style="width:100%;border-collapse:collapse;margin-bottom:4px">
+      <tr>
+        <td style="width:30px;vertical-align:top">
+          <img src="${LOGO_B64}" style="width:28px;height:28px;object-fit:contain">
+        </td>
+        <td style="text-align:center;vertical-align:top;padding:0 2px">
+          <div style="font-size:6.5px;line-height:1.5;color:#000">
+            République du Sénégal<br><b>Un peuple-un but-une foi</b><br>
+            ………………………………<br>Ministère de la Santé et l'Action Sociale<br>
+            ………………………………<br>Direction Générale des Etablissements de Santé<br>
+            ……………………………<br>Direction des Etablissements Publics de Santé<br>
+            ………………………………<br><b>Centre Hospitalier National Cheikh Ahmadoul Khadim</b><br>
+            ………………………………<br><b>Service d'Oncologie - Radiothérapie</b>
+          </div>
+        </td>
+        <td style="width:30px;vertical-align:top;text-align:right">
+          <img src="${LOGO_B64}" style="width:26px;height:26px;object-fit:contain;opacity:0.5">
+        </td>
+      </tr>
+    </table>
+
+    <!-- TITRE -->
+    <div style="text-align:center;background:#0A3D7A;color:white;padding:4px 8px;font-size:11px;font-weight:bold;letter-spacing:0.05em;margin-bottom:6px">
+      RENDEZ-VOUS
+    </div>
+
+    <!-- PATIENT INFO -->
+    <div style="font-size:9px;line-height:2.2;margin-bottom:6px;padding:0 4px">
+      <div style="display:flex"><span style="min-width:55px;font-weight:600">Prénom :</span><span style="flex:1;border-bottom:1px dotted #333">&nbsp;${prenom.toUpperCase()}</span></div>
+      <div style="display:flex"><span style="min-width:55px;font-weight:600">Nom :</span><span style="flex:1;border-bottom:1px dotted #333">&nbsp;${nom.toUpperCase()}</span></div>
+      <div style="display:flex;gap:10px">
+        <div style="display:flex;flex:1"><span style="min-width:35px;font-weight:600">Age :</span><span style="flex:1;border-bottom:1px dotted #333">&nbsp;${age} ans</span></div>
+        <div style="display:flex;flex:1"><span style="min-width:25px;font-weight:600">Tél :</span><span style="flex:1;border-bottom:1px dotted #333">&nbsp;${tel||''}</span></div>
+      </div>
+      <div style="display:flex"><span style="min-width:55px;font-weight:600">ID :</span><span style="flex:1;border-bottom:1px dotted #333">&nbsp;${cubix||dossier}</span></div>
+    </div>
+
+    <!-- DATE RDV -->
+    <div style="font-size:9px;padding:0 4px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:4px">
+        <span style="font-weight:600;white-space:nowrap">Numéro dossier :</span>
+        <span style="border-bottom:1px dotted #333;flex:1">&nbsp;${dossier}</span>
+      </div>
+      <div style="margin-top:4px;display:flex;align-items:center;gap:4px">
+        <span style="font-weight:600;white-space:nowrap">Date du rendez-vous :</span>
+        <span style="border-bottom:1px dotted #333;flex:1">&nbsp;<b>${nextDate}</b> à 07h30</span>
+      </div>
+    </div>
+
+    <!-- CASES À COCHER -->
+    <div style="font-size:9.5px;padding:0 4px;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+        <input type="checkbox" checked style="width:13px;height:13px">
+        <span style="font-weight:600">CHIMIOTHÉRAPIE (acte) : <span style="color:#0A3D7A">${proto.name}</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <input type="checkbox" style="width:13px;height:13px">
+        <span style="font-weight:600">TRANSFUSION (acte) :</span>
+        <span style="border-bottom:1px dotted #333;flex:1">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      </div>
+    </div>
+
+    <!-- MONTANT -->
+    <div style="border:1.5px solid #0A3D7A;border-radius:4px;padding:5px 8px;margin-bottom:8px;font-size:9px">
+      <div style="display:flex;align-items:center;gap:4px">
+        <span style="font-weight:600;white-space:nowrap">Montant à payer à la facturation :</span>
+        <span style="font-size:11px;font-weight:bold;color:#0A3D7A;flex:1;text-align:right">${montant}</span>
+      </div>
+      <div style="font-size:8px;color:#888;margin-top:2px;text-align:right">Unité de chimiothérapie</div>
+    </div>
+
+    <!-- SIGNATURE -->
+    <div style="text-align:right;font-size:9px;font-weight:bold;padding-right:4px">
+      ${med||'Le Médecin traitant'}
+      <div style="border-bottom:1px solid #000;margin-top:22px;width:120px;margin-left:auto"></div>
+    </div>
+
+    <!-- TEL -->
+    <div style="text-align:center;font-size:9px;font-weight:bold;margin-top:8px;color:#0A3D7A">
+      76 196 79 85
+    </div>
+  </div>`;
+
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8">
+<title>Bon RDV — ${prenom} ${nom}</title>
+<style>
+  @page{size:A4 landscape;margin:8mm 10mm}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Helvetica,sans-serif;color:#000;background:white}
+  input[type=checkbox]{accent-color:#0A3D7A}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    input[type=checkbox]{-webkit-print-color-adjust:exact}}
+</style>
+</head><body>
+<div style="display:flex;width:100%;gap:0;align-items:flex-start">
+  ${bloc()}
+  <div style="width:4%;display:flex;justify-content:center">
+    <div style="border-left:1.5px dashed #aaa;height:100%;min-height:180px"></div>
+  </div>
+  ${bloc()}
+</div>
+</body></html>`;
+
+  const frame=document.getElementById('print-frame');
+  frame.style.cssText='position:fixed;left:-9999px;top:0;width:297mm;height:210mm;border:none;display:block';
+  const fdoc=frame.contentDocument||frame.contentWindow.document;
+  fdoc.open();fdoc.write(html);fdoc.close();
+  setTimeout(()=>{
+    try{frame.contentWindow.focus();frame.contentWindow.print();}
+    catch(e){const b=new Blob([html],{type:'text/html'});window.open(URL.createObjectURL(b),'_blank');}
+    setTimeout(()=>{frame.style.cssText='display:none;position:fixed;left:-9999px;width:0;height:0;border:none';},3000);
+  },400);
+}
+
+function printRapport(){
+  const period   = getStatsPeriod();
+  const allHist  = historique;
+  const allSorties = JSON.parse(localStorage.getItem('chncak_sorties')||'[]');
+  const hist     = filterByPeriod(allHist, period);
+  const sorties  = filterByPeriod(allSorties, period);
+  const label    = periodLabel(period);
+  const now      = new Date();
+  const dateStr  = now.toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  const timeStr  = now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+
+  // ── Compute stats ──
+  const total    = hist.length;
+  const patients = new Set(hist.map(h=>h.nom+h.prenom)).size;
+  const nbSorties= sorties.length;
+
+  const protoCount={}, medecinCount={}, indicCount={}, monthCount={};
+  hist.forEach(h=>{
+    protoCount[h.protoName]=(protoCount[h.protoName]||0)+1;
+    if(h.medecin) medecinCount[h.medecin]=(medecinCount[h.medecin]||0)+1;
+    if(h.indication){ const ind=h.indication.replace('Chimiothérapie ',''); indicCount[ind]=(indicCount[ind]||0)+1; }
+    const d=new Date(h.dateTs);
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    monthCount[key]=(monthCount[key]||0)+1;
+  });
+
+  const molCount={}, molFlacons={}, molCout={};
+  sorties.forEach(s=>{
+    if(s.details){
+      s.details.split(', ').forEach(detail=>{
+        const m=detail.match(/^(.+?):\s*(\d+)\s*flacon/);
+        if(m){ const mol=m[1].trim(), fl=parseInt(m[2]);
+          molCount[mol]=(molCount[mol]||0)+1;
+          molFlacons[mol]=(molFlacons[mol]||0)+fl;
+        }
+      });
+    }
+  });
+  // Compute costs from catalog
+  let coutTotal = 0;
+  Object.entries(molFlacons).forEach(([mol, fl])=>{
+    const drug = catalog.find(c=>c.name===mol);
+    if(drug){ const cout=(drug.prixUnit||0)*fl; molCout[mol]=cout; coutTotal+=cout; }
+  });
+
+  const topProtos   = Object.entries(protoCount).sort((a,b)=>b[1]-a[1]);
+  const topMedecins = Object.entries(medecinCount).sort((a,b)=>b[1]-a[1]);
+  const topIndics   = Object.entries(indicCount).sort((a,b)=>b[1]-a[1]);
+  const months      = Object.entries(monthCount).sort((a,b)=>a[0].localeCompare(b[0]));
+  const topMols     = Object.entries(molCount).sort((a,b)=>b[1]-a[1]);
+
+  // ── Helper : bar SVG ──
+  const maxProto = Math.max(...topProtos.map(p=>p[1]),1);
+  const maxMol   = Math.max(...topMols.map(m=>m[1]),1);
+
+  const barRow = (label, val, max, color='#0A3D7A') => `
+    <tr>
+      <td style="padding:4px 8px;font-size:10px;width:35%;font-weight:600;color:#333">${label}</td>
+      <td style="padding:4px 8px;width:50%">
+        <div style="background:#E8EEF8;border-radius:3px;height:12px;overflow:hidden">
+          <div style="background:${color};height:100%;width:${Math.round(val/max*100)}%;border-radius:3px"></div>
+        </div>
+      </td>
+      <td style="padding:4px 8px;font-size:10px;font-weight:700;color:${color};text-align:right;white-space:nowrap">${val}</td>
+    </tr>`;
+
+  const section = (title, color, content) => `
+    <div style="margin-bottom:14px;border:1px solid #ddd;border-radius:6px;overflow:hidden;page-break-inside:avoid">
+      <div style="background:${color};color:white;padding:7px 12px;font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:0.05em">${title}</div>
+      <div style="padding:10px 12px">${content}</div>
+    </div>`;
+
+  // ── Historique table ──
+  const histRows = hist.slice(0,50).map((h,i)=>`
+    <tr style="${i%2===0?'background:#F8FAFB':''}">
+      <td style="padding:4px 8px;border:1px solid #ddd;font-size:9px">${h.date||'—'}</td>
+      <td style="padding:4px 8px;border:1px solid #ddd;font-size:9px;font-weight:600">${h.prenom} ${h.nom}</td>
+      <td style="padding:4px 8px;border:1px solid #ddd;font-size:9px">${h.protoName||'—'}</td>
+      <td style="padding:4px 8px;border:1px solid #ddd;font-size:9px">${(h.localisation||'—').substring(0,25)}</td>
+      <td style="padding:4px 8px;border:1px solid #ddd;font-size:9px">${h.medecin||'—'}</td>
+      <td style="padding:4px 8px;border:1px solid #ddd;font-size:9px;text-align:center">${h.cureNum||'—'}</td>
+    </tr>`).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8">
+<title>${label} — CHNCAK</title>
+<style>
+  @page{size:A4;margin:12mm 14mm}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#000;background:white}
+  h1{font-size:14px} h2{font-size:12px} h3{font-size:11px}
+  table{width:100%;border-collapse:collapse}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+  .kpi{border:1px solid #ddd;border-radius:5px;padding:10px;text-align:center;border-top:3px solid #0A3D7A}
+  .kpi-val{font-size:22px;font-weight:bold;color:#0A3D7A}
+  .kpi-lbl{font-size:9px;color:#666;margin-top:3px;text-transform:uppercase;letter-spacing:0.05em}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact} .page-break{page-break-before:always}}
+</style>
+</head><body>
+
+<!-- EN-TÊTE -->
+<table style="margin-bottom:12px;border-bottom:2px solid #0A3D7A;padding-bottom:8px">
+  <tr>
+    <td style="width:55px;vertical-align:middle">
+      <img src="${LOGO_B64}" style="width:50px;height:50px;object-fit:contain">
+    </td>
+    <td style="padding-left:10px;vertical-align:top">
+      <div style="font-size:8px;color:#555;line-height:1.6">
+        République du Sénégal — Ministère de la Santé et de l'Action Sociale<br>
+        <b>Centre Hospitalier National Cheikh Ahmadoul Khadim — TOUBA</b><br>
+        <b>Service d'Oncologie-Radiothérapie</b>
+      </div>
+    </td>
+    <td style="text-align:right;vertical-align:top">
+      <div style="font-size:8px;color:#555;line-height:1.8">
+        Généré le : <b>${dateStr}</b><br>
+        à <b>${timeStr}</b><br>
+        Par : ChimioPro v2
+      </div>
+    </td>
+  </tr>
+</table>
+
+<!-- TITRE RAPPORT -->
+<div style="background:#0A3D7A;color:white;border-radius:5px;padding:10px 16px;margin-bottom:14px;text-align:center">
+  <div style="font-size:14px;font-weight:bold;text-transform:uppercase;letter-spacing:0.05em">&#128200; ${label}</div>
+  <div style="font-size:10px;opacity:0.85;margin-top:3px">CHNCAK — Service d'Oncologie-Radiothérapie</div>
+</div>
+
+<!-- KPI -->
+<div class="kpi-grid">
+  <div class="kpi" style="border-top-color:#0A3D7A">
+    <div class="kpi-val">${total}</div>
+    <div class="kpi-lbl">Protocoles enregistrés</div>
+  </div>
+  <div class="kpi" style="border-top-color:#0B5E3C">
+    <div class="kpi-val" style="color:#0B5E3C">${patients}</div>
+    <div class="kpi-lbl">Patients uniques</div>
+  </div>
+  <div class="kpi" style="border-top-color:#6B3FA0">
+    <div class="kpi-val" style="color:#6B3FA0">${nbSorties}</div>
+    <div class="kpi-lbl">Préparations validées</div>
+  </div>
+  <div class="kpi" style="border-top-color:#E67E22">
+    <div class="kpi-val" style="color:#E67E22">${coutTotal>0?coutTotal.toLocaleString('fr-FR')+' F':'—'}</div>
+    <div class="kpi-lbl">Coût médicaments (FCFA)</div>
+  </div>
+</div>
+
+<!-- DEUX COLONNES -->
+<div class="two-col">
+
+  <!-- Protocoles -->
+  ${section('Protocoles utilisés', '#0A3D7A', topProtos.length ? `
+    <table>${topProtos.map(([n,v])=>barRow(n,v,maxProto,'#0A3D7A')).join('')}</table>` :
+    '<p style="color:#999;font-size:10px;text-align:center;padding:10px">Aucune donnée</p>')}
+
+  <!-- Médecins -->
+  ${section('Prescriptions par médecin', '#0B5E3C', topMedecins.length ? `
+    <table>${topMedecins.map(([n,v])=>`
+      <tr>
+        <td style="padding:4px 8px;font-size:10px;font-weight:600">${n}</td>
+        <td style="padding:4px 8px;font-size:10px;font-weight:700;color:#0B5E3C;text-align:right">${v} protocole${v>1?'s':''}</td>
+      </tr>`).join('')}</table>` :
+    '<p style="color:#999;font-size:10px;text-align:center;padding:10px">Aucun médecin</p>')}
+
+</div>
+
+<div class="two-col">
+
+  <!-- Indications -->
+  ${section('Types de chimiothérapie', '#6B3FA0', topIndics.length ? `
+    <table>${topIndics.map(([n,v])=>`
+      <tr>
+        <td style="padding:4px 8px;font-size:10px;font-weight:600;color:#6B3FA0">${n}</td>
+        <td style="padding:4px 8px;font-size:10px;font-weight:700;text-align:right">${v}</td>
+      </tr>`).join('')}</table>` :
+    '<p style="color:#999;font-size:10px;text-align:center;padding:10px">Aucune donnée</p>')}
+
+  <!-- Activité par mois -->
+  ${section('Activité par mois', '#185FA5', months.length ? `
+    <table>${months.map(([m,v])=>{
+      const [yr,mo]=m.split('-');
+      const mName=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'][parseInt(mo)-1];
+      return barRow(mName+' '+yr, v, Math.max(...months.map(x=>x[1]),1), '#185FA5');
+    }).join('')}</table>` :
+    '<p style="color:#999;font-size:10px;text-align:center;padding:10px">Aucune donnée</p>')}
+
+</div>
+
+<!-- MOLÉCULES & COÛTS -->
+${topMols.length ? section('Consommation médicaments (préparations validées)', '#4A2A80', `
+  <table style="width:100%;border-collapse:collapse">
+    <thead>
+      <tr style="background:#F5F0FF">
+        <th style="padding:5px 8px;font-size:9px;color:#4A2A80;text-align:left;border-bottom:2px solid #D0C0F0">Médicament</th>
+        <th style="padding:5px 8px;font-size:9px;color:#4A2A80;text-align:center;border-bottom:2px solid #D0C0F0">Prépas</th>
+        <th style="padding:5px 8px;font-size:9px;color:#4A2A80;text-align:center;border-bottom:2px solid #D0C0F0">Flacons</th>
+        <th style="padding:5px 8px;font-size:9px;color:#4A2A80;text-align:right;border-bottom:2px solid #D0C0F0">Coût total (FCFA)</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${topMols.map(([mol,n],i)=>`
+        <tr style="${i%2===0?'background:#FAF8FF':''}">
+          <td style="padding:4px 8px;font-size:10px;font-weight:600;color:#4A2A80">${mol}</td>
+          <td style="padding:4px 8px;font-size:10px;text-align:center;font-weight:700">${n}</td>
+          <td style="padding:4px 8px;font-size:10px;text-align:center">${molFlacons[mol]||0}</td>
+          <td style="padding:4px 8px;font-size:10px;text-align:right;color:#6B3FA0;font-weight:600">${molCout[mol]?(molCout[mol]).toLocaleString('fr-FR')+' F':'—'}</td>
+        </tr>`).join('')}
+      <tr style="background:#F5F0FF;font-weight:bold">
+        <td colspan="3" style="padding:5px 8px;font-size:10px;color:#4A2A80">TOTAL</td>
+        <td style="padding:5px 8px;font-size:11px;text-align:right;color:#4A2A80">${coutTotal>0?coutTotal.toLocaleString('fr-FR')+' FCFA':'—'}</td>
+      </tr>
+    </tbody>
+  </table>`) : ''}
+
+<!-- HISTORIQUE PROTOCOLES -->
+<div class="page-break"></div>
+${hist.length ? section('Registre des protocoles administrés ('+hist.length+' enregistrements)', '#0A3D7A', `
+  <table>
+    <thead>
+      <tr style="background:#EEF4FD">
+        <th style="padding:5px 8px;font-size:9px;text-align:left;border-bottom:2px solid #B8D0F5;color:#0A3D7A">Date</th>
+        <th style="padding:5px 8px;font-size:9px;text-align:left;border-bottom:2px solid #B8D0F5;color:#0A3D7A">Patient</th>
+        <th style="padding:5px 8px;font-size:9px;text-align:left;border-bottom:2px solid #B8D0F5;color:#0A3D7A">Protocole</th>
+        <th style="padding:5px 8px;font-size:9px;text-align:left;border-bottom:2px solid #B8D0F5;color:#0A3D7A">Localisation</th>
+        <th style="padding:5px 8px;font-size:9px;text-align:left;border-bottom:2px solid #B8D0F5;color:#0A3D7A">Médecin</th>
+        <th style="padding:5px 8px;font-size:9px;text-align:center;border-bottom:2px solid #B8D0F5;color:#0A3D7A">Cure N°</th>
+      </tr>
+    </thead>
+    <tbody>${histRows}</tbody>
+  </table>
+  ${hist.length>50?`<p style="font-size:9px;color:#888;margin-top:6px;text-align:center">Affichage limité à 50 enregistrements sur ${hist.length}. Exportez pour voir tout.</p>`:''}`) : ''}
+
+<!-- PIED DE PAGE -->
+<div style="margin-top:20px;padding-top:8px;border-top:1px solid #ddd;display:flex;justify-content:space-between;font-size:8px;color:#999">
+  <span>CHNCAK — Service d'Oncologie-Radiothérapie, Touba — ChimioPro v2</span>
+  <span>Rapport confidentiel — Usage médical interne uniquement</span>
+  <span>${dateStr}</span>
+</div>
+
+</body></html>`;
+
+  const frame = document.getElementById('print-frame');
+  frame.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:none;display:block';
+  const fdoc = frame.contentDocument || frame.contentWindow.document;
+  fdoc.open(); fdoc.write(html); fdoc.close();
+  setTimeout(()=>{
+    try{ frame.contentWindow.focus(); frame.contentWindow.print(); }
+    catch(e){ const b=new Blob([html],{type:'text/html'}); window.open(URL.createObjectURL(b),'_blank'); }
+    setTimeout(()=>{ frame.style.cssText='display:none;position:fixed;left:-9999px;width:0;height:0;border:none'; },3000);
+  }, 400);
+}
 
 function printDoc(double){
   const proto = PROTOCOLS.find(p=>p.id===selId);
@@ -3713,7 +5614,6 @@ function printDoc(double){
 
 
 <!-- Hidden iframe for printing — avoids window.open popup blockers -->
-<iframe id="print-frame" style="display:none;position:fixed;left:-9999px;top:0;width:0;height:0;border:none"></iframe>
 
 </body>
 </html>`;
@@ -3731,24 +5631,22 @@ function printDoc(double){
   fdoc.write(html);
   fdoc.close();
 
-  // Wait for content to load then print
-  frame.onload = function(){
+  // Use setTimeout for reliable cross-browser print
+  setTimeout(function(){
     try {
       frame.contentWindow.focus();
       frame.contentWindow.print();
     } catch(e){
-      // Fallback: open in new tab
       const blob = new Blob([html], {type:'text/html'});
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
     }
-    // Hide iframe after print dialog
     setTimeout(()=>{
       frame.style.display = 'none';
       frame.style.width = '0';
       frame.style.height = '0';
     }, 2000);
-  };
+  }, 400);
 }
 
 /* ============================================================
@@ -3805,6 +5703,166 @@ function saveCatalog(){
   msg.style.display='inline';
   setTimeout(()=>msg.style.display='none', 2000);
   renderPharmacie();
+}
+
+/* ── IMPORT EXCEL CATALOGUE ── */
+function importCatalogExcel(input){
+  const file = input.files[0];
+  if(!file) return;
+  const msgEl = document.getElementById('catalog-import-msg');
+  msgEl.style.display = '';
+  msgEl.style.background = 'var(--blue-pale)';
+  msgEl.style.color = 'var(--blue)';
+  msgEl.style.border = '1px solid var(--blue-mid)';
+  msgEl.textContent = '⏳ Lecture du fichier…';
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      const data = new Uint8Array(e.target.result);
+      const wb   = XLSX.read(data, {type:'array'});
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+
+      if(!rows.length){ showImportMsg('error','❌ Fichier vide ou format incorrect.'); return; }
+
+      let updated=0, added=0, errors=[];
+
+      rows.forEach((row, i)=>{
+        // Accept flexible column names (case-insensitive, accents ignored)
+        const normalize = s => (s||'').toString().toLowerCase()
+          .normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+
+        const getCol = (...keys) => {
+          for(const k of Object.keys(row)){
+            if(keys.some(key => normalize(k).includes(normalize(key))))
+              return row[k];
+          }
+          return null;
+        };
+
+        const name      = (getCol('medicament','nom','name','drug') || '').toString().trim().toUpperCase();
+        const dci       = (getCol('dci','molecule','generique') || '').toString().trim();
+        const dosagesRaw= (getCol('dosage','presentation','flacon','mg') || '').toString();
+        const forme     = (getCol('forme','type') || 'Injectable').toString().trim();
+        const cond      = (getCol('cond','conditionnement') || 'B1').toString().trim();
+        const prix      = parseFloat((getCol('prix','price','cout','tarif','fcfa') || '0').toString().replace(/[^0-9.]/g,'')) || 0;
+        const stock     = parseInt((getCol('stock','qte','quantite') || '0').toString().replace(/[^0-9]/g,'')) || 0;
+
+        if(!name){ errors.push(`Ligne ${i+2} : nom médicament vide`); return; }
+
+        // Parse dosages: "50,100" or "50 100" or "50;100" or just "100"
+        const dosages = dosagesRaw
+          .split(/[,;\s\/]+/)
+          .map(d => parseInt(d))
+          .filter(d => !isNaN(d) && d > 0);
+
+        if(!dosages.length){ errors.push(`Ligne ${i+2} (${name}) : dosages invalides "${dosagesRaw}"`); return; }
+
+        const existing = catalog.findIndex(c => c.name === name);
+        if(existing >= 0){
+          // Update existing entry
+          catalog[existing].dci       = dci || catalog[existing].dci;
+          catalog[existing].dosages   = dosages;
+          catalog[existing].forme     = forme;
+          catalog[existing].cond      = cond;
+          if(prix > 0) catalog[existing].prixUnit = prix;
+          catalog[existing].qteStock  = stock;
+          updated++;
+        } else {
+          // Add new entry
+          catalog.push({name, dci, dosages, forme, cond, qteStock:stock, prixUnit:prix});
+          added++;
+        }
+      });
+
+      saveCatalog();
+      const summary = `✅ Import réussi : ${updated} mis à jour, ${added} ajoutés.` +
+        (errors.length ? ` ⚠ ${errors.length} erreur(s) : ${errors.slice(0,3).join(' | ')}` : '');
+      showImportMsg(errors.length?'warn':'success', summary);
+    } catch(err){
+      showImportMsg('error','❌ Erreur lecture fichier : ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function showImportMsg(type, text){
+  const el = document.getElementById('catalog-import-msg');
+  el.style.display = '';
+  el.textContent   = text;
+  if(type==='success'){ el.style.background='var(--green-pale)'; el.style.color='var(--green)'; el.style.border='1px solid #B0DCC5'; }
+  else if(type==='warn'){ el.style.background='var(--amber-pale)'; el.style.color='var(--amber)'; el.style.border='1px solid #F0C060'; }
+  else { el.style.background='var(--red-pale)'; el.style.color='var(--red2)'; el.style.border='1px solid #F5AAAA'; }
+  setTimeout(()=>{ el.style.display='none'; }, 8000);
+}
+
+/* ── EXPORT EXCEL CATALOGUE ── */
+function exportCatalogExcel(){
+  const rows = catalog.map(d => ({
+    'Médicament':   d.name,
+    'DCI':          d.dci || '',
+    'Dosages (mg)': (d.dosages||[]).join(', '),
+    'Forme':        d.forme || 'Injectable',
+    'Conditionnement': d.cond || 'B1',
+    'Prix/flacon (FCFA)': d.prixUnit || 0,
+    'Stock (flacons)': d.qteStock ?? d.stock ?? 0,
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  // Column widths
+  ws['!cols'] = [30,22,18,14,18,22,18].map(w=>({wch:w}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Catalogue');
+  XLSX.writeFile(wb, 'Catalogue_Pharmacie_CHNCAK.xlsx');
+}
+
+/* ── DOWNLOAD TEMPLATE ── */
+function downloadCatalogTemplate(){
+  const template = [
+    {
+      'Médicament':   'OXALIPLATINE',
+      'DCI':          'Oxaliplatine',
+      'Dosages (mg)': '50, 100',
+      'Forme':        'Injectable',
+      'Conditionnement': 'B1',
+      'Prix/flacon (FCFA)': 45000,
+      'Stock (flacons)': 50,
+    },
+    {
+      'Médicament':   'CISPLATINE',
+      'DCI':          'Cisplatine',
+      'Dosages (mg)': '10, 50',
+      'Forme':        'Injectable',
+      'Conditionnement': 'B1',
+      'Prix/flacon (FCFA)': 8000,
+      'Stock (flacons)': 50,
+    },
+    {
+      'Médicament':   'CARBOPLATINE AUC5',
+      'DCI':          'Carboplatine',
+      'Dosages (mg)': '150, 450',
+      'Forme':        'Injectable',
+      'Conditionnement': 'B1',
+      'Prix/flacon (FCFA)': 35000,
+      'Stock (flacons)': 100,
+    },
+    {
+      'Médicament':   '[Votre médicament ici]',
+      'DCI':          '[DCI / générique]',
+      'Dosages (mg)': '[ex: 100, 500]',
+      'Forme':        'Injectable',
+      'Conditionnement': 'B1',
+      'Prix/flacon (FCFA)': 0,
+      'Stock (flacons)': 0,
+    },
+  ];
+  const ws = XLSX.utils.json_to_sheet(template);
+  ws['!cols'] = [28,22,18,14,18,22,18].map(w=>({wch:w}));
+  // Style header row note
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Modèle_Catalogue');
+  XLSX.writeFile(wb, 'Modele_Catalogue_Pharmacie_CHNCAK.xlsx');
 }
 
 // Calculate how many vials needed and remainder
@@ -4031,11 +6089,147 @@ function scrollToCatalog(){
 }
 
 /* ============================================================
+   DARK MODE
+============================================================ */
+function toggleDarkMode(){
+  const isDark = document.body.classList.toggle('dark-mode');
+  document.getElementById('dark-btn').textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('chncak_dark', isDark ? '1' : '0');
+}
+
+/* ============================================================
+   TOAST NOTIFICATIONS
+============================================================ */
+function showToast(msg, type='info'){
+  const tc = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  tc.appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+/* ============================================================
+   FORM PROGRESS INDICATOR
+============================================================ */
+function updateProgress(){
+  const fields = [
+    document.getElementById('prenom')?.value,
+    document.getElementById('nom')?.value,
+    document.getElementById('age')?.value,
+    document.getElementById('poids')?.value,
+    document.getElementById('taille')?.value,
+    document.getElementById('dossier')?.value,
+    document.getElementById('medecin-select')?.value,
+    document.getElementById('date-protocole')?.value,
+    document.getElementById('localisation')?.value,
+    selId ? '1' : '',
+  ];
+  const filled = fields.filter(f => f && f.trim()).length;
+  const pct = Math.round(filled / fields.length * 100);
+  const bar = document.getElementById('form-progress-bar');
+  const lbl = document.getElementById('progress-label-text');
+  const pctEl = document.getElementById('progress-pct');
+  const wrap = document.getElementById('nav-progress-wrap');
+  if(bar){ bar.style.width = pct + '%'; }
+  if(pctEl){ pctEl.textContent = pct + '%'; }
+  if(lbl){
+    if(pct === 0) lbl.textContent = 'Formulaire vide';
+    else if(pct < 40) lbl.textContent = 'Données incomplètes';
+    else if(pct < 80) lbl.textContent = 'En cours de remplissage…';
+    else if(pct < 100) lbl.textContent = 'Presque complet';
+    else lbl.textContent = '✓ Formulaire complet';
+  }
+  if(wrap){
+    const onProtocolPage = document.getElementById('page-protocole')?.classList.contains('active');
+    wrap.style.display = onProtocolPage ? '' : 'none';
+  }
+}
+
+/* ============================================================
+   KEYBOARD SHORTCUTS
+============================================================ */
+document.addEventListener('keydown', function(e){
+  // Ctrl+P → Imprimer aperçu
+  if(e.ctrlKey && e.key === 'p'){
+    e.preventDefault();
+    const apercuBtn = document.getElementById('apercu-print-btn');
+    if(apercuBtn && !apercuBtn.disabled){
+      printFromApercu();
+      showToast('🖨 Impression lancée…', 'info');
+    } else {
+      showToast('⚠ Remplissez d\'abord les données patient et choisissez un protocole.', 'error');
+    }
+  }
+  // Ctrl+S → Sauvegarder
+  if(e.ctrlKey && e.key === 's'){
+    e.preventDefault();
+    const btn = document.getElementById('btn-save');
+    if(btn && !btn.disabled){
+      saveToHistory();
+      showToast('💾 Protocole sauvegardé !', 'success');
+    }
+  }
+  // Ctrl+Z → Aller à la page protocole
+  if(e.ctrlKey && e.key === 'z' && !e.shiftKey){
+    // Esc → fermer modal
+  }
+  // Escape → fermer modal
+  if(e.key === 'Escape'){
+    const modal = document.getElementById('hist-modal');
+    if(modal && modal.classList.contains('open')) closeModal();
+  }
+});
+
+/* ============================================================
+   PATCH: update() intercept for progress
+============================================================ */
+const _origUpdate = update;
+window.update = function(){
+  _origUpdate();
+  updateProgress();
+};
+
+/* ============================================================
+   PATCH: saveToHistory with toast
+============================================================ */
+const _origSave = saveToHistory;
+window.saveToHistory = function(){
+  _origSave();
+  updateProgress();
+};
+
+/* ============================================================
+   PATCH: showPage for progress visibility
+============================================================ */
+const _origShowPage = showPage;
+window.showPage = function(id, btn){
+  _origShowPage(id, btn);
+  updateProgress();
+};
+
+/* ============================================================
    INIT
 ============================================================ */
+// Restore dark mode preference
+if(localStorage.getItem('chncak_dark') === '1'){
+  document.body.classList.add('dark-mode');
+  const btn = document.getElementById('dark-btn');
+  if(btn) btn.textContent = '☀️';
+}
+
+// Set today's date if empty
+const dpEl = document.getElementById('date-protocole');
+if(dpEl && !dpEl.value){
+  dpEl.value = new Date().toISOString().split('T')[0];
+}
+
 renderProtos();
 populateMedecinSelect();
 renderHistory();
+updateProgress();
+
 </script>
+<iframe id="print-frame" style="display:none;position:fixed;left:-9999px;top:0;width:0;height:0;border:none"></iframe>
 </body>
 </html>
