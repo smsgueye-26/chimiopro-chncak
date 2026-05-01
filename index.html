@@ -185,21 +185,39 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
 .modal-body{padding:16px 18px}
 .modal-footer{padding:12px 18px;border-top:1px solid var(--gray-border);display:flex;gap:8px;justify-content:flex-end}
 
+/* PROGRAMME */
+.prog-day-btn{
+  padding:8px 16px;font-size:12px;font-weight:600;border:1.5px solid var(--gray-border);
+  border-radius:var(--radius);background:white;color:var(--gray-mid);cursor:pointer;
+  font-family:var(--font);transition:all 0.15s;white-space:nowrap;
+}
+.prog-day-btn.active{background:var(--blue);color:white;border-color:var(--blue);}
+.prog-day-btn:hover:not(.active){background:var(--blue-pale);color:var(--blue);border-color:var(--blue-mid);}
+.prog-input{
+  width:100%;padding:5px 6px;font-size:12px;border:1px solid transparent;
+  border-radius:4px;background:transparent;font-family:var(--font);color:var(--gray);
+}
+.prog-input:focus{border-color:var(--blue-mid);background:white;outline:none;}
+.prog-row-done td{opacity:0.5;text-decoration:line-through;}
+.prog-row-done td:last-child{opacity:1;text-decoration:none;}
+
 /* PRINT STYLES */
 @media print{
   .no-print{display:none!important}
   body{background:white}
 }
 </style>
+<!-- SheetJS for Excel import -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Mammoth.js for Word import -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
 <body>
 
 <nav class="nav no-print">
   <div class="nav-top">
-    <div class="nav-logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#0A3D7A" stroke-width="2">
-        <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
-      </svg>
+    <div class="nav-logo" style="overflow:hidden;padding:2px">
+      <img src="data:image/jpeg;base64,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" style="width:38px;height:38px;object-fit:contain" alt="CHNCAK">
     </div>
     <div class="nav-title">
       <h1>ChimioPro — CHNCAK</h1>
@@ -213,6 +231,9 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
     <button class="tab-btn" onclick="showPage('pharmacie',this)">&#128138; Gestion Médicaments</button>
     <button class="tab-btn" onclick="showPage('apercu',this)">&#128065; Aperçu &amp; Impression</button>
     <button class="tab-btn" onclick="showPage('preparation',this)">&#9881; Préparation</button>
+    <button class="tab-btn" onclick="showPage('support',this)">&#128138; Ordonnance Support</button>
+    <button class="tab-btn" onclick="showPage('stats',this)">&#128200; Statistiques</button>
+    <button class="tab-btn" onclick="showPage('programme',this)">&#128197; Programme</button>
   </div>
 </nav>
 
@@ -240,7 +261,7 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
         <div class="field"><label>N° Dossier</label><input id="dossier" type="text" placeholder="ex: 539/24" oninput="update()"></div>
       </div>
       <div class="fg g4">
-        <div class="field"><label>ID Cubix</label><input id="cubix" type="text" placeholder="ex: 122/24" oninput="update()"></div>
+        <div class="field"><label>ID Cubix</label><input id="cubix" type="text" placeholder="ex: 122/24" oninput="update()" style="letter-spacing:0.03em"></div>
         <div class="field">
           <label>N° séquentiel (Code Gratuite)</label>
           <input id="num-seq" type="number" placeholder="ex: 155" min="1" oninput="genCodeGratuite()">
@@ -268,7 +289,25 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
       </div>
       <div class="fg g2">
         <div class="field"><label>Localisation / Diagnostic</label><input id="localisation" type="text" placeholder="ex: ADK côlon stade IV" oninput="update()"></div>
-        <div class="field"><label>Antécédents médicaux</label><input id="atcd" type="text" placeholder="ex: HTA, Diabète" oninput="update()"></div>
+        <div class="field">
+          <label>Antécédents médicaux</label>
+          <select id="atcd-select" onchange="onAtcdChange()" style="width:100%;padding:9px 11px;font-size:14px;font-family:var(--font);border:1.5px solid var(--gray-border);border-radius:var(--radius);background:white;color:var(--gray);outline:none;transition:border-color 0.15s">
+            <option value="RAS">RAS</option>
+            <option value="HTA">HTA</option>
+            <option value="DIABETE">DIABETE</option>
+            <option value="HTA + DIABETE">HTA + DIABETE</option>
+            <option value="ASTHME">ASTHME</option>
+            <option value="EPIGASTRALGIES">EPIGASTRALGIES</option>
+            <option value="HTA + DIABETE + ASTHME">HTA + DIABETE + ASTHME</option>
+            <option value="INSUFFISANCE RENALE">INSUFFISANCE RENALE</option>
+            <option value="INSUFFISANCE HEPATIQUE">INSUFFISANCE HEPATIQUE</option>
+            <option value="CARDIOPATHIE">CARDIOPATHIE</option>
+            <option value="VIH">VIH POSITIF</option>
+            <option value="autre">Autre (saisir)...</option>
+          </select>
+          <input id="atcd" type="text" placeholder="Précisez les antécédents..." oninput="update()"
+            style="display:none;margin-top:6px;width:100%;padding:9px 11px;font-size:14px;font-family:var(--font);border:1.5px solid var(--gray-border);border-radius:var(--radius);background:white;color:var(--gray);outline:none">
+        </div>
       </div>
       <div class="sc-banner">
         <div>
@@ -620,6 +659,141 @@ tr.hl td:first-child{font-weight:600;color:var(--blue)}
   </div>
 </div>
 
+<!-- ===== PAGE : ORDONNANCE SUPPORT ===== -->
+<div id="page-support" class="page">
+  <div style="max-width:820px;margin:0 auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div>
+        <h2 style="font-size:15px;font-weight:600;color:var(--blue)">&#128138; Ordonnance Médicaments de Support</h2>
+        <p style="font-size:12px;color:var(--gray-mid);margin-top:2px" id="support-subtitle">Sélectionnez un protocole pour générer l'ordonnance de support.</p>
+      </div>
+      <button id="support-print-btn" onclick="printSupport()" disabled
+        style="padding:10px 20px;background:var(--blue);color:white;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;opacity:0.5">
+        &#128424; Imprimer ordonnance
+      </button>
+    </div>
+    <div id="support-empty" style="background:white;border:1px solid var(--gray-border);border-radius:var(--radius-lg);padding:60px;text-align:center;color:var(--gray-mid)">
+      <div style="font-size:40px;margin-bottom:12px">&#128138;</div>
+      <div style="font-size:14px;font-weight:500">Aucun protocole sélectionné</div>
+    </div>
+    <div id="support-content" style="display:none"></div>
+  </div>
+</div>
+
+<!-- ===== PAGE : STATISTIQUES ===== -->
+<div id="page-stats" class="page">
+  <div style="max-width:820px;margin:0 auto">
+    <h2 style="font-size:15px;font-weight:600;color:var(--blue);margin-bottom:16px">&#128200; Statistiques du Service</h2>
+    <div id="stats-content"></div>
+  </div>
+</div>
+
+<!-- ===== PAGE : PROGRAMME ===== -->
+<div id="page-programme" class="page">
+  <div style="max-width:900px;margin:0 auto">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div>
+        <h2 style="font-size:15px;font-weight:600;color:var(--blue)">&#128197; Programme de Chimiothérapie</h2>
+        <p style="font-size:12px;color:var(--gray-mid);margin-top:2px">Planning hebdomadaire — CHNCAK Service d'Oncologie-Radiothérapie</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="printProgramme()"
+          style="padding:10px 16px;background:var(--blue);color:white;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px">
+          &#128424; Imprimer programme
+        </button>
+        <label style="padding:10px 16px;background:var(--green2);color:white;border:none;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px"
+          title="Importer un fichier Excel (.xlsx) ou Word (.docx) du programme">
+          &#128228; Importer fichier
+          <input type="file" accept=".xlsx,.xls,.docx" onchange="importProgramme(this)" style="display:none">
+        </label>
+      </div>
+    </div>
+
+    <!-- Week selector + Responsables -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;align-items:end">
+          <div class="field">
+            <label>Semaine du (Lundi)</label>
+            <input type="date" id="prog-semaine" oninput="renderProgramme()">
+          </div>
+          <div class="field">
+            <label>Responsable 1</label>
+            <input type="text" id="prog-resp1" value="FATOUMATA FAYE" oninput="saveProgrammeConfig()">
+          </div>
+          <div class="field">
+            <label>Responsable 2</label>
+            <input type="text" id="prog-resp2" value="BINTA SOW" oninput="saveProgrammeConfig()">
+          </div>
+          <div class="field">
+            <label>Salle</label>
+            <input type="text" id="prog-salle" value="SALLE CHIMIO" oninput="saveProgrammeConfig()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Days tabs -->
+    <div style="display:flex;gap:4px;margin-bottom:12px;overflow-x:auto">
+      <button class="prog-day-btn active" onclick="selectDay(0,this)" id="day-btn-0">Lundi</button>
+      <button class="prog-day-btn" onclick="selectDay(1,this)" id="day-btn-1">Mardi</button>
+      <button class="prog-day-btn" onclick="selectDay(2,this)" id="day-btn-2">Mercredi</button>
+      <button class="prog-day-btn" onclick="selectDay(3,this)" id="day-btn-3">Jeudi</button>
+      <button class="prog-day-btn" onclick="selectDay(4,this)" id="day-btn-4">Vendredi</button>
+      <div style="margin-left:auto;display:flex;gap:6px">
+        <button onclick="addPatientRow()" 
+          style="padding:8px 14px;background:var(--green2);color:white;border:none;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+          + Ajouter patient
+        </button>
+        <button onclick="clearDay()"
+          style="padding:8px 14px;background:var(--red-pale);color:var(--red2);border:1px solid #F5AAAA;border-radius:var(--radius);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">
+          Effacer jour
+        </button>
+      </div>
+    </div>
+
+    <!-- Programme table -->
+    <div class="card">
+      <div class="card-header" style="justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="card-num" style="background:var(--blue)">&#128197;</div>
+          <h2 id="prog-day-title">Lundi</h2>
+        </div>
+        <span id="prog-count" style="font-size:12px;color:var(--gray-mid)">0 patients</span>
+      </div>
+      <div class="card-body" style="padding:0;overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;min-width:700px" id="prog-table">
+          <thead>
+            <tr style="background:var(--blue)">
+              <th style="padding:8px 10px;color:white;font-size:10px;text-align:center;width:40px;border:1px solid rgba(255,255,255,0.2)">N°</th>
+              <th style="padding:8px 10px;color:white;font-size:10px;text-align:left;border:1px solid rgba(255,255,255,0.2)">Prénom</th>
+              <th style="padding:8px 10px;color:white;font-size:10px;text-align:left;border:1px solid rgba(255,255,255,0.2)">Nom</th>
+              <th style="padding:8px 10px;color:white;font-size:10px;text-align:left;border:1px solid rgba(255,255,255,0.2)">Contact</th>
+              <th style="padding:8px 10px;color:white;font-size:10px;text-align:left;border:1px solid rgba(255,255,255,0.2)">Chimiothérapie</th>
+              <th style="padding:8px 10px;color:white;font-size:10px;text-align:left;border:1px solid rgba(255,255,255,0.2)">Observations</th>
+              <th style="padding:8px 10px;color:white;font-size:10px;text-align:center;width:50px;border:1px solid rgba(255,255,255,0.2)">✓</th>
+              <th style="padding:8px 10px;color:white;font-size:10px;text-align:center;width:50px;border:1px solid rgba(255,255,255,0.2)">🗑</th>
+            </tr>
+          </thead>
+          <tbody id="prog-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Vue semaine résumée -->
+    <div class="card" style="margin-top:14px">
+      <div class="card-header">
+        <div class="card-num" style="background:#6B3FA0">&#128336;</div>
+        <h2>Vue d'ensemble de la semaine</h2>
+      </div>
+      <div class="card-body" id="prog-week-overview"></div>
+    </div>
+
+  </div>
+</div>
+
 <!-- MODAL Historique détail -->
 <div class="modal-overlay" id="hist-modal">
   <div class="modal">
@@ -789,6 +963,52 @@ const PROTOCOLS = [
       {name:'Capécitabine per os',mgm2:2000,unit:'mg',sol:'—',dur:'J2–J14',ryt:'J1=J21',hl:true,oral:true,capeQty:2000},
     ]
   },
+  // ── NOUVEAU : Carbo-Taxol 175 mg/m² J1=J21 (col utérin, ovaire) ──
+  {
+    id:'carbo_taxol175', name:'Carbo-Taxol 175', rythme:'J1=J21',
+    detail:'Carboplatine AUC5 (Calvert) J1 + Paclitaxel 175 mg/m² J1',
+    badge:'J1=J21', badgeClass:'b21', hasCarbo:true,
+    drugs:[
+      {t:'r',label:'Rinçage 400 cc SSI 0.9%',dur:'30 mn'},
+      {name:'Hydrocortisone',fix:200,unit:'mg',sol:'20 cc SSI 0.9%',dur:'5 mn',ryt:'J1=J21'},
+      {name:'Kytril',fix:3,unit:'mg',sol:'15 cc SSI 0.9%',dur:'2 mn',ryt:'J1=J21'},
+      {t:'r',label:'Rinçage 100 cc SSI 0.9%',dur:'15 mn'},
+      {name:'TAXOL (Paclitaxel)',mgm2:175,unit:'mg',sol:'250 cc SSI 0.9%',dur:'60 mn',ryt:'J1=J21',hl:true},
+      {t:'r',label:'Rinçage 100 cc SSI 0.9%',dur:'30 mn'},
+      {name:'CARBOPLATINE AUC5',carbo:true,unit:'mg',sol:'250 cc G5%',dur:'60 mn',ryt:'J1=J21',hl:true},
+      {t:'r',label:'Rinçage 500 cc SSI 0.9%',dur:'30 mn'},
+    ]
+  },
+  // ── NOUVEAU : AC 60 J1=J21 (rythme 3 semaines, non dose-dense) ──
+  {
+    id:'ac60_j21', name:'AC 60 J1=J21', rythme:'J1=J21',
+    detail:'Doxorubicine 60 mg/m² + Cyclophosphamide 600 mg/m² J1=J21',
+    badge:'J1=J21', badgeClass:'b21',
+    drugs:[
+      {t:'r',label:'Réhydratation 250 cc SSI 0.9%',dur:'30 mn'},
+      {name:'Hydrocortisone',fix:200,unit:'mg',sol:'50 cc SSI 0.9%',dur:'10 mn',ryt:'J1=J21'},
+      {name:'Kytril',fix:3,unit:'mg',sol:'15 cc SSI 0.9%',dur:'2 mn',ryt:'J1=J21'},
+      {name:'DOXORUBICINE',mgm2:60,unit:'mg',sol:'100 cc SSI 0.9%',dur:'15 mn',ryt:'J1=J21',hl:true,note:'Protéger contre la lumière'},
+      {t:'r',label:'Rinçage 250 cc SSI 0.9%',dur:'30 mn'},
+      {name:'CYCLOPHOSPHAMIDE',mgm2:600,unit:'mg',sol:'250 cc G5%',dur:'60 mn',ryt:'J1=J21',hl:true},
+      {t:'r',label:'Rinçage 500 cc SSI 0.9%',dur:'30 mn'},
+    ]
+  },
+  // ── NOUVEAU : MAP J1=J36 (Ostéosarcome) ──
+  {
+    id:'map', name:'MAP', rythme:'J1=J36',
+    detail:'Cisplatine 60 mg/m² + Doxorubicine 37,5 mg/m² J1,J2 + Méthotrexate 20 mg/m² J29,J36',
+    badge:'J1=J36', badgeClass:'b28',
+    drugs:[
+      {t:'r',label:'Rinçage 400 cc SSI 0.9%',dur:'30 mn'},
+      {name:'Hydrocortisone',fix:200,unit:'mg',sol:'20 cc SSI 0.9%',dur:'5 mn',ryt:'J1,J2,J29,J36'},
+      {name:'Kytril',fix:3,unit:'mg',sol:'15 cc SSI 0.9%',dur:'2 mn',ryt:'J1,J2,J29,J36'},
+      {name:'CISPLATINE',mgm2:60,unit:'mg',sol:'500 cc SSI 0.9%',dur:'60 mn + rinçage',ryt:'J1 ET J2',hl:true},
+      {name:'DOXORUBICINE',mgm2:37.5,unit:'mg',sol:'250 cc SSI 0.9%',dur:'60 mn + rinçage',ryt:'J1 ET J2',hl:true,note:'Protéger contre la lumière'},
+      {name:'MÉTHOTREXATE',mgm2:20,unit:'mg',sol:'50 cc SSI 0.9%',dur:'10 mn + rinçage',ryt:'J29 et J36',hl:true},
+      {name:'Acide folinique',fix:'20 mg',sol:'—',dur:'12h après MTX',ryt:'J29 à J36'},
+    ]
+  },
   {
     id:'folfiri', name:'FOLFIRI', rythme:'J1=J14',
     detail:'Irinotécan 180 mg/m² + LV 400 mg/m² + 5-FU 400 bolus + 2400 mg/m² perf 46h',
@@ -804,11 +1024,119 @@ const PROTOCOLS = [
       {t:'r',label:'Rinçage 250 cc SSI 0.9%',dur:'30 mn'},
     ]
   },
+  // ── ABVD (Lymphome de Hodgkin) ──
+  {
+    id:'abvd', name:'ABVD', rythme:'J1=J28',
+    detail:'Doxorubicine 25 mg/m² + Bléomycine 10 UI/m² + Vinblastine 6 mg/m² + Dacarbazine 375 mg/m²',
+    badge:'J1=J28', badgeClass:'b28',
+    drugs:[
+      {t:'r',label:'Réhydratation 250 cc SSI 0.9%',dur:'30 mn'},
+      {name:'Hydrocortisone',fix:200,unit:'mg',sol:'20 cc SSI 0.9%',dur:'5 mn',ryt:'J1,J15'},
+      {name:'Kytril',fix:3,unit:'mg',sol:'15 cc SSI 0.9%',dur:'2 mn',ryt:'J1,J15'},
+      {name:'DOXORUBICINE',mgm2:25,unit:'mg',sol:'100 cc SSI 0.9%',dur:'15 mn',ryt:'J1,J15',hl:true,note:'Protéger contre la lumière'},
+      {t:'r',label:'Rinçage 100 cc SSI 0.9%',dur:'10 mn'},
+      {name:'BLÉOMYCINE',mgm2:10,unit:'UI',sol:'100 cc SSI 0.9%',dur:'10 mn',ryt:'J1,J15',hl:true},
+      {t:'r',label:'Rinçage 100 cc SSI 0.9%',dur:'10 mn'},
+      {name:'VINBLASTINE',mgm2:6,unit:'mg',sol:'50 cc SSI 0.9%',dur:'10 mn',ryt:'J1,J15',hl:true},
+      {t:'r',label:'Rinçage 100 cc SSI 0.9%',dur:'10 mn'},
+      {name:'DACARBAZINE',mgm2:375,unit:'mg',sol:'250 cc G5%',dur:'30 mn',ryt:'J1,J15',hl:true,note:'Protéger strictement de la lumière'},
+      {t:'r',label:'Réhydratation 250 cc SSI 0.9%',dur:'30 mn'},
+    ]
+  },
+  // ── BEP (Tumeurs germinales) ──
+  {
+    id:'bep', name:'BEP', rythme:'J1=J21',
+    detail:'Bléomycine 30 UI J1,J8,J15 + Étoposide 100 mg/m² J1-J5 + Cisplatine 20 mg/m² J1-J5',
+    badge:'J1=J21', badgeClass:'b21',
+    drugs:[
+      {t:'r',label:'Réhydratation 500 cc SSI 0.9%',dur:'30 mn'},
+      {name:'Hydrocortisone',fix:200,unit:'mg',sol:'20 cc SSI 0.9%',dur:'5 mn',ryt:'J1-J5,J8,J15'},
+      {name:'Kytril',fix:3,unit:'mg',sol:'15 cc SSI 0.9%',dur:'2 mn',ryt:'J1-J5,J8,J15'},
+      {name:'ÉTOPOSIDE',mgm2:100,unit:'mg',sol:'250 cc SSI 0.9%',dur:'60 mn',ryt:'J1-J5',hl:true},
+      {t:'r',label:'Rinçage 250 cc SSI 0.9%',dur:'15 mn'},
+      {name:'CISPLATINE',mgm2:20,unit:'mg',sol:'250 cc G5%',dur:'30 mn',ryt:'J1-J5',hl:true},
+      {t:'r',label:'Réhydratation 500 cc SSI 0.9%',dur:'30 mn'},
+      {name:'BLÉOMYCINE',fix:30,unit:'UI',sol:'100 cc SSI 0.9%',dur:'10 mn',ryt:'J1,J8,J15',hl:true},
+    ]
+  },
+  // ── CHOP (Lymphome non-Hodgkinien) ──
+  {
+    id:'chop', name:'CHOP', rythme:'J1=J21',
+    detail:'Cyclophosphamide 750 mg/m² + Doxorubicine 50 mg/m² + Vincristine 1,4 mg/m² + Prednisone 100mg J1-J5',
+    badge:'J1=J21', badgeClass:'b21',
+    drugs:[
+      {t:'r',label:'Réhydratation 250 cc SSI 0.9%',dur:'30 mn'},
+      {name:'Hydrocortisone',fix:200,unit:'mg',sol:'20 cc SSI 0.9%',dur:'5 mn',ryt:'J1=J21'},
+      {name:'Kytril',fix:3,unit:'mg',sol:'15 cc SSI 0.9%',dur:'2 mn',ryt:'J1=J21'},
+      {name:'CYCLOPHOSPHAMIDE',mgm2:750,unit:'mg',sol:'250 cc G5%',dur:'60 mn',ryt:'J1=J21',hl:true},
+      {t:'r',label:'Rinçage 250 cc SSI 0.9%',dur:'15 mn'},
+      {name:'DOXORUBICINE',mgm2:50,unit:'mg',sol:'100 cc SSI 0.9%',dur:'15 mn',ryt:'J1=J21',hl:true,note:'Protéger contre la lumière'},
+      {t:'r',label:'Rinçage 100 cc SSI 0.9%',dur:'10 mn'},
+      {name:'VINCRISTINE',mgm2:1.4,unit:'mg',sol:'50 cc SSI 0.9%',dur:'10 mn',ryt:'J1=J21',hl:true,note:'Dose max 2 mg'},
+      {t:'r',label:'Rinçage 250 cc SSI 0.9%',dur:'15 mn'},
+      {name:'Prednisone per os',fix:'100 mg/j',sol:'—',dur:'J1–J5',ryt:'J1=J21'},
+    ]
+  },
+  // ── R-CHOP (LNH CD20+) ──
+  {
+    id:'rchop', name:'R-CHOP', rythme:'J1=J21',
+    detail:'Rituximab 375 mg/m² + CHOP standard',
+    badge:'J1=J21', badgeClass:'b21',
+    drugs:[
+      {t:'r',label:'Réhydratation 250 cc SSI 0.9%',dur:'30 mn'},
+      {name:'Hydrocortisone',fix:200,unit:'mg',sol:'20 cc SSI 0.9%',dur:'5 mn',ryt:'J1=J21'},
+      {name:'Kytril',fix:3,unit:'mg',sol:'15 cc SSI 0.9%',dur:'2 mn',ryt:'J1=J21'},
+      {name:'RITUXIMAB',mgm2:375,unit:'mg',sol:'500 cc SSI 0.9%',dur:'120-240 mn',ryt:'J1=J21',hl:true,note:'1ère perf 120 mn, suivantes 60 mn'},
+      {t:'r',label:'Rinçage 250 cc SSI 0.9%',dur:'30 mn'},
+      {name:'CYCLOPHOSPHAMIDE',mgm2:750,unit:'mg',sol:'250 cc G5%',dur:'60 mn',ryt:'J1=J21',hl:true},
+      {t:'r',label:'Rinçage 250 cc SSI 0.9%',dur:'15 mn'},
+      {name:'DOXORUBICINE',mgm2:50,unit:'mg',sol:'100 cc SSI 0.9%',dur:'15 mn',ryt:'J1=J21',hl:true,note:'Protéger contre la lumière'},
+      {t:'r',label:'Rinçage 100 cc SSI 0.9%',dur:'10 mn'},
+      {name:'VINCRISTINE',mgm2:1.4,unit:'mg',sol:'50 cc SSI 0.9%',dur:'10 mn',ryt:'J1=J21',hl:true,note:'Dose max 2 mg'},
+      {t:'r',label:'Rinçage 250 cc SSI 0.9%',dur:'15 mn'},
+      {name:'Prednisone per os',fix:'100 mg/j',sol:'—',dur:'J1–J5',ryt:'J1=J21'},
+    ]
+  },
+  // ── VIP (Tumeurs germinales réfractaires) ──
+  {
+    id:'vip', name:'VIP', rythme:'J1=J21',
+    detail:'Étoposide 75 mg/m² + Ifosfamide 1200 mg/m² + Cisplatine 20 mg/m² J1-J5',
+    badge:'J1=J21', badgeClass:'b21',
+    drugs:[
+      {t:'r',label:'Réhydratation 1000 cc SSI 0.9%',dur:'60 mn'},
+      {name:'Hydrocortisone',fix:200,unit:'mg',sol:'20 cc SSI 0.9%',dur:'5 mn',ryt:'J1-J5'},
+      {name:'Kytril',fix:3,unit:'mg',sol:'15 cc SSI 0.9%',dur:'2 mn',ryt:'J1-J5'},
+      {name:'ÉTOPOSIDE',mgm2:75,unit:'mg',sol:'250 cc SSI 0.9%',dur:'60 mn',ryt:'J1-J5',hl:true},
+      {t:'r',label:'Rinçage 250 cc SSI 0.9%',dur:'15 mn'},
+      {name:'CISPLATINE',mgm2:20,unit:'mg',sol:'250 cc G5%',dur:'30 mn',ryt:'J1-J5',hl:true},
+      {t:'r',label:'Réhydratation 500 cc SSI 0.9%',dur:'30 mn'},
+    ]
+  },
+  // ── MVAC (Cancer urothélial) ──
+  {
+    id:'mvac', name:'MVAC', rythme:'J1=J28',
+    detail:'Méthotrexate 30 mg/m² J1 + Vinblastine 3 mg/m² J2 + Doxorubicine 30 mg/m² J2 + Cisplatine 70 mg/m² J2',
+    badge:'J1=J28', badgeClass:'b28',
+    drugs:[
+      {t:'r',label:'Réhydratation 500 cc SSI 0.9%',dur:'30 mn'},
+      {name:'Hydrocortisone',fix:200,unit:'mg',sol:'20 cc SSI 0.9%',dur:'5 mn',ryt:'J1,J2,J15,J22'},
+      {name:'Kytril',fix:3,unit:'mg',sol:'15 cc SSI 0.9%',dur:'2 mn',ryt:'J1,J2,J15,J22'},
+      {name:'MÉTHOTREXATE',mgm2:30,unit:'mg',sol:'100 cc SSI 0.9%',dur:'15 mn',ryt:'J1,J15,J22',hl:true},
+      {t:'r',label:'Rinçage 250 cc SSI 0.9%',dur:'15 mn'},
+      {name:'VINBLASTINE',mgm2:3,unit:'mg',sol:'50 cc SSI 0.9%',dur:'10 mn',ryt:'J2,J15,J22',hl:true},
+      {t:'r',label:'Rinçage 100 cc SSI 0.9%',dur:'10 mn'},
+      {name:'DOXORUBICINE',mgm2:30,unit:'mg',sol:'100 cc SSI 0.9%',dur:'15 mn',ryt:'J2',hl:true,note:'Protéger contre la lumière'},
+      {t:'r',label:'Rinçage 250 cc SSI 0.9%',dur:'15 mn'},
+      {name:'CISPLATINE',mgm2:70,unit:'mg',sol:'500 cc G5%',dur:'60 mn',ryt:'J2',hl:true},
+      {t:'r',label:'Réhydratation 500 cc SSI 0.9%',dur:'30 mn'},
+    ]
+  },
 ];
 
 /* ============================================================
    STATE
 ============================================================ */
+const LOGO_B64 = 'data:image/jpeg;base64,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';
 let selId = null, sc = 0, poids = 0;
 let medecins = JSON.parse(localStorage.getItem('chncak_medecins')||'[]');
 let historique = JSON.parse(localStorage.getItem('chncak_historique')||'[]');
@@ -842,11 +1170,34 @@ function showPage(id,btn){
   if(id==='pharmacie') renderPharmacie();
   if(id==='apercu') renderApercu();
   if(id==='preparation') renderPreparation();
+  if(id==='support') renderSupport();
+  if(id==='stats') renderStats();
+  if(id==='programme'){initProgramme();renderProgramme();}
 }
 
 /* ============================================================
    SC CALC
 ============================================================ */
+function onAtcdChange(){
+  const sel = document.getElementById('atcd-select');
+  const inp = document.getElementById('atcd');
+  if(sel.value === 'autre'){
+    inp.style.display = '';
+    inp.focus();
+    inp.value = '';
+  } else {
+    inp.style.display = 'none';
+    inp.value = sel.value;
+  }
+  update();
+}
+
+function getAtcd(){
+  const sel = document.getElementById('atcd-select');
+  const inp = document.getElementById('atcd');
+  return sel.value === 'autre' ? (inp.value||'') : sel.value;
+}
+
 function calcSC(){
   const p=parseFloat(document.getElementById('poids').value)||0;
   const t=parseFloat(document.getElementById('taille').value)||0;
@@ -1132,6 +1483,7 @@ function update(){
   if(document.getElementById('page-pharmacie').classList.contains('active')) renderPharmacie();
   if(document.getElementById('page-apercu').classList.contains('active')) renderApercu();
   if(document.getElementById('page-preparation').classList.contains('active')) renderPreparation();
+  if(document.getElementById('page-support').classList.contains('active')) renderSupport();
 }
 
 /* ============================================================
@@ -1243,7 +1595,7 @@ function saveToHistory(){
     sc:sc.toFixed(2),
     indication:document.getElementById('indication').value,
     localisation:document.getElementById('localisation').value,
-    atcd:document.getElementById('atcd').value,
+    atcd:getAtcd(),
     medecin:document.getElementById('medecin-select').value,
     dossier:document.getElementById('dossier').value,
     cubix:document.getElementById('cubix').value,
@@ -1327,7 +1679,13 @@ function reloadFromHistory(){
   document.getElementById('sexe').value=h.sexe;
   document.getElementById('indication').value=h.indication;
   document.getElementById('localisation').value=h.localisation||'';
-  document.getElementById('atcd').value=h.atcd||'';
+  // Restore atcd
+  const atcdSel = document.getElementById('atcd-select');
+  const atcdInp = document.getElementById('atcd');
+  const atcdVal = h.atcd||'RAS';
+  const atcdOpt = [...atcdSel.options].find(o=>o.value===atcdVal);
+  if(atcdOpt){ atcdSel.value=atcdVal; atcdInp.style.display='none'; atcdInp.value=atcdVal; }
+  else { atcdSel.value='autre'; atcdInp.style.display=''; atcdInp.value=atcdVal; }
   document.getElementById('dossier').value=h.dossier||'';
   document.getElementById('total-cures').value=h.totalCures||4;
   document.getElementById('cure-num').value=h.cureNum||1;
@@ -1515,6 +1873,8 @@ function renderPreparation(){
   empty.style.display   = 'none';
   content.style.display = '';
   btn.disabled = false; btn.style.opacity='1'; btn.style.cursor='pointer';
+  const vbtn = document.getElementById('prep-validate-btn');
+  if(vbtn){ vbtn.disabled=false; vbtn.style.opacity='1'; vbtn.style.cursor='pointer'; }
 
   const prenom  = document.getElementById('prenom').value;
   const nom     = document.getElementById('nom').value;
@@ -1655,102 +2015,688 @@ function renderPreparation(){
     : '<span style="color:var(--green)">✓ Pas de précaution particulière pour ce protocole.</span>';
 }
 
-function printPreparation(){
+/* ============================================================
+   APERÇU & IMPRESSION
+============================================================ */
+function buildDocumentHTML(){
+  const proto = PROTOCOLS.find(p=>p.id===selId);
+  if(!proto || sc<=0) return null;
+
+  const prenom       = document.getElementById('prenom').value.trim();
+  const nom          = document.getElementById('nom').value.trim();
+  const age          = document.getElementById('age').value;
+  const pdsVal       = document.getElementById('poids').value;
+  const tailleVal    = document.getElementById('taille').value;
+  const ind          = document.getElementById('indication').value;
+  const loc          = document.getElementById('localisation').value||'—';
+  const atcd         = getAtcd()||'RAS';
+  const med          = document.getElementById('medecin-select').value||'';
+  const dossier      = document.getElementById('dossier').value||'';
+  const cubix        = document.getElementById('cubix').value||'';
+  const codegratuite = document.getElementById('codegratuite').value||'';
+  const totalC       = document.getElementById('total-cures').value||'4';
+  const cureN        = document.getElementById('cure-num').value||'';
+  const dp           = document.getElementById('date-protocole').value;
+  const dateProto    = dp ? dp.split('-').reverse().join('/') : new Date().toLocaleDateString('fr-FR');
+
+  const rows = proto.drugs.map(d=>{
+    const dose = getDose(d);
+    if(dose.cls==='rh') return `<tr><td colspan="5" style="padding:3px 8px;font-size:10px;color:#555;background:#f0f0f0;font-style:italic;border:1px solid #ccc">${d.label}, faire passer en ${d.dur}</td></tr>`;
+    const lim = checkDoseLimit(d.name, dose.val);
+    const warn = lim==='danger'?' <b style="color:#C0392B">⛔</b>':lim==='warn'?' <span style="color:#E67E22">⚠</span>':'';
+    const doseCell = (dose.calc||dose.oral) ? `<b>${dose.txt}</b>${warn}${dose.note?'<br><small style="color:#888;font-style:italic">'+dose.note+'</small>':''}` : dose.txt;
+    const solDisplay = dose.sol||d.sol||'—';
+    const rowBg = d.hl?'background:#f0f4fb;':'';
+    const bold  = d.hl?'font-weight:bold;':'';
+    return `<tr>
+      <td style="padding:4px 6px;border:1px solid #ccc;font-size:10px;${bold}${rowBg}">${d.name}${d.note?'<br><small style="color:#c07800;font-style:italic">⚠ '+d.note+'</small>':''}</td>
+      <td style="padding:4px 6px;border:1px solid #ccc;font-size:10px;${rowBg}">${doseCell}</td>
+      <td style="padding:4px 6px;border:1px solid #ccc;font-size:10px;${rowBg}">${solDisplay}</td>
+      <td style="padding:4px 6px;border:1px solid #ccc;font-size:10px;${rowBg}">${d.dur||'—'}</td>
+      <td style="padding:4px 6px;border:1px solid #ccc;font-size:10px;${rowBg}">${d.ryt||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  let capeHtml = '';
+  if(proto.hasCape){
+    const capeDrug = proto.drugs.find(d=>d.oral);
+    if(capeDrug){
+      const dt=Math.round(capeDrug.mgm2*sc);
+      const cp500=Math.floor(dt/500), cp150=Math.round((dt-cp500*500)/150);
+      const cpTxt=(cp500>0?cp500+' cp à 500 mg':'')+(cp150>0?(cp500?' + ':'')+cp150+' cp à 150 mg':'');
+      const makeRows=(from,to)=>Array.from({length:to-from+1},(_,i)=>`
+        <tr><td style="border:1px solid #ccc;padding:3px 5px;font-size:9px;font-weight:bold;text-align:center;background:#e8eef8;width:30px">J${from+i}</td>
+        <td style="border:1px solid #ccc;padding:3px 5px;font-size:9px">${cpTxt} = <b>${dt} mg</b></td>
+        <td style="border:1px solid #ccc;padding:3px 5px;font-size:9px;text-align:center;width:45px">&#9744;</td>
+        <td style="border:1px solid #ccc;padding:3px 5px;font-size:9px;text-align:center;width:45px">&#9744;</td></tr>`).join('');
+      capeHtml=`<div style="margin-top:7px">
+        <div style="font-size:9px;font-weight:bold;color:#0A3D7A;border-left:3px solid #0A3D7A;padding-left:5px;margin-bottom:4px;text-transform:uppercase">Capécitabine — ${dt} mg × 2/j</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+          <table style="width:100%;border-collapse:collapse"><thead><tr>
+            <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Jour</th>
+            <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Comprimés</th>
+            <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Matin ✓</th>
+            <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Soir ✓</th>
+          </tr></thead><tbody>${makeRows(1,7)}</tbody></table>
+          <table style="width:100%;border-collapse:collapse"><thead><tr>
+            <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Jour</th>
+            <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Comprimés</th>
+            <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Matin ✓</th>
+            <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Soir ✓</th>
+          </tr></thead><tbody>${makeRows(8,14)}</tbody></table>
+        </div>
+        <div style="margin-top:4px;font-size:8.5px;color:#7A4B00;background:#FFF3DC;padding:3px 7px;border-radius:3px">
+          ⚠ Repos 7j — Avaler entiers avec eau 30mn après repas. Ne pas écraser. NFS + Créatinine au 5e jour.
+        </div></div>`;
+    }
+  }
+
+  const carboBox = (proto.hasCarbo && carboDose>0)
+    ? `<div style="background:#EEF4FD;border:1px solid #B8D0F5;padding:3px 8px;font-size:9px;color:#0A3D7A;margin:3px 0;border-radius:3px">
+        <b>Calvert :</b> Créatininémie ${document.getElementById('creatinine').value} µmol/L —
+        ClCr ${document.getElementById('res-clcr').textContent} mL/min —
+        AUC ${document.getElementById('res-auc').textContent} —
+        <b>Dose : ${carboDose} mg</b></div>` : '';
+
+  return `
+    <table style="width:100%;border-collapse:collapse;margin-bottom:6px"><tr>
+      <td style="width:50px;vertical-align:top;padding-right:6px">
+        <img src="${LOGO_B64}" style="width:45px;height:45px;object-fit:contain" alt="CHNCAK">
+      </td>
+      <td style="vertical-align:top;width:57%">
+        <div style="font-size:8.5px;line-height:1.65;color:#000">
+          République du Sénégal<br><b>Un peuple-un but-une foi</b><br>
+          …………………………………<br>Ministère de la Santé et l'Action Sociale<br>
+          …………………………………<br>Direction Générale des Etablissements de Santé<br>
+          …………………………….<br>Direction des Etablissements Publics de Santé<br>
+          ………………………………<br><b>Centre Hospitalier National Cheikh Ahmadoul Khadim</b><br>
+          ……………………………….<br><b>Service d'Oncologie - Radiothérapie</b>
+        </div>
+      </td>
+      <td style="vertical-align:top;text-align:right;font-size:9px;line-height:2;color:#000">
+        <b>CHNCAK …N°${dossier||'________'}</b><br>
+        <span style="font-size:8.5px">Date : <b>${dateProto}</b></span><br>
+        ${cubix?'<b>'+cubix+'</b><br>':''}
+        ${codegratuite?'<b>'+codegratuite+'</b>':''}
+      </td>
+    </tr></table>
+
+    <div style="border:1.5px solid #000;padding:5px 10px;margin-bottom:5px;text-align:center">
+      <div style="font-size:11px;font-weight:bold;text-transform:uppercase">PROTOCOLE (${proto.detail})</div>
+      <div style="font-size:9px;margin-top:2px">Indication : <b>${ind}</b></div>
+    </div>
+
+    <div style="margin-bottom:5px">
+      <div style="font-size:12px;font-weight:bold;margin-bottom:3px">${prenom.toUpperCase()} ${nom.toUpperCase()}</div>
+      <div style="font-size:10px;margin-bottom:2px">Age : <b>${age} ans</b>&nbsp;&nbsp;&nbsp;Poids : <b>${pdsVal} kg</b>&nbsp;&nbsp;&nbsp;taille : <b>${tailleVal} cm</b>&nbsp;&nbsp;&nbsp;SC : <b>${sc.toFixed(2)} m²</b></div>
+      <div style="font-size:10px;margin-bottom:2px">Localisation : <b>${loc}</b></div>
+      <div style="font-size:10px">Antécédents médicaux : <b>${atcd}</b></div>
+    </div>
+
+    ${carboBox}
+
+    <table style="width:100%;border-collapse:collapse;margin-bottom:4px">
+      <thead><tr>
+        <th style="border:1px solid #ccc;padding:4px 6px;background:#e8eef8;font-size:9px;text-align:left;width:30%">Médicaments</th>
+        <th style="border:1px solid #ccc;padding:4px 6px;background:#e8eef8;font-size:9px;text-align:left;width:14%">Dose</th>
+        <th style="border:1px solid #ccc;padding:4px 6px;background:#e8eef8;font-size:9px;text-align:left;width:27%">Solvant</th>
+        <th style="border:1px solid #ccc;padding:4px 6px;background:#e8eef8;font-size:9px;text-align:left;width:12%">Durée</th>
+        <th style="border:1px solid #ccc;padding:4px 6px;background:#e8eef8;font-size:9px;text-align:left;width:17%">Rythme</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+
+    <div style="font-size:10px;margin:4px 0 3px">
+      Faire au total <b><u>${totalC} cures</u></b> puis évaluation
+      ${cureN?'&nbsp;&nbsp;&nbsp;<b>Cure N° : '+cureN+'</b>':''}
+    </div>
+    ${capeHtml}
+    <div style="text-align:right;margin-top:8px">
+      <div style="display:inline-block;text-align:center;font-size:9px;min-width:150px">
+        <div style="font-style:italic">Médecin traitant</div>
+        <div style="font-weight:bold;font-size:11px;margin-top:2px">${med||'DR ________________'}</div>
+        <div style="border-bottom:1px solid #000;margin-top:24px;width:150px"></div>
+      </div>
+    </div>`;
+}
+
+function renderApercu(){
+  const proto   = PROTOCOLS.find(p=>p.id===selId);
+  const empty   = document.getElementById('apercu-empty');
+  const wrapper = document.getElementById('apercu-sheet-wrapper');
+  const btn     = document.getElementById('apercu-print-btn');
+  const subtitle= document.getElementById('apercu-subtitle');
+  if(!proto||sc<=0){
+    if(empty) empty.style.display='';
+    if(wrapper) wrapper.style.display='none';
+    if(btn){btn.disabled=true;btn.style.opacity='0.5';btn.style.cursor='not-allowed';}
+    if(subtitle) subtitle.textContent='Remplissez les données patient et choisissez un protocole pour voir l\'aperçu.';
+    return;
+  }
+  const html = buildDocumentHTML();
+  if(!html){ if(empty) empty.style.display=''; if(wrapper) wrapper.style.display='none'; return; }
+  if(empty) empty.style.display='none';
+  if(wrapper) wrapper.style.display='';
+  if(btn){btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';}
+  const prenom=document.getElementById('prenom').value;
+  const nom=document.getElementById('nom').value;
+  if(subtitle) subtitle.textContent=`Protocole ${proto.name} — ${prenom} ${nom}`;
+  const c1=document.getElementById('apercu-content-1');
+  const c2=document.getElementById('apercu-content-2');
+  if(c1) c1.innerHTML=html;
+  if(c2) c2.innerHTML=html;
+  scaleApercuSheet();
+}
+
+function scaleApercuSheet(){
+  const sheet=document.getElementById('apercu-sheet');
+  if(!sheet) return;
+  const wrapper=sheet.parentElement;
+  const available=wrapper.clientWidth-32;
+  const naturalW=794;
+  const scale=available<naturalW?available/naturalW:1;
+  sheet.style.transform=`scale(${scale})`;
+  sheet.style.transformOrigin='top left';
+  wrapper.style.height=(sheet.offsetHeight*scale+32)+'px';
+}
+window.addEventListener('resize', scaleApercuSheet);
+
+function printFromApercu(){
+  const html=buildDocumentHTML();
+  if(!html) return;
+  const proto=PROTOCOLS.find(p=>p.id===selId);
+  const prenom=document.getElementById('prenom').value;
+  const nom=document.getElementById('nom').value;
+  const fullDoc=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+  <title>Protocole ${proto?proto.name:''} — ${prenom} ${nom}</title>
+  <style>@page{size:A4;margin:8mm 14mm}*{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,Helvetica,sans-serif;font-size:10px;color:#000;background:white}
+  .cut{border:none;border-top:1.5px dashed #888;margin:6px 0}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  </style></head><body>
+  <div>${html}</div><div class="cut"></div><div>${html}</div>
+  </body></html>`;
+  const frame=document.getElementById('print-frame');
+  frame.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:none;display:block';
+  const fdoc=frame.contentDocument||frame.contentWindow.document;
+  fdoc.open();fdoc.write(fullDoc);fdoc.close();
+  frame.onload=()=>{
+    try{frame.contentWindow.focus();frame.contentWindow.print();}
+    catch(e){const b=new Blob([fullDoc],{type:'text/html'});window.open(URL.createObjectURL(b),'_blank');}
+    setTimeout(()=>{frame.style.cssText='display:none;position:fixed;left:-9999px;width:0;height:0;border:none';},3000);
+  };
+}
+
+function validatePreparation(){
   const proto = PROTOCOLS.find(p=>p.id===selId);
   if(!proto||sc<=0) return;
 
   const prenom = document.getElementById('prenom').value;
   const nom    = document.getElementById('nom').value;
-  const poids  = document.getElementById('poids').value;
-  const dateP  = new Date().toLocaleDateString('fr-FR');
 
-  // Collect prep data
+  if(!confirm(`Valider la sortie physique des médicaments pour ${prenom} ${nom} — ${proto.name} ?
+
+Cela déduira les flacons utilisés du stock.`)) return;
+
   const activeDrugs = proto.drugs.filter(d=>!d.t && (d.mgm2||d.carbo||d.avastin||d.fix));
-  let tableRows = '';
-  activeDrugs.forEach((d,i)=>{
-    const dose = getDose(d);
-    if(!dose.val && !dose.txt) return;
-    const steps = dose.val ? getVolAspirer(d.name, dose.val) : null;
-    const dynSolObj = dose.val ? getSolvantVol(d.name, dose.val) : null;
-    const dynSol = dynSolObj ? `${dynSolObj.vol} cc ${dynSolObj.sol}` : (dose.sol||d.sol||'—');
-    const totalVol = steps ? steps.reduce((s,x)=>s+x.volAspire,0).toFixed(1) : '—';
-    const reliquat = steps ? steps.map(s=>s.volRestant>0?s.volRestant+' mL restant':'Flacon entier utilisé').join(' / ') : '—';
-    const flacons  = steps ? [...new Set(steps.map(s=>s.flacon))].join(', ') : dose.txt;
+  let updated = 0, warnings = [];
 
-    tableRows += `<tr style="${i%2===0?'background:#f8f8f8':''}">
-      <td style="padding:5px 8px;border:1px solid #ccc;font-size:11px;font-weight:bold">${i+1}. ${d.name}</td>
-      <td style="padding:5px 8px;border:1px solid #ccc;font-size:11px;text-align:center"><b>${dose.val||'—'} mg</b></td>
-      <td style="padding:5px 8px;border:1px solid #ccc;font-size:11px">${flacons}</td>
-      <td style="padding:5px 8px;border:1px solid #ccc;font-size:12px;font-weight:bold;text-align:center;color:#0A3D7A">${totalVol} mL</td>
-      <td style="padding:5px 8px;border:1px solid #ccc;font-size:11px">${dynSol}</td>
-      <td style="padding:5px 8px;border:1px solid #ccc;font-size:11px;color:#E67E22">${reliquat}</td>
-      <td style="padding:5px 8px;border:1px solid #ccc;font-size:11px">${d.dur||'—'}</td>
-      <td style="padding:5px 8px;border:1px solid #ccc;font-size:11px;text-align:center">&#9744;</td>
+  activeDrugs.forEach(d=>{
+    const dose = getDose(d);
+    if(!dose.val) return;
+    const calc = calcFlacons(d.name, dose.val);
+    if(!calc) return;
+
+    const drugIdx = catalog.findIndex(cat=>cat.name===d.name);
+    if(drugIdx===-1){ warnings.push(`${d.name} : non trouvé dans le catalogue`); return; }
+
+    const stock = catalog[drugIdx].qteStock ?? catalog[drugIdx].stock ?? 0;
+    if(stock < calc.nbFlacons){
+      warnings.push(`${d.name} : stock insuffisant (${stock} disponible, ${calc.nbFlacons} requis)`);
+      return;
+    }
+    catalog[drugIdx].qteStock = stock - calc.nbFlacons;
+    updated++;
+  });
+
+  localStorage.setItem('chncak_catalog', JSON.stringify(catalog));
+
+  // Log to historique
+  const entry = {
+    id: Date.now(),
+    date: new Date().toLocaleDateString('fr-FR'),
+    dateTs: Date.now(),
+    type: 'sortie',
+    patient: `${prenom} ${nom}`,
+    protocole: proto.name,
+    details: activeDrugs.map(d=>{
+      const dose=getDose(d);
+      const calc=dose.val?calcFlacons(d.name,dose.val):null;
+      return calc?`${d.name}: ${calc.nbFlacons} flacon(s)`:null;
+    }).filter(Boolean).join(', ')
+  };
+  const sorties = JSON.parse(localStorage.getItem('chncak_sorties')||'[]');
+  sorties.unshift(entry);
+  localStorage.setItem('chncak_sorties', JSON.stringify(sorties));
+
+  let msg = '\u2705 Stock mis \u00e0 jour pour ' + updated + ' m\u00e9dicament(s).';
+  if(warnings.length) msg += '\n\nAvertissements :\n' + warnings.join('\n');
+  alert(msg);
+  alert(msg);
+
+  // Refresh preparation page
+  renderPreparation();
+  if(document.getElementById('page-pharmacie').classList.contains('active')) renderPharmacie();
+}
+
+function printPreparation(){
+  const proto = PROTOCOLS.find(p=>p.id===selId);
+  if(!proto || sc<=0) return;
+
+  const prenom    = document.getElementById('prenom').value;
+  const nom       = document.getElementById('nom').value;
+  const age       = document.getElementById('age').value;
+  const poids     = document.getElementById('poids').value;
+  const tailleVal = document.getElementById('taille').value;
+  const dossier   = document.getElementById('dossier').value||'';
+  const cubix     = document.getElementById('cubix').value||'';
+  const codegrat  = document.getElementById('codegratuite').value||'';
+  const med       = document.getElementById('medecin-select').value||'';
+  const dp        = document.getElementById('date-protocole').value;
+  const dateProto = dp ? dp.split('-').reverse().join('/') : new Date().toLocaleDateString('fr-FR');
+  const cureN     = document.getElementById('cure-num').value||'';
+
+  // Build one row per active drug
+  const activeDrugs = proto.drugs.filter(d => !d.t && (d.mgm2||d.carbo||d.avastin||d.fix));
+
+  let tableRows = '';
+  let stepNum = 0;
+
+  proto.drugs.forEach(d => {
+    const dose = getDose(d);
+
+    // Réhydratation / Rinçage — show as separator row
+    if(dose.cls === 'rh'){
+      tableRows += `<tr style="background:#f0f0f0">
+        <td colspan="7" style="padding:3px 8px;font-size:9px;color:#777;font-style:italic;border:1px solid #ddd">
+          ▸ ${d.label} — faire passer en ${d.dur}
+        </td>
+      </tr>`;
+      return;
+    }
+
+    stepNum++;
+    const dose_val  = dose.val || null;
+    const dose_txt  = dose.txt || '—';
+
+    // Flacon aspiration calculation
+    const steps = dose_val ? getVolAspirer(d.name, dose_val) : null;
+
+    // Dynamic solvant
+    const dynSolObj = dose_val ? getSolvantVol(d.name, dose_val) : null;
+    const dynSol    = dynSolObj ? `${dynSolObj.vol} cc ${dynSolObj.sol}` : (dose.sol || d.sol || '—');
+
+    // Build aspiration details
+    let aspirDetails = '—';
+    let totalVol = '—';
+    let reliquat = '—';
+
+    if(steps && steps.length){
+      const vialMap = {};
+      steps.forEach(s => { vialMap[s.dosage] = (vialMap[s.dosage]||0) + 1; });
+      const vialStr = Object.entries(vialMap)
+        .sort((a,b) => b[0]-a[0])
+        .map(([mg,n]) => `${n} fl. × ${mg}mg`)
+        .join(' + ');
+
+      const totalV = steps.reduce((s,x) => s + x.volAspire, 0);
+      const rel    = steps.reduce((s,x) => s + x.volRestant, 0);
+
+      aspirDetails = steps.map(s =>
+        `Aspirer <b>${s.volAspire} mL</b> du fl. ${s.dosage}mg`
+      ).join('<br>');
+      totalVol = `<b style="color:#0A3D7A;font-size:13px">${totalV.toFixed(1)} mL</b>`;
+      reliquat = rel > 0
+        ? `<span style="color:#E67E22"><b>${rel.toFixed(1)} mL</b><br><small>à jeter</small></span>`
+        : '<span style="color:#0B5E3C">0 mL<br><small>fl. entier</small></span>';
+    } else if(d.fix){
+      aspirDetails = `Dose fixe : <b>${dose_txt}</b>`;
+      totalVol = '—';
+      reliquat = '—';
+    }
+
+    const precaut = DRUG_PRECAUTIONS[d.name];
+    const noteBg  = d.note ? '#FFF3DC' : '';
+    const noteStr = d.note ? `<br><small style="color:#c07800">⚠ ${d.note}</small>` : '';
+
+    tableRows += `<tr style="${stepNum%2===0?'background:#f8f8f8':'background:white'}">
+      <td style="padding:5px 8px;border:1px solid #ddd;font-size:11px;font-weight:bold;color:#0A3D7A;text-align:center">${stepNum}</td>
+      <td style="padding:5px 8px;border:1px solid #ddd;font-size:11px;font-weight:bold">${d.name}${noteStr}</td>
+      <td style="padding:5px 8px;border:1px solid #ddd;font-size:12px;font-weight:bold;text-align:center;color:#0A3D7A">${dose_txt}</td>
+      <td style="padding:5px 8px;border:1px solid #ddd;font-size:11px">${aspirDetails}</td>
+      <td style="padding:5px 8px;border:1px solid #ddd;font-size:11px;text-align:center">${totalVol}</td>
+      <td style="padding:5px 8px;border:1px solid #ddd;font-size:11px">${dynSol}</td>
+      <td style="padding:5px 8px;border:1px solid #ddd;font-size:11px;text-align:center">${reliquat}</td>
     </tr>`;
   });
 
-  const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
-  <title>Fiche Préparation — ${proto.name} — ${prenom} ${nom}</title>
-  <style>
-    @page{size:A4;margin:10mm 14mm}
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:Arial,sans-serif;font-size:10px;color:#000}
-    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
-  </style>
+  const html = `<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8">
+<title>Fiche Préparation — ${proto.name} — ${prenom} ${nom}</title>
+<style>
+  @page { size:A4; margin:8mm 12mm; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:Arial,Helvetica,sans-serif; font-size:11px; color:#000; background:white; }
+  @media print { body{-webkit-print-color-adjust:exact;print-color-adjust:exact} }
+</style>
 </head><body>
-  <!-- HEADER -->
-  <table style="width:100%;border-collapse:collapse;margin-bottom:10px">
-    <tr>
-      <td style="font-size:8.5px;line-height:1.6">
+
+<!-- EN-TÊTE -->
+<table style="width:100%;border-collapse:collapse;margin-bottom:8px">
+  <tr>
+    <td style="width:60px;vertical-align:middle">
+      <img src="${LOGO_B64}" style="width:55px;height:55px;object-fit:contain" alt="CHNCAK">
+    </td>
+    <td style="vertical-align:top;padding-left:8px">
+      <div style="font-size:8px;line-height:1.55;color:#333">
         République du Sénégal — Un peuple-un but-une foi<br>
-        Ministère de la Santé et l'Action Sociale<br>
+        Ministère de la Santé et de l'Action Sociale<br>
         <b>Centre Hospitalier National Cheikh Ahmadoul Khadim — TOUBA</b><br>
         <b>Service d'Oncologie-Radiothérapie</b>
-      </td>
-      <td style="text-align:right;font-size:9px">
-        Date : <b>${dateP}</b><br>
-        <span style="background:#0A3D7A;color:white;padding:2px 8px;border-radius:3px;font-weight:bold;font-size:11px">
-          FICHE DE PRÉPARATION
-        </span>
-      </td>
+      </div>
+    </td>
+    <td style="text-align:right;vertical-align:top;font-size:9px;line-height:1.8">
+      ${dossier ? 'N° <b>'+dossier+'</b><br>' : ''}
+      ${cubix ? '<b>'+cubix+'</b><br>' : ''}
+      ${codegrat ? '<b>'+codegrat+'</b><br>' : ''}
+      Date : <b>${dateProto}</b>
+      ${cureN ? '<br>Cure N° : <b>'+cureN+'</b>' : ''}
+    </td>
+  </tr>
+</table>
+
+<!-- TITRE -->
+<div style="background:#0A3D7A;color:white;padding:6px 12px;border-radius:4px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">
+  <div>
+    <div style="font-size:13px;font-weight:bold;text-transform:uppercase">FICHE DE PRÉPARATION — ${proto.name}</div>
+    <div style="font-size:10px;opacity:0.85;margin-top:2px">${proto.detail}</div>
+  </div>
+  <div style="text-align:right;font-size:10px;opacity:0.9">
+    Médecin : <b>${med || '—'}</b>
+  </div>
+</div>
+
+<!-- PATIENT -->
+<div style="border:1px solid #0A3D7A;border-radius:4px;padding:6px 10px;margin-bottom:8px;background:#EEF4FD">
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:8px;align-items:center">
+    <div>
+      <div style="font-size:9px;color:#555;text-transform:uppercase">Patient</div>
+      <div style="font-size:14px;font-weight:bold">${prenom.toUpperCase()} ${nom.toUpperCase()}</div>
+    </div>
+    <div>
+      <div style="font-size:9px;color:#555;text-transform:uppercase">Âge</div>
+      <div style="font-size:13px;font-weight:bold">${age} ans</div>
+    </div>
+    <div>
+      <div style="font-size:9px;color:#555;text-transform:uppercase">Poids</div>
+      <div style="font-size:13px;font-weight:bold">${poids} kg</div>
+    </div>
+    <div>
+      <div style="font-size:9px;color:#555;text-transform:uppercase">Taille</div>
+      <div style="font-size:13px;font-weight:bold">${tailleVal} cm</div>
+    </div>
+    <div>
+      <div style="font-size:9px;color:#555;text-transform:uppercase">Surface corp.</div>
+      <div style="font-size:15px;font-weight:bold;color:#0A3D7A">${sc.toFixed(2)} m²</div>
+    </div>
+  </div>
+</div>
+
+<!-- TABLE PRÉPARATION -->
+<table style="width:100%;border-collapse:collapse;margin-bottom:8px">
+  <thead>
+    <tr style="background:#0A3D7A;color:white">
+      <th style="padding:5px 8px;font-size:9px;text-align:center;border:1px solid rgba(255,255,255,0.3);width:25px">#</th>
+      <th style="padding:5px 8px;font-size:9px;text-align:left;border:1px solid rgba(255,255,255,0.3);width:22%">Médicament</th>
+      <th style="padding:5px 8px;font-size:9px;text-align:center;border:1px solid rgba(255,255,255,0.3);width:12%">Dose prescrite</th>
+      <th style="padding:5px 8px;font-size:9px;text-align:left;border:1px solid rgba(255,255,255,0.3);width:24%">Aspiration du flacon</th>
+      <th style="padding:5px 8px;font-size:9px;text-align:center;border:1px solid rgba(255,255,255,0.3);width:10%">Vol. total aspiré</th>
+      <th style="padding:5px 8px;font-size:9px;text-align:left;border:1px solid rgba(255,255,255,0.3);width:18%">Diluer dans</th>
+      <th style="padding:5px 8px;font-size:9px;text-align:center;border:1px solid rgba(255,255,255,0.3);width:10%">Reliquat</th>
     </tr>
-  </table>
+  </thead>
+  <tbody>${tableRows}</tbody>
+</table>
 
-  <!-- PATIENT + PROTOCOLE -->
-  <div style="background:#0A3D7A;color:white;padding:7px 12px;border-radius:4px;margin-bottom:8px;display:flex;gap:20px;align-items:center;flex-wrap:wrap">
-    <span style="font-size:13px;font-weight:bold">${prenom.toUpperCase()} ${nom.toUpperCase()}</span>
-    <span style="font-size:11px">Protocole : <b>${proto.name}</b></span>
-    <span style="font-size:11px">SC : <b>${sc.toFixed(2)} m²</b></span>
-    <span style="font-size:11px">Poids : <b>${poids} kg</b></span>
+<!-- CASE VALIDATION -->
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:10px;border-top:1px solid #0A3D7A;padding-top:8px">
+  <div style="font-size:9px;text-align:center">
+    <div style="font-weight:bold;margin-bottom:2px;color:#0A3D7A">Préparateur(e)</div>
+    <div style="border:1px solid #ccc;height:35px;border-radius:3px;margin-top:4px"></div>
+    <div style="margin-top:3px;color:#888">Nom + Signature</div>
   </div>
-
-  <!-- TABLE PRÉPARATION -->
-  <table style="width:100%;border-collapse:collapse;margin-bottom:10px">
-    <thead>
-      <tr style="background:#e8eef8">
-        <th style="padding:5px 8px;border:1px solid #ccc;font-size:10px;text-align:left">Médicament</th>
-        <th style="padding:5px 8px;border:1px solid #ccc;font-size:10px;text-align:center">Dose</th>
-        <th style="padding:5px 8px;border:1px solid #ccc;font-size:10px;text-align:left">Flacon(s)</th>
-        <th style="padding:5px 8px;border:1px solid #ccc;font-size:10px;text-align:center;color:#0A3D7A">Vol. à aspirer</th>
-        <th style="padding:5px 8px;border:1px solid #ccc;font-size:10px;text-align:left">Diluer dans</th>
-        <th style="padding:5px 8px;border:1px solid #ccc;font-size:10px;text-align:left;color:#E67E22">Reliquat</th>
-        <th style="padding:5px 8px;border:1px solid #ccc;font-size:10px;text-align:left">Durée</th>
-        <th style="padding:5px 8px;border:1px solid #ccc;font-size:10px;text-align:center">✓</th>
-      </tr>
-    </thead>
-    <tbody>${tableRows}</tbody>
-  </table>
-
-  <div style="background:#FFF3DC;border:1px solid #F0C060;padding:6px 10px;border-radius:4px;font-size:10px;color:#7A4B00;margin-bottom:8px">
-    ⚠ Préparation à effectuer sous hotte à flux laminaire — Port de gants, masque et lunettes obligatoire — Élimination déchets cytotoxiques selon protocole DASRI
+  <div style="font-size:9px;text-align:center">
+    <div style="font-weight:bold;margin-bottom:2px;color:#0A3D7A">Pharmacien(ne)</div>
+    <div style="border:1px solid #ccc;height:35px;border-radius:3px;margin-top:4px"></div>
+    <div style="margin-top:3px;color:#888">Nom + Signature</div>
   </div>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:14px;border-top:1px solid #ccc;padding-top:10px">
-    <div style="font-size:9px">Préparateur(e)<br><div style="border-bottom:1px solid #000;height:30px;margin-top:4px"></div></div>
-    <div style="font-size:9px">Pharmacien(ne)<br><div style="border-bottom:1px solid #000;height:30px;margin-top:4px"></div></div>
-    <div style="font-size:9px">Infirmier(e) / Administration<br><div style="border-bottom:1px solid #000;height:30px;margin-top:4px"></div></div>
+  <div style="font-size:9px;text-align:center">
+    <div style="font-weight:bold;margin-bottom:2px;color:#0A3D7A">Infirmier(e)</div>
+    <div style="border:1px solid #ccc;height:35px;border-radius:3px;margin-top:4px"></div>
+    <div style="margin-top:3px;color:#888">Nom + Signature + Heure</div>
   </div>
+</div>
+
+<div style="margin-top:8px;background:#FFF3DC;border:1px solid #F0C060;border-radius:3px;padding:5px 10px;font-size:9px;color:#7A4B00">
+  ⚠ Préparation sous hotte à flux laminaire — Port de gants, masque et lunettes obligatoire — Élimination déchets cytotoxiques selon protocole DASRI
+</div>
+
 </body></html>`;
+
+  const frame = document.getElementById('print-frame');
+  frame.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:none;display:block';
+  const fdoc = frame.contentDocument || frame.contentWindow.document;
+  fdoc.open(); fdoc.write(html); fdoc.close();
+  frame.onload = () => {
+    try { frame.contentWindow.focus(); frame.contentWindow.print(); }
+    catch(e){ const b=new Blob([html],{type:'text/html'}); window.open(URL.createObjectURL(b),'_blank'); }
+    setTimeout(()=>{ frame.style.cssText='display:none;position:fixed;left:-9999px;width:0;height:0;border:none'; }, 3000);
+  };
+}
+
+/* ============================================================
+   ORDONNANCE SUPPORT/* ============================================================
+   ORDONNANCE SUPPORT
+============================================================ */
+// Support medications per protocol family
+const SUPPORT_PROTOCOLS = {
+  // Platine-based — nausées +++, nephrotoxicité
+  platinum: {
+    antiemetiques:[
+      {drug:'Ondansétron (Zofran)',dose:'8 mg',voie:'IV lent 15 mn',moment:'30 mn avant chimio puis J1 à J3'},
+      {drug:'Dexaméthasone',dose:'8 mg',voie:'IV',moment:'30 mn avant chimio + J1 à J3'},
+      {drug:'Métoclopramide (Primpéran)',dose:'10 mg × 3/j',voie:'PO',moment:'En cas de nausées retardées J2-J5'},
+    ],
+    hyperhydratation:[
+      {drug:'SSI 0,9%',dose:'1000 cc',voie:'IV',moment:'Avant Cisplatine'},
+      {drug:'G5% + KCl 2g + MgSO4 1g',dose:'500 cc',voie:'IV',moment:'Pendant Cisplatine'},
+      {drug:'SSI 0,9%',dose:'1000 cc',voie:'IV',moment:'Après Cisplatine'},
+    ],
+    autres:[
+      {drug:'Furosémide (Lasilix)',dose:'20 mg si diurèse insuffisante',voie:'IV',moment:'Si diurèse < 100 mL/h'},
+      {drug:'Magnésium 10%',dose:'2 amp',voie:'IV dilué G5%',moment:'J1 systématique'},
+    ]
+  },
+  // Taxanes — allergie, neurotoxicité
+  taxane:{
+    premedication:[
+      {drug:'Dexaméthasone',dose:'20 mg',voie:'PO ou IV',moment:'La veille et le matin du traitement (Taxol) / 3j pour Taxotère'},
+      {drug:'Diphénhydramine (Diphenhydramine)',dose:'50 mg',voie:'IV lent',moment:'30 mn avant Taxol'},
+      {drug:'Ranitidine',dose:'50 mg',voie:'IV',moment:'30 mn avant Taxol'},
+    ],
+    antiemetiques:[
+      {drug:'Ondansétron',dose:'8 mg',voie:'IV',moment:'30 mn avant chimio'},
+      {drug:'Dexaméthasone',dose:'8 mg',voie:'IV',moment:'Inclus dans prémédication'},
+    ],
+    autres:[
+      {drug:'G-CSF (Filgrastim)',dose:'5 µg/kg/j SC',voie:'SC',moment:'J3 à J10 si neutropénie attendue'},
+    ]
+  },
+  // Anthracyclines — nausées, cardiotoxicité
+  anthracycline:{
+    antiemetiques:[
+      {drug:'Ondansétron',dose:'8 mg',voie:'IV',moment:'30 mn avant chimio'},
+      {drug:'Dexaméthasone',dose:'8 mg',voie:'IV',moment:'Avant chimio'},
+      {drug:'Aprépitant (Emend)',dose:'125 mg J1, 80 mg J2-J3',voie:'PO',moment:'Nausées chimio hautement émétisante'},
+    ],
+    autres:[
+      {drug:'G-CSF (Filgrastim)',dose:'5 µg/kg/j',voie:'SC',moment:'J3-J10 (dose-dense obligatoire)'},
+      {drug:'Dexrazoxane (Cardioxane)',dose:'10× dose Doxorubicine',voie:'IV',moment:'Si dose cumulée > 300 mg/m²'},
+    ]
+  },
+  // Capécitabine — syndrome main-pied, mucites
+  oral:{
+    soins:[
+      {drug:'Uréa crème 10%',dose:'Application 2×/j',voie:'Topique',moment:'Prévention syndrome main-pied dès J1'},
+      {drug:'Bain de bouche Bicarbonate',dose:'1 cs dans 200 mL eau',voie:'Gargarisme',moment:'Après chaque repas prévention mucites'},
+      {drug:'Vitamine B6 (Pyridoxine)',dose:'50 mg × 3/j',voie:'PO',moment:'En cas de syndrome main-pied'},
+    ]
+  },
+  // Général
+  general:{
+    antiemetiques:[
+      {drug:'Ondansétron',dose:'8 mg',voie:'IV',moment:'30 mn avant chimio'},
+      {drug:'Métoclopramide',dose:'10 mg × 3/j',voie:'PO',moment:'Si nausées à domicile'},
+    ],
+    autres:[
+      {drug:'Paracétamol',dose:'1g × 3/j',voie:'PO',moment:'Si fièvre ou douleurs'},
+      {drug:'Lopéramide (Imodium)',dose:'4 mg puis 2 mg/selles',voie:'PO',moment:'Si diarrhée'},
+    ]
+  }
+};
+
+// Map protocol to support category
+function getSupportCategory(protoId){
+  const platine  = ['xelox','ecx','carbo_taxol','carbo_taxol175','gemox','folfox','folfiri','bep','vip','mvac','map'];
+  const taxane   = ['carbo_taxol','carbo_taxol175','taxotere','xeliri'];
+  const anthra   = ['ac60','ac60_j21','rchop','chop','abvd','mvac','map'];
+  const hasCape  = ['xelox','ecx','xeliri'];
+  return {
+    platine:  platine.includes(protoId),
+    taxane:   taxane.includes(protoId),
+    anthra:   anthra.includes(protoId),
+    oral:     hasCape.includes(protoId),
+  };
+}
+
+function renderSupport(){
+  const proto   = PROTOCOLS.find(p=>p.id===selId);
+  const empty   = document.getElementById('support-empty');
+  const content = document.getElementById('support-content');
+  const btn     = document.getElementById('support-print-btn');
+  const subtitle= document.getElementById('support-subtitle');
+
+  if(!proto){
+    empty.style.display=''; content.style.display='none';
+    btn.disabled=true; btn.style.opacity='0.5';
+    return;
+  }
+  empty.style.display='none'; content.style.display='';
+  btn.disabled=false; btn.style.opacity='1';
+
+  const prenom = document.getElementById('prenom').value;
+  const nom    = document.getElementById('nom').value;
+  subtitle.textContent = `${proto.name} — ${prenom} ${nom}`;
+
+  const cats = getSupportCategory(proto.id);
+  let sections = [];
+
+  const makeTable = (title, color, bg, icon, items) => `
+    <div class="card" style="margin-bottom:12px;border-left:4px solid ${color}">
+      <div class="card-header" style="background:${bg}">
+        <div class="card-num" style="background:${color}">${icon}</div>
+        <h2 style="color:${color};font-size:13px">${title}</h2>
+      </div>
+      <div class="card-body" style="padding:0">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead><tr style="background:${bg}">
+            <th style="padding:8px 12px;text-align:left;font-size:11px;color:${color};border-bottom:1px solid var(--gray-border);width:30%">Médicament</th>
+            <th style="padding:8px 12px;text-align:left;font-size:11px;color:${color};border-bottom:1px solid var(--gray-border);width:15%">Dose</th>
+            <th style="padding:8px 12px;text-align:left;font-size:11px;color:${color};border-bottom:1px solid var(--gray-border);width:12%">Voie</th>
+            <th style="padding:8px 12px;text-align:left;font-size:11px;color:${color};border-bottom:1px solid var(--gray-border)">Moment / Instructions</th>
+          </tr></thead>
+          <tbody>
+            ${items.map((m,i)=>`<tr style="${i%2===0?'background:'+bg+';opacity:0.5':''}">
+              <td style="padding:8px 12px;border-bottom:1px solid var(--gray-border);font-weight:600">${m.drug}</td>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--gray-border)">${m.dose}</td>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--gray-border)">${m.voie}</td>
+              <td style="padding:8px 12px;border-bottom:1px solid var(--gray-border);color:var(--gray-mid)">${m.moment}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+
+  // Always show general antiemetics
+  sections.push(makeTable('Antiémétiques', 'var(--blue)', 'var(--blue-pale)', '💊',
+    SUPPORT_PROTOCOLS.general.antiemetiques));
+
+  if(cats.platine) sections.push(makeTable(
+    'Hyperhydratation (Platine)', 'var(--blue)', 'var(--blue-pale)', '💧',
+    SUPPORT_PROTOCOLS.platinum.hyperhydratation));
+
+  if(cats.platine) sections.push(makeTable(
+    'Support Rénal (Platine)', '#0B5E3C', 'var(--green-pale)', '🫘',
+    SUPPORT_PROTOCOLS.platinum.autres));
+
+  if(cats.taxane) sections.push(makeTable(
+    'Prémédication Antiallergique (Taxane)', 'var(--red2)', 'var(--red-pale)', '⚠️',
+    SUPPORT_PROTOCOLS.taxane.premedication));
+
+  if(cats.anthra) sections.push(makeTable(
+    'Support Anthracyclines + G-CSF', 'var(--amber)', 'var(--amber-pale)', '❤️',
+    SUPPORT_PROTOCOLS.anthracycline.autres));
+
+  if(cats.oral) sections.push(makeTable(
+    'Soins Capécitabine (Syndrome main-pied)', 'var(--green)', 'var(--green-pale)', '🤲',
+    SUPPORT_PROTOCOLS.oral.soins));
+
+  sections.push(makeTable('Traitement symptomatique général', 'var(--gray)', 'var(--gray-light)', '🩺',
+    SUPPORT_PROTOCOLS.general.autres));
+
+  content.innerHTML = `
+    <div style="background:var(--blue);color:white;border-radius:var(--radius-lg);padding:10px 16px;margin-bottom:14px;font-size:13px">
+      <b>Protocole : ${proto.name}</b> &nbsp;|&nbsp; Patient : ${prenom} ${nom} &nbsp;|&nbsp; 
+      Date : ${new Date().toLocaleDateString('fr-FR')}
+    </div>
+    ${sections.join('')}
+    <div style="background:var(--amber-pale);border:1px solid #F0C060;border-radius:var(--radius);padding:10px 14px;font-size:12px;color:var(--amber);margin-top:4px">
+      ⚠️ Cette ordonnance de support est indicative. Le médecin prescripteur adapte selon l'état clinique du patient.
+    </div>`;
+}
+
+function printSupport(){
+  const proto = PROTOCOLS.find(p=>p.id===selId);
+  if(!proto) return;
+  const prenom = document.getElementById('prenom').value;
+  const nom    = document.getElementById('nom').value;
+  const content = document.getElementById('support-content').innerHTML;
+
+  const html = `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+  <title>Support ${proto.name} — ${prenom} ${nom}</title>
+  <style>
+    @page{size:A4;margin:12mm 14mm}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;font-size:11px;color:#000}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:5px 8px;border:1px solid #ddd;text-align:left;font-size:10px}
+    th{background:#e8eef8;font-weight:bold}
+    .card{margin-bottom:10px;border:1px solid #ddd;border-radius:4px}
+    .card-header{padding:6px 10px;background:#f0f4fb;font-weight:bold;font-size:11px}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  </style></head><body>
+  ${content}
+  </body></html>`;
 
   const frame = document.getElementById('print-frame');
   frame.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:none;display:block';
@@ -1764,287 +2710,748 @@ function printPreparation(){
 }
 
 /* ============================================================
-   APERÇU & IMPRESSION — renders the exact original model inside the page
+   PROGRAMME HEBDOMADAIRE — Fonctions principales
 ============================================================ */
-function buildDocumentHTML(forPrint){
-  const proto = PROTOCOLS.find(p=>p.id===selId);
-  if(!proto || sc<=0) return null;
+let programmeData = JSON.parse(localStorage.getItem('chncak_programme')||'{}');
+let progConfig = JSON.parse(localStorage.getItem('chncak_prog_config')||'{"resp1":"FATOUMATA FAYE","resp2":"BINTA SOW","salle":"SALLE CHIMIO"}');
+let currentDay = 0;
 
-  const prenom       = document.getElementById('prenom').value.trim();
-  const nom          = document.getElementById('nom').value.trim();
-  const age          = document.getElementById('age').value;
-  const pdsVal       = document.getElementById('poids').value;
-  const tailleVal    = document.getElementById('taille').value;
-  const ind          = document.getElementById('indication').value;
-  const loc          = document.getElementById('localisation').value||'—';
-  const atcd         = document.getElementById('atcd').value||'RAS';
-  const med          = document.getElementById('medecin-select').value||'';
-  const dossier      = document.getElementById('dossier').value||'';
-  const cubix        = document.getElementById('cubix').value||'';
-  const codegratuite = document.getElementById('codegratuite').value||'';
-  const totalC       = document.getElementById('total-cures').value||'4';
-  const cureN        = document.getElementById('cure-num').value||'';
-  const dp           = document.getElementById('date-protocole').value;
-  const dateProto    = dp ? dp.split('-').reverse().join('/') : new Date().toLocaleDateString('fr-FR');
+const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
+const CHIMIO_COLORS = {
+  'XELOX':'#0A3D7A','ECX':'#0B5E3C','CARBO TAXOL':'#6B3FA0',
+  'AC60':'#8B1A1A','TAXOL HEBDO':'#7A4B00','GEMOX':'#0A3D7A',
+  'CISPLATINE HEBDO':'#185FA5','CARBO GEMCI':'#0B5E3C',
+  'EC100':'#C0392B','FOLFOX':'#2E86AB','FOLFIRI':'#A23B72',
+};
 
-  /* Drug rows */
-  const rows = proto.drugs.map(d=>{
-    const dose = getDose(d);
-    if(dose.cls==='rh') return `<tr><td colspan="5" style="padding:3px 8px;font-size:${forPrint?'10':'10'}px;color:#555;background:#f0f0f0;font-style:italic;border:1px solid #ccc">${d.label}, faire passer en ${d.dur}</td></tr>`;
-    const lim = checkDoseLimit(d.name, dose.val);
-    const warn = lim==='danger'?' <b style="color:#C0392B">⛔</b>':lim==='warn'?' <span style="color:#E67E22">⚠</span>':'';
-    const doseCell = (dose.calc||dose.oral)
-      ? `<b>${dose.txt}</b>${warn}${dose.note?'<br><small style="color:#888;font-style:italic">'+dose.note+'</small>':''}`
-      : dose.txt;
-    const solDisplay = dose.sol||d.sol||'—';
-    const rowBg = d.hl?'background:#f0f4fb;':'';
-    const bold  = d.hl?'font-weight:bold;':'';
-    return `<tr>
-      <td style="padding:4px 6px;border:1px solid #ccc;font-size:10px;${bold}${rowBg}">${d.name}${d.note?'<br><small style="color:#c07800;font-style:italic">⚠ '+d.note+'</small>':''}</td>
-      <td style="padding:4px 6px;border:1px solid #ccc;font-size:10px;${rowBg}">${doseCell}</td>
-      <td style="padding:4px 6px;border:1px solid #ccc;font-size:10px;${rowBg}">${solDisplay}</td>
-      <td style="padding:4px 6px;border:1px solid #ccc;font-size:10px;${rowBg}">${d.dur||'—'}</td>
-      <td style="padding:4px 6px;border:1px solid #ccc;font-size:10px;${rowBg}">${d.ryt||'—'}</td>
-    </tr>`;
-  }).join('');
+function saveProgrammeConfig(){
+  progConfig.resp1 = document.getElementById('prog-resp1').value;
+  progConfig.resp2 = document.getElementById('prog-resp2').value;
+  progConfig.salle = document.getElementById('prog-salle').value;
+  localStorage.setItem('chncak_prog_config', JSON.stringify(progConfig));
+}
 
-  /* Capécitabine table */
-  let capeHtml = '';
-  if(proto.hasCape){
-    const capeDrug = proto.drugs.find(d=>d.oral);
-    if(capeDrug){
-      const dt    = Math.round(capeDrug.mgm2*sc);
-      const cp500 = Math.floor(dt/500);
-      const cp150 = Math.round((dt - cp500*500)/150);
-      const cpTxt = (cp500>0?cp500+' cp à 500 mg':'')+(cp150>0?(cp500?' + ':'')+cp150+' cp à 150 mg':'');
-      const makeRows = (from,to) => Array.from({length:to-from+1},(_,i)=>`
-        <tr>
-          <td style="border:1px solid #ccc;padding:3px 5px;font-size:9px;font-weight:bold;text-align:center;background:#e8eef8;width:30px">J${from+i}</td>
-          <td style="border:1px solid #ccc;padding:3px 5px;font-size:9px">${cpTxt} = <b>${dt} mg</b></td>
-          <td style="border:1px solid #ccc;padding:3px 5px;font-size:9px;text-align:center;width:45px">&#9744;</td>
-          <td style="border:1px solid #ccc;padding:3px 5px;font-size:9px;text-align:center;width:45px">&#9744;</td>
-        </tr>`).join('');
-      capeHtml = `<div style="margin-top:7px">
-        <div style="font-size:9px;font-weight:bold;color:#0A3D7A;border-left:3px solid #0A3D7A;padding-left:5px;margin-bottom:4px;text-transform:uppercase">
-          Capécitabine — Calendrier de prise — ${dt} mg × 2/j
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-          <table style="width:100%;border-collapse:collapse">
-            <thead><tr>
-              <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Jour</th>
-              <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Comprimés</th>
-              <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Matin ✓</th>
-              <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Soir ✓</th>
-            </tr></thead>
-            <tbody>${makeRows(1,7)}</tbody>
-          </table>
-          <table style="width:100%;border-collapse:collapse">
-            <thead><tr>
-              <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Jour</th>
-              <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Comprimés</th>
-              <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Matin ✓</th>
-              <th style="border:1px solid #0A3D7A;padding:3px 5px;background:#0A3D7A;color:white;font-size:8px">Soir ✓</th>
-            </tr></thead>
-            <tbody>${makeRows(8,14)}</tbody>
-          </table>
-        </div>
-        <div style="margin-top:4px;font-size:8.5px;color:#7A4B00;background:#FFF3DC;padding:3px 7px;border-radius:3px">
-          ⚠ Repos 7 jours — Comprimés avalés entiers avec eau dans les 30 mn après repas. Ne pas écraser. NFS + Créatinine au 5e jour de repos.
-        </div>
-      </div>`;
-    }
+function saveProgramme(){
+  localStorage.setItem('chncak_programme', JSON.stringify(programmeData));
+}
+
+function getSemaineKey(){
+  const val = document.getElementById('prog-semaine').value;
+  return val || null;
+}
+
+function getWeekDates(mondayStr){
+  const dates = [];
+  const base = new Date(mondayStr);
+  for(let i=0;i<5;i++){
+    const d = new Date(base);
+    d.setDate(base.getDate()+i);
+    dates.push(d.toLocaleDateString('fr-FR'));
+  }
+  return dates;
+}
+
+function ensureDayData(semaine, day){
+  if(!programmeData[semaine]) programmeData[semaine] = {};
+  if(!programmeData[semaine][day]) programmeData[semaine][day] = [];
+  return programmeData[semaine][day];
+}
+
+function initProgramme(){
+  const today = new Date();
+  const day = today.getDay();
+  const diff = day===0 ? -6 : 1-day;
+  const monday = new Date(today);
+  monday.setDate(today.getDate()+diff);
+  if(!document.getElementById('prog-semaine').value){
+    document.getElementById('prog-semaine').value = monday.toISOString().split('T')[0];
+  }
+  document.getElementById('prog-resp1').value = progConfig.resp1||'FATOUMATA FAYE';
+  document.getElementById('prog-resp2').value = progConfig.resp2||'BINTA SOW';
+  document.getElementById('prog-salle').value  = progConfig.salle||'SALLE CHIMIO';
+}
+
+function selectDay(dayIdx, btn){
+  saveDayFromTable();
+  currentDay = dayIdx;
+  document.querySelectorAll('.prog-day-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderProgramme();
+}
+
+function saveDayFromTable(){
+  const semaine = getSemaineKey();
+  if(!semaine) return;
+  const rows = document.querySelectorAll('#prog-tbody tr[data-idx]');
+  const data = [];
+  rows.forEach(row=>{
+    const inputs = row.querySelectorAll('.prog-input');
+    if(inputs.length>=5) data.push({
+      prenom:  inputs[0].value.trim(),
+      nom:     inputs[1].value.trim(),
+      contact: inputs[2].value.trim(),
+      chimio:  inputs[3].value.trim(),
+      obs:     inputs[4].value.trim(),
+      done:    row.classList.contains('prog-row-done'),
+    });
+  });
+  if(!programmeData[semaine]) programmeData[semaine]={};
+  programmeData[semaine][currentDay] = data;
+  saveProgramme();
+}
+
+function renderProgramme(){
+  const semaine = getSemaineKey();
+  const dates = semaine ? getWeekDates(semaine) : ['','','','',''];
+  const dayDate = dates[currentDay]||'';
+
+  JOURS.forEach((j,i)=>{
+    const btn = document.getElementById('day-btn-'+i);
+    if(btn) btn.textContent = j+(dates[i]?' '+dates[i]:'');
+  });
+
+  const titleEl = document.getElementById('prog-day-title');
+  if(titleEl) titleEl.textContent = JOURS[currentDay]+(dayDate?' — '+dayDate:'');
+
+  const isFriday = currentDay===4;
+  const patients = semaine ? (programmeData[semaine]?.[currentDay]||[]) : [];
+  const tbody = document.getElementById('prog-tbody');
+  if(!tbody) return;
+
+  if(patients.length===0){
+    tbody.innerHTML = `<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--gray-mid);font-size:13px">
+      ${isFriday?'<b>⚠️ VENDREDI — Journée Transfusions Sanguines</b><br><small>Ajoutez des patients si chimiothérapie programmée</small>':'Aucun patient — cliquez <b>+ Ajouter patient</b>'}
+    </td></tr>`;
+  } else {
+    tbody.innerHTML = patients.map((p,i)=>{
+      const chimioColor = CHIMIO_COLORS[p.chimio?.toUpperCase()]||'var(--blue)';
+      return `<tr data-idx="${i}" class="${p.done?'prog-row-done':''}" style="${i%2===0?'background:var(--gray-light)':'background:white'}">
+        <td style="padding:5px 8px;border:1px solid var(--gray-border);text-align:center;font-weight:600;font-size:12px">${i+1}</td>
+        <td style="padding:2px 4px;border:1px solid var(--gray-border)"><input class="prog-input" value="${p.prenom||''}" placeholder="Prénom" oninput="autoSave()" style="text-transform:uppercase;font-weight:600"></td>
+        <td style="padding:2px 4px;border:1px solid var(--gray-border)"><input class="prog-input" value="${p.nom||''}" placeholder="Nom" oninput="autoSave()" style="text-transform:uppercase;font-weight:600"></td>
+        <td style="padding:2px 4px;border:1px solid var(--gray-border)"><input class="prog-input" value="${p.contact||''}" placeholder="Téléphone" oninput="autoSave()"></td>
+        <td style="padding:2px 4px;border:1px solid var(--gray-border)"><input class="prog-input" value="${p.chimio||''}" placeholder="Protocole" oninput="autoSave()" style="font-weight:700;color:${chimioColor};text-transform:uppercase"></td>
+        <td style="padding:2px 4px;border:1px solid var(--gray-border)"><input class="prog-input" value="${p.obs||''}" placeholder="Observations" oninput="autoSave()"></td>
+        <td style="padding:5px;border:1px solid var(--gray-border);text-align:center">
+          <input type="checkbox" ${p.done?'checked':''} onchange="toggleDone(${i},this)" style="width:16px;height:16px;cursor:pointer">
+        </td>
+        <td style="padding:5px;border:1px solid var(--gray-border);text-align:center">
+          <button onclick="deleteRow(${i})" style="background:none;border:none;cursor:pointer;color:var(--red2);font-size:16px">🗑</button>
+        </td>
+      </tr>`;
+    }).join('');
   }
 
-  /* Calvert box */
-  const carboBox = (proto.hasCarbo && carboDose>0)
-    ? `<div style="background:#EEF4FD;border:1px solid #B8D0F5;padding:3px 8px;font-size:9px;color:#0A3D7A;margin:3px 0;border-radius:3px">
-        <b>Calvert :</b> Créatininémie ${document.getElementById('creatinine').value} µmol/L —
-        ClCr ${document.getElementById('res-clcr').textContent} mL/min —
-        AUC ${document.getElementById('res-auc').textContent} —
-        <b>Dose : ${carboDose} mg</b>
-       </div>` : '';
+  const total = patients.filter(p=>p.prenom||p.nom).length;
+  const done  = patients.filter(p=>p.done).length;
+  const countEl = document.getElementById('prog-count');
+  if(countEl) countEl.textContent = `${total} patient${total>1?'s':''} — ${done} traité${done>1?'s':''}`;
 
-  /* ONE EXEMPLAIRE — exact model layout */
-  return `
-    <!-- EN-TÊTE -->
-    <table style="width:100%;border-collapse:collapse;margin-bottom:6px">
-      <tr>
-        <td style="vertical-align:top;width:63%">
-          <div style="font-size:8.5px;line-height:1.65;color:#000">
-            République du Sénégal<br>
-            <b>Un peuple-un but-une foi</b><br>
-            …………………………………<br>
-            Ministère de la Santé et l'Action Sociale<br>
-            …………………………………<br>
-            Direction Générale des Etablissements de Santé<br>
-            …………………………….<br>
-            Direction des Etablissements Publics de Santé<br>
-            ………………………………<br>
-            <b>Centre Hospitalier National Cheikh Ahmadoul Khadim</b><br>
-            ……………………………….<br>
-            <b>Service d'Oncologie - Radiothérapie</b>
-          </div>
-        </td>
-        <td style="vertical-align:top;text-align:right;font-size:9px;line-height:2;color:#000">
-          <b>CHNCAK …N°${dossier||'________'}</b><br>
-          <span style="font-size:8.5px">Date : <b>${dateProto}</b></span><br>
-          ${cubix?'<span style="font-size:9px"><b>'+cubix+'</b></span><br>':''}
-          ${codegratuite?'<span style="font-size:9px"><b>'+codegratuite+'</b></span>':''}
-        </td>
-      </tr>
-    </table>
+  renderWeekOverview(semaine, dates);
+}
 
-    <!-- TITRE PROTOCOLE encadré -->
-    <div style="border:1.5px solid #000;padding:5px 10px;margin-bottom:5px;text-align:center">
-      <div style="font-size:11px;font-weight:bold;text-transform:uppercase;letter-spacing:0.01em">
-        PROTOCOLE (${proto.detail})
+let autoSaveTimer = null;
+function autoSave(){
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(()=>saveDayFromTable(), 800);
+}
+
+function addPatientRow(){
+  let semaine = getSemaineKey();
+  if(!semaine){
+    const today = new Date();
+    const diff = today.getDay()===0?-6:1-today.getDay();
+    const mon = new Date(today);
+    mon.setDate(today.getDate()+diff);
+    document.getElementById('prog-semaine').value = mon.toISOString().split('T')[0];
+    semaine = getSemaineKey();
+  }
+  saveDayFromTable();
+  ensureDayData(semaine, currentDay).push({prenom:'',nom:'',contact:'',chimio:'',obs:'',done:false});
+  saveProgramme();
+  renderProgramme();
+  setTimeout(()=>{
+    const inputs = document.querySelectorAll('#prog-tbody tr:last-child .prog-input');
+    if(inputs[0]) inputs[0].focus();
+  },100);
+}
+
+function deleteRow(idx){
+  saveDayFromTable();
+  const semaine = getSemaineKey();
+  if(!semaine) return;
+  programmeData[semaine][currentDay].splice(idx,1);
+  saveProgramme();
+  renderProgramme();
+}
+
+function toggleDone(idx, cb){
+  saveDayFromTable();
+  const semaine = getSemaineKey();
+  if(!semaine) return;
+  if(programmeData[semaine]&&programmeData[semaine][currentDay])
+    programmeData[semaine][currentDay][idx].done = cb.checked;
+  saveProgramme();
+  renderProgramme();
+}
+
+function clearDay(){
+  if(!confirm('Effacer tous les patients de ce jour ?')) return;
+  const semaine = getSemaineKey();
+  if(!semaine) return;
+  if(programmeData[semaine]) programmeData[semaine][currentDay]=[];
+  saveProgramme();
+  renderProgramme();
+}
+
+function renderWeekOverview(semaine, dates){
+  const el = document.getElementById('prog-week-overview');
+  if(!el) return;
+  if(!semaine||!programmeData[semaine]){
+    el.innerHTML='<p style="color:var(--gray-mid);font-size:13px;text-align:center;padding:20px">Aucune donnée pour cette semaine.</p>';
+    return;
+  }
+  const html = JOURS.map((jour,i)=>{
+    const patients = (programmeData[semaine][i]||[]).filter(p=>p.prenom||p.nom);
+    const done = patients.filter(p=>p.done).length;
+    return `<div style="flex:1;min-width:130px;background:${i===currentDay?'var(--blue-pale)':'var(--gray-light)'};
+      border:${i===currentDay?'1.5px solid var(--blue)':'1px solid var(--gray-border)'};
+      border-radius:var(--radius);padding:10px 12px;cursor:pointer" onclick="selectDay(${i},document.getElementById('day-btn-${i}'))">
+      <div style="font-size:12px;font-weight:600;color:${i===currentDay?'var(--blue)':'var(--gray)'}">${jour}</div>
+      <div style="font-size:10px;color:var(--gray-mid)">${dates[i]||''}</div>
+      <div style="font-size:22px;font-weight:700;color:${i===currentDay?'var(--blue)':'var(--gray)'};margin:6px 0">${patients.length}</div>
+      <div style="font-size:10px;color:${done===patients.length&&patients.length>0?'var(--green)':'var(--gray-mid)'}">
+        ${done}/${patients.length} traités
       </div>
-      <div style="font-size:9px;margin-top:2px">Indication : <b>${ind}</b></div>
-    </div>
-
-    <!-- PATIENT -->
-    <div style="margin-bottom:5px">
-      <div style="font-size:12px;font-weight:bold;margin-bottom:3px">${prenom.toUpperCase()} ${nom.toUpperCase()}</div>
-      <div style="font-size:10px;margin-bottom:2px">
-        Age : <b>${age} ans</b>&nbsp;&nbsp;&nbsp;
-        Poids : <b>${pdsVal} kg</b>&nbsp;&nbsp;&nbsp;
-        taille : <b>${tailleVal} cm</b>&nbsp;&nbsp;&nbsp;
-        SC : <b>${sc.toFixed(2)} m²</b>
-      </div>
-      <div style="font-size:10px;margin-bottom:2px">Localisation : <b>${loc}</b></div>
-      <div style="font-size:10px">Antécédents médicaux : <b>${atcd}</b></div>
-    </div>
-
-    ${carboBox}
-
-    <!-- TABLEAU MÉDICAMENTS -->
-    <table style="width:100%;border-collapse:collapse;margin-bottom:4px">
-      <thead>
-        <tr>
-          <th style="border:1px solid #ccc;padding:4px 6px;background:#e8eef8;font-size:9px;text-align:left;width:30%">Médicaments</th>
-          <th style="border:1px solid #ccc;padding:4px 6px;background:#e8eef8;font-size:9px;text-align:left;width:14%">Dose</th>
-          <th style="border:1px solid #ccc;padding:4px 6px;background:#e8eef8;font-size:9px;text-align:left;width:27%">Solvant</th>
-          <th style="border:1px solid #ccc;padding:4px 6px;background:#e8eef8;font-size:9px;text-align:left;width:12%">Durée</th>
-          <th style="border:1px solid #ccc;padding:4px 6px;background:#e8eef8;font-size:9px;text-align:left;width:17%">Rythme</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>
-
-    <!-- CURES -->
-    <div style="font-size:10px;margin:4px 0 3px">
-      Faire au total <b><u>${totalC} cures</u></b> puis évaluation
-      ${cureN?'&nbsp;&nbsp;&nbsp;<b>Cure N° : '+cureN+'</b>':''}
-    </div>
-
-    ${capeHtml}
-
-    <!-- SIGNATURE -->
-    <div style="text-align:right;margin-top:8px">
-      <div style="display:inline-block;text-align:center;font-size:9px;min-width:150px">
-        <div style="font-style:italic">Médecin traitant</div>
-        <div style="font-weight:bold;font-size:11px;margin-top:2px">${med||'DR ________________'}</div>
-        <div style="border-bottom:1px solid #000;margin-top:24px;width:150px"></div>
+      <div style="background:var(--gray-border);border-radius:4px;height:4px;margin-top:6px;overflow:hidden">
+        <div style="background:${i===4?'var(--amber2)':'var(--blue)'};height:100%;width:${patients.length?Math.round(done/patients.length*100):0}%"></div>
       </div>
     </div>`;
+  }).join('');
+  el.innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap">${html}</div>`;
 }
 
-function renderApercu(){
-  const proto = PROTOCOLS.find(p=>p.id===selId);
-  const empty   = document.getElementById('apercu-empty');
-  const wrapper = document.getElementById('apercu-sheet-wrapper');
-  const btn     = document.getElementById('apercu-print-btn');
-  const subtitle= document.getElementById('apercu-subtitle');
+function printProgramme(){
+  saveDayFromTable();
+  const semaine = getSemaineKey();
+  if(!semaine){ alert('Sélectionnez une semaine.'); return; }
+  const dates   = getWeekDates(semaine);
+  const resp1   = document.getElementById('prog-resp1').value;
+  const resp2   = document.getElementById('prog-resp2').value;
+  const salle   = document.getElementById('prog-salle').value;
 
-  if(!proto || sc<=0){
-    empty.style.display   = '';
-    wrapper.style.display = 'none';
-    btn.disabled = true;
-    btn.style.opacity = '0.5';
-    btn.style.cursor  = 'not-allowed';
-    subtitle.textContent = 'Remplissez les données patient et choisissez un protocole pour voir l\'aperçu.';
-    return;
-  }
+  const allDays = JOURS.map((jour,i)=>{
+    const patients = (programmeData[semaine]?.[i]||[]).filter(p=>p.prenom||p.nom);
+    if(!patients.length && i<4) return '';
+    const rows = i===4&&patients.length===0
+      ? `<tr><td colspan="7" style="padding:8px;text-align:center;background:#FFF3DC;font-weight:bold;font-size:11px">TRANSFUSIONS SANGUINES</td></tr>`
+      : patients.map((p,idx)=>`<tr style="${idx%2===0?'background:#f8f8f8':''}">
+          <td style="padding:3px 6px;border:1px solid #ccc;text-align:center;font-size:10px">${idx+1}</td>
+          <td style="padding:3px 6px;border:1px solid #ccc;font-size:10px;font-weight:bold">${p.prenom||''}</td>
+          <td style="padding:3px 6px;border:1px solid #ccc;font-size:10px;font-weight:bold">${p.nom||''}</td>
+          <td style="padding:3px 6px;border:1px solid #ccc;font-size:10px">${p.contact||''}</td>
+          <td style="padding:3px 6px;border:1px solid #ccc;font-size:10px;font-weight:bold">${p.chimio||''}</td>
+          <td style="padding:3px 6px;border:1px solid #ccc;font-size:10px">${p.obs||''}</td>
+          <td style="padding:3px 6px;border:1px solid #ccc;font-size:10px;text-align:center">${resp1}<br>${resp2}</td>
+        </tr>`).join('');
+    return `<div style="margin-bottom:10px;page-break-inside:avoid">
+      <div style="background:#0A3D7A;color:white;padding:4px 8px;font-size:11px;font-weight:bold">
+        DATES | ${salle} &nbsp;—&nbsp; ${jour} ${dates[i]||''}
+      </div>
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:#e8eef8">
+          <th style="padding:3px 6px;border:1px solid #ccc;font-size:9px;width:25px">N°</th>
+          <th style="padding:3px 6px;border:1px solid #ccc;font-size:9px">PRÉNOM</th>
+          <th style="padding:3px 6px;border:1px solid #ccc;font-size:9px">NOM</th>
+          <th style="padding:3px 6px;border:1px solid #ccc;font-size:9px">CONTACTS</th>
+          <th style="padding:3px 6px;border:1px solid #ccc;font-size:9px">CHIMIOTHÉRAPIE</th>
+          <th style="padding:3px 6px;border:1px solid #ccc;font-size:9px">OBSERVATIONS</th>
+          <th style="padding:3px 6px;border:1px solid #ccc;font-size:9px">RESPONSABLE</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }).join('');
 
-  const html = buildDocumentHTML(false);
-  if(!html){
-    empty.style.display = '';
-    wrapper.style.display = 'none';
-    return;
-  }
-
-  empty.style.display   = 'none';
-  wrapper.style.display = '';
-  btn.disabled = false;
-  btn.style.opacity = '1';
-  btn.style.cursor  = 'pointer';
-
-  const prenom = document.getElementById('prenom').value;
-  const nom    = document.getElementById('nom').value;
-  subtitle.textContent = `Protocole ${proto.name} — ${prenom} ${nom}`;
-
-  // Inject into both halves of the A4 sheet
-  document.getElementById('apercu-content-1').innerHTML = html;
-  document.getElementById('apercu-content-2').innerHTML = html;
-
-  // Scale the sheet to fit the screen width
-  scaleApercuSheet();
-}
-
-function scaleApercuSheet(){
-  const sheet = document.getElementById('apercu-sheet');
-  if(!sheet) return;
-  const wrapper = sheet.parentElement;
-  const available = wrapper.clientWidth - 32; // padding
-  const naturalW  = 794; // A4 at 96dpi
-  const scale     = available < naturalW ? available/naturalW : 1;
-  sheet.style.transform = `scale(${scale})`;
-  sheet.style.transformOrigin = 'top left';
-  wrapper.style.height = (sheet.offsetHeight * scale + 32) + 'px';
-}
-
-window.addEventListener('resize', scaleApercuSheet);
-
-function printFromApercu(){
-  const html = buildDocumentHTML(true);
-  if(!html) return;
-
-  const prenom = document.getElementById('prenom').value;
-  const nom    = document.getElementById('nom').value;
-  const proto  = PROTOCOLS.find(p=>p.id===selId);
-
-  const fullDoc = `<!DOCTYPE html>
-<html lang="fr"><head>
-  <meta charset="UTF-8">
-  <title>Protocole ${proto?proto.name:''} — ${prenom} ${nom}</title>
-  <style>
-    @page { size:A4; margin:8mm 14mm; }
-    *{ box-sizing:border-box; margin:0; padding:0; }
-    body{ font-family:Arial,Helvetica,sans-serif; font-size:10px; color:#000; background:white; }
-    .cut{ border:none; border-top:1.5px dashed #888; margin:6px 0; }
-    @media print{ body{-webkit-print-color-adjust:exact;print-color-adjust:exact;} }
-  </style>
-</head>
-<body>
-  <div>${html}</div>
-  <div class="cut"></div>
-  <div>${html}</div>
-</body></html>`;
+  const html=`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+  <title>Programme Chimio</title>
+  <style>@page{size:A4 landscape;margin:8mm 12mm}*{box-sizing:border-box;margin:0;padding:0}body{font-family:Arial,sans-serif;font-size:10px}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
+  </head><body>
+  <div style="text-align:center;margin-bottom:8px">
+    <div style="font-size:13px;font-weight:bold;color:#0A3D7A">PROGRAMME DE CHIMIOTHÉRAPIE — CHNCAK TOUBA</div>
+    <div style="font-size:11px">DU ${dates[0]} AU ${dates[4]} &nbsp;|&nbsp; Responsables : ${resp1} / ${resp2}</div>
+  </div>
+  ${allDays}
+  </body></html>`;
 
   const frame = document.getElementById('print-frame');
-  frame.style.cssText = 'position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:none;display:block';
-  const fdoc = frame.contentDocument || frame.contentWindow.document;
-  fdoc.open(); fdoc.write(fullDoc); fdoc.close();
-  frame.onload = ()=>{
-    try{
-      frame.contentWindow.focus();
-      frame.contentWindow.print();
-    } catch(e){
-      const blob = new Blob([fullDoc],{type:'text/html'});
-      window.open(URL.createObjectURL(blob),'_blank');
-    }
-    setTimeout(()=>{ frame.style.cssText='display:none;position:fixed;left:-9999px;width:0;height:0;border:none'; },3000);
+  frame.style.cssText='position:fixed;left:-9999px;top:0;width:297mm;height:210mm;border:none;display:block';
+  const fdoc=frame.contentDocument||frame.contentWindow.document;
+  fdoc.open();fdoc.write(html);fdoc.close();
+  frame.onload=()=>{
+    try{frame.contentWindow.focus();frame.contentWindow.print();}
+    catch(e){const b=new Blob([html],{type:'text/html'});window.open(URL.createObjectURL(b),'_blank');}
+    setTimeout(()=>{frame.style.cssText='display:none;position:fixed;left:-9999px;width:0;height:0;border:none';},3000);
   };
+}
+
+function exportProgrammeWord(){
+  alert('Export Word disponible dans la prochaine version. Utilisez l\'impression PDF pour l\'instant.');
+}
+
+/* ============================================================
+   IMPORT PROGRAMME (Excel / Word)
+============================================================ */
+function importProgramme(input){
+  const file = input.files[0];
+  if(!file) return;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  const reader = new FileReader();
+
+  if(ext === 'xlsx' || ext === 'xls'){
+    reader.onload = e => importFromExcel(e.target.result);
+    reader.readAsArrayBuffer(file);
+  } else if(ext === 'docx'){
+    reader.onload = e => importFromWord(e.target.result);
+    reader.readAsArrayBuffer(file);
+  } else {
+    alert('Format non supporté. Utilisez un fichier Excel (.xlsx) ou Word (.docx).');
+  }
+  input.value = '';
+}
+
+function parsePatientRows(rows){
+  // Parse rows from either Excel or Word table
+  // Expected columns: DATE | N° | PRENOM | NOM | CONTACT | CHIMIOTHÉRAPIE | OBSERVATIONS | RESPONSABLE
+  const dayMap = {}; // date_str -> [{prenom, nom, contact, chimio, obs}]
+
+  rows.forEach(row => {
+    if(!row || row.length < 4) return;
+
+    const dateStr  = String(row[0]||'').trim();
+    const numStr   = String(row[1]||'').trim();
+    const prenom   = String(row[2]||'').trim().toUpperCase();
+    const nom      = String(row[3]||'').trim().toUpperCase();
+    const contact  = String(row[4]||'').trim();
+    const chimio   = String(row[5]||'').trim().toUpperCase();
+    const obs      = String(row[6]||'').trim();
+
+    // Skip header rows and empty rows
+    if(!prenom && !nom && !chimio) return;
+    if(dateStr.toLowerCase().includes('date') || 
+       prenom.toLowerCase().includes('prenom') ||
+       prenom === 'DATES') return;
+    if(!dateStr.match(/\d{2}[\/\-\.]\d{2}[\/\-\.]\d{4}/)) return;
+
+    if(!dayMap[dateStr]) dayMap[dateStr] = [];
+    dayMap[dateStr].push({prenom, nom, contact, chimio, obs, done:false});
+  });
+
+  return dayMap;
+}
+
+function applyImportedData(dayMap){
+  let semaine = getSemaineKey();
+
+  // Auto-detect week from imported dates if not set
+  if(!semaine){
+    const allDates = Object.keys(dayMap);
+    if(!allDates.length){ alert('Aucune date trouvée dans le fichier.'); return; }
+
+    // Parse first date and find its Monday
+    const firstDate = allDates[0];
+    const parts = firstDate.split(/[\/\-\.]/);
+    let d;
+    if(parts[0].length === 4){
+      // YYYY-MM-DD
+      d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+    } else {
+      // DD/MM/YYYY
+      d = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+    }
+    const dow = d.getDay();
+    const diff = dow===0 ? -6 : 1-dow;
+    d.setDate(d.getDate()+diff);
+    semaine = d.toISOString().split('T')[0];
+    document.getElementById('prog-semaine').value = semaine;
+  }
+
+  const dates = getWeekDates(semaine);
+  // Map dates[0..4] to day index 0..4
+  const dateToDay = {};
+  dates.forEach((d, i) => { dateToDay[d] = i; });
+
+  // Also try matching DD/MM/YYYY format variations
+  const semBase = new Date(semaine);
+  const altDates = [];
+  for(let i=0;i<5;i++){
+    const d = new Date(semBase);
+    d.setDate(semBase.getDate()+i);
+    // Try various formats
+    const dd = String(d.getDate()).padStart(2,'0');
+    const mm = String(d.getMonth()+1).padStart(2,'0');
+    const yy = d.getFullYear();
+    altDates.push({
+      idx: i,
+      formats: [
+        `${dd}/${mm}/${yy}`,
+        `${dd}-${mm}-${yy}`,
+        `${dd}.${mm}.${yy}`,
+        `${d.getDate()}/${d.getMonth()+1}/${yy}`,
+      ]
+    });
+  }
+
+  let totalImported = 0;
+  if(!programmeData[semaine]) programmeData[semaine] = {};
+
+  Object.entries(dayMap).forEach(([dateStr, patients]) => {
+    let dayIdx = -1;
+
+    // Try direct match
+    if(dateToDay[dateStr] !== undefined){
+      dayIdx = dateToDay[dateStr];
+    } else {
+      // Try alt formats
+      for(const alt of altDates){
+        if(alt.formats.includes(dateStr)){
+          dayIdx = alt.idx;
+          break;
+        }
+      }
+    }
+
+    if(dayIdx === -1) return; // date not in this week
+
+    // Merge with existing (don't erase)
+    const existing = programmeData[semaine][dayIdx] || [];
+    const newEntries = patients.filter(p =>
+      !existing.some(e => e.prenom === p.prenom && e.nom === p.nom)
+    );
+    programmeData[semaine][dayIdx] = [...existing, ...newEntries];
+    totalImported += newEntries.length;
+  });
+
+  saveProgramme();
+  renderProgramme();
+  alert('\u2705 Import terminé !\n\n'+totalImported+' patient(s) ajouté(s) pour la semaine du '+dates[0]+' au '+dates[4]+'.');
+}
+
+function importFromExcel(buffer){
+  try {
+    const wb = XLSX.read(buffer, {type:'array'});
+    const allRows = [];
+
+    wb.SheetNames.forEach(sheetName => {
+      const ws = wb.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
+      data.forEach(row => allRows.push(row));
+    });
+
+    const dayMap = parsePatientRows(allRows);
+    const total = Object.values(dayMap).reduce((s,v)=>s+v.length,0);
+
+    if(total === 0){
+      alert('Aucun patient trouvé dans le fichier Excel.\n\nVérifiez que le fichier contient les colonnes :\nDATE | N° | PRENOM | NOM | CONTACT | CHIMIOTHÉRAPIE | OBSERVATIONS');
+      return;
+    }
+    applyImportedData(dayMap);
+  } catch(e){
+    alert('Erreur lors de la lecture du fichier Excel : ' + e.message);
+    console.error(e);
+  }
+}
+
+function importFromWord(buffer){
+  try {
+    mammoth.extractRawText({arrayBuffer: buffer}).then(result => {
+      const text = result.value;
+      // Parse text lines — Word tables become tab-separated or space-separated text
+      const lines = text.split('\n').map(l=>l.trim()).filter(l=>l);
+      const rows = lines.map(line => {
+        // Split by tab or multiple spaces
+        return line.split(/\t|\s{2,}/).map(s=>s.trim());
+      });
+      const dayMap = parsePatientRows(rows);
+      const total = Object.values(dayMap).reduce((s,v)=>s+v.length,0);
+
+      if(total === 0){
+        alert('Aucun patient trouvé dans le fichier Word.\n\nPour de meilleurs résultats, exportez votre programme en format Excel (.xlsx).');
+        return;
+      }
+      applyImportedData(dayMap);
+    }).catch(e => {
+      alert('Erreur lors de la lecture du fichier Word : ' + e.message);
+    });
+  } catch(e){
+    alert('Erreur : ' + e.message);
+  }
+}
+
+/* ============================================================
+   STATISTIQUES DU SERVICE
+============================================================ */
+function renderStats(){
+  const hist    = historique;
+  const sorties = JSON.parse(localStorage.getItem('chncak_sorties')||'[]');
+  const el      = document.getElementById('stats-content');
+
+  if(!hist.length && !sorties.length){
+    el.innerHTML = `<div style="background:white;border:1px solid var(--gray-border);border-radius:var(--radius-lg);padding:60px;text-align:center;color:var(--gray-mid)">
+      <div style="font-size:40px;margin-bottom:12px">📊</div>
+      <div style="font-size:14px;font-weight:500">Aucune donnée disponible</div>
+      <div style="font-size:13px;margin-top:6px">Commencez à enregistrer des protocoles et à valider des préparations.</div>
+    </div>`;
+    return;
+  }
+
+  // ── KPIs ──
+  const total      = hist.length;
+  const patients   = new Set(hist.map(h=>h.nom+h.prenom)).size;
+  const thisMonth  = hist.filter(h=>{
+    const d=new Date(h.dateTs); const n=new Date();
+    return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear();
+  }).length;
+  const nbSorties  = sorties.length;
+
+  // ── Protocol counts ──
+  const protoCount={}, medecinCount={}, indicCount={}, monthCount={};
+  hist.forEach(h=>{
+    protoCount[h.protoName]  = (protoCount[h.protoName]||0)+1;
+    if(h.medecin) medecinCount[h.medecin]=(medecinCount[h.medecin]||0)+1;
+    if(h.indication){
+      const ind=h.indication.replace('Chimiothérapie ','');
+      indicCount[ind]=(indicCount[ind]||0)+1;
+    }
+    const d=new Date(h.dateTs);
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    monthCount[key]=(monthCount[key]||0)+1;
+  });
+
+  // ── Molecule usage from sorties ──
+  const molCount={}, molFlacons={};
+  sorties.forEach(s=>{
+    if(s.details){
+      s.details.split(', ').forEach(detail=>{
+        const m = detail.match(/^(.+?):\s*(\d+)\s*flacon/);
+        if(m){
+          const mol=m[1].trim(), fl=parseInt(m[2]);
+          molCount[mol]   = (molCount[mol]||0)+1;    // nb préparations
+          molFlacons[mol] = (molFlacons[mol]||0)+fl;  // nb flacons total
+        }
+      });
+    }
+  });
+
+  const topProtos   = Object.entries(protoCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const topMedecins = Object.entries(medecinCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const topIndics   = Object.entries(indicCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const months      = Object.entries(monthCount).sort((a,b)=>a[0].localeCompare(b[0])).slice(-6);
+  const topMols     = Object.entries(molCount).sort((a,b)=>b[1]-a[1]);
+  const maxMonth    = Math.max(...months.map(m=>m[1]),1);
+  const maxProto    = Math.max(...topProtos.map(p=>p[1]),1);
+  const maxMol      = Math.max(...topMols.map(m=>m[1]),1);
+
+  // Colors for molecules
+  const MOL_COLORS = ['#0A3D7A','#0B5E3C','#6B3FA0','#8B1A1A','#7A4B00','#185FA5','#C0392B','#2E86AB','#A23B72','#16A085'];
+
+  el.innerHTML = `
+    <!-- KPI Cards -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+      <div class="stat-card" style="border-left:4px solid var(--blue)">
+        <div class="stat-val">${total}</div>
+        <div class="stat-label">Protocoles total</div>
+      </div>
+      <div class="stat-card" style="border-left:4px solid var(--green2)">
+        <div class="stat-val">${patients}</div>
+        <div class="stat-label">Patients uniques</div>
+      </div>
+      <div class="stat-card" style="border-left:4px solid var(--amber2)">
+        <div class="stat-val">${thisMonth}</div>
+        <div class="stat-label">Ce mois-ci</div>
+      </div>
+      <div class="stat-card" style="border-left:4px solid #6B3FA0">
+        <div class="stat-val">${nbSorties}</div>
+        <div class="stat-label">Préparations validées</div>
+      </div>
+    </div>
+
+    <!-- Molécules utilisées -->
+    ${topMols.length ? `
+    <div class="card" style="margin-bottom:14px;border-left:4px solid #6B3FA0">
+      <div class="card-header" style="background:#F5F0FF">
+        <div class="card-num" style="background:#6B3FA0">💊</div>
+        <h2 style="color:#4A2A80">Utilisation des molécules (sorties stock validées)</h2>
+      </div>
+      <div class="card-body" style="padding:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+          <!-- Left col: bar chart -->
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;margin-bottom:8px">Nombre de préparations par molécule</div>
+            ${topMols.map(([mol,n],i)=>`
+              <div style="margin-bottom:7px">
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+                  <span style="font-weight:600;color:${MOL_COLORS[i%MOL_COLORS.length]}">${mol}</span>
+                  <span style="font-weight:700;color:${MOL_COLORS[i%MOL_COLORS.length]}">${n} prépa.</span>
+                </div>
+                <div style="background:var(--gray-border);border-radius:4px;height:10px;overflow:hidden">
+                  <div style="background:${MOL_COLORS[i%MOL_COLORS.length]};height:100%;width:${Math.round(n/maxMol*100)}%;border-radius:4px"></div>
+                </div>
+              </div>`).join('')}
+          </div>
+          <!-- Right col: flacons table -->
+          <div>
+            <div style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;margin-bottom:8px">Flacons consommés au total</div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr style="background:#F5F0FF">
+                <th style="padding:6px 10px;text-align:left;font-size:11px;color:#4A2A80;border-bottom:2px solid #D0C0F0">Molécule</th>
+                <th style="padding:6px 10px;text-align:center;font-size:11px;color:#4A2A80;border-bottom:2px solid #D0C0F0">Prépas</th>
+                <th style="padding:6px 10px;text-align:center;font-size:11px;color:#4A2A80;border-bottom:2px solid #D0C0F0">Flacons</th>
+                <th style="padding:6px 10px;text-align:center;font-size:11px;color:#4A2A80;border-bottom:2px solid #D0C0F0">Moy/prépa</th>
+              </tr></thead>
+              <tbody>
+                ${topMols.map(([mol,n],i)=>{
+                  const fl = molFlacons[mol]||0;
+                  const moy = fl>0 ? (fl/n).toFixed(1) : '—';
+                  return `<tr style="${i%2===0?'background:var(--gray-light)':''}">
+                    <td style="padding:5px 10px;border-bottom:1px solid var(--gray-border);font-weight:600;font-size:11px;color:${MOL_COLORS[i%MOL_COLORS.length]}">${mol}</td>
+                    <td style="padding:5px 10px;border-bottom:1px solid var(--gray-border);text-align:center;font-weight:700">${n}</td>
+                    <td style="padding:5px 10px;border-bottom:1px solid var(--gray-border);text-align:center">
+                      <span style="background:#F5F0FF;color:#6B3FA0;border-radius:4px;padding:2px 8px;font-weight:700">${fl}</span>
+                    </td>
+                    <td style="padding:5px 10px;border-bottom:1px solid var(--gray-border);text-align:center;color:var(--gray-mid)">${moy}</td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>` : `
+    <div style="background:var(--amber-pale);border:1px solid #F0C060;border-radius:var(--radius-lg);padding:14px;margin-bottom:14px;font-size:13px;color:var(--amber)">
+      ⚠ Aucune préparation validée pour le moment. Utilisez le bouton <b>"Valider sortie stock"</b> dans l'onglet <b>Préparation</b> pour alimenter ces statistiques.
+    </div>`}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <!-- Top Protocoles -->
+      <div class="card">
+        <div class="card-header"><div class="card-num">📊</div><h2>Protocoles les plus utilisés</h2></div>
+        <div class="card-body" style="padding:12px">
+          ${topProtos.map(([name,n])=>`
+            <div style="margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+                <span style="font-weight:600">${name}</span>
+                <span style="color:var(--blue);font-weight:700">${n} cure${n>1?'s':''}</span>
+              </div>
+              <div style="background:var(--gray-border);border-radius:4px;height:8px;overflow:hidden">
+                <div style="background:var(--blue);height:100%;width:${Math.round(n/maxProto*100)}%;border-radius:4px"></div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Activité mensuelle -->
+      <div class="card">
+        <div class="card-header"><div class="card-num">📅</div><h2>Activité mensuelle</h2></div>
+        <div class="card-body" style="padding:12px">
+          ${months.map(([m,n])=>`
+            <div style="margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+                <span style="font-weight:600">${m}</span>
+                <span style="color:var(--green2);font-weight:700">${n}</span>
+              </div>
+              <div style="background:var(--gray-border);border-radius:4px;height:8px;overflow:hidden">
+                <div style="background:var(--green2);height:100%;width:${Math.round(n/maxMonth*100)}%;border-radius:4px"></div>
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+      <!-- Top Médecins -->
+      <div class="card">
+        <div class="card-header"><div class="card-num">👨‍⚕️</div><h2>Prescriptions par médecin</h2></div>
+        <div class="card-body" style="padding:12px">
+          ${topMedecins.length ? topMedecins.map(([name,n])=>`
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-border)">
+              <span style="font-size:12px;font-weight:500">${name}</span>
+              <span style="background:var(--blue-pale);color:var(--blue);border-radius:10px;padding:2px 10px;font-size:11px;font-weight:600">${n}</span>
+            </div>`).join('')
+          : '<p style="color:var(--gray-mid);font-size:12px">Aucun médecin enregistré.</p>'}
+        </div>
+      </div>
+
+      <!-- Indications -->
+      <div class="card">
+        <div class="card-header"><div class="card-num">🏥</div><h2>Types de chimiothérapie</h2></div>
+        <div class="card-body" style="padding:12px">
+          ${topIndics.map(([name,n])=>`
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-border)">
+              <span style="font-size:12px;font-weight:500">${name}</span>
+              <span style="background:var(--green-pale);color:var(--green);border-radius:10px;padding:2px 10px;font-size:11px;font-weight:600">${n}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Historique sorties récentes -->
+    ${sorties.length ? `
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-header"><div class="card-num">📦</div><h2>Dernières sorties stock validées</h2></div>
+      <div class="card-body" style="padding:0;overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="background:var(--gray-light)">
+            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Date</th>
+            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Patient</th>
+            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Protocole</th>
+            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Médicaments sortis</th>
+          </tr></thead>
+          <tbody>
+            ${sorties.slice(0,10).map((s,i)=>`<tr style="${i%2===0?'background:var(--gray-light)':''}">
+              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);color:var(--gray-mid)">${s.date}</td>
+              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);font-weight:600">${s.patient}</td>
+              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border)">
+                <span style="background:var(--blue-pale);color:var(--blue);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600">${s.protocole}</span>
+              </td>
+              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);font-size:11px;color:var(--gray-mid)">${s.details||'—'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>` : ''}
+
+    <!-- 10 derniers protocoles -->
+    <div class="card">
+      <div class="card-header"><div class="card-num">🕐</div><h2>10 derniers protocoles enregistrés</h2></div>
+      <div class="card-body" style="padding:0;overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:500px">
+          <thead><tr style="background:var(--gray-light)">
+            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Patient</th>
+            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Protocole</th>
+            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Médecin</th>
+            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Date</th>
+            <th style="padding:8px 12px;text-align:center;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Cure</th>
+          </tr></thead>
+          <tbody>
+            ${hist.slice(0,10).map((h,i)=>`<tr style="${i%2===0?'background:var(--gray-light)':''}">
+              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);font-weight:600">${h.prenom} ${h.nom}</td>
+              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border)">
+                <span style="background:var(--blue-pale);color:var(--blue);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600">${h.protoName}</span>
+              </td>
+              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);color:var(--gray-mid)">${h.medecin||'—'}</td>
+              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);color:var(--gray-mid)">${h.date}</td>
+              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);text-align:center">
+                ${h.cureNum?`<span style="background:var(--green-pale);color:var(--green);border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600">N°${h.cureNum}</span>`:'—'}
+              </td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
 }
 
 function printDoc(double){ printFromApercu(); }
@@ -2062,7 +3469,7 @@ function printDoc(double){
   const sexe        = document.getElementById('sexe').value;
   const ind         = document.getElementById('indication').value;
   const loc         = document.getElementById('localisation').value||'—';
-  const atcd        = document.getElementById('atcd').value||'RAS';
+  const atcd        = getAtcd()||'RAS';
   const med         = document.getElementById('medecin-select').value||'';
   const dossier     = document.getElementById('dossier').value||'';
   const cubix       = document.getElementById('cubix').value||'';
