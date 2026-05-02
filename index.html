@@ -268,6 +268,17 @@ body.dark-mode .med-item{background:#1E2530;border-color:#2E3A4A}
       <h1 style="color:#0B5E3C;font-size:28px;margin:0 0 10px 0;">🏥 ChimioPro</h1>
       <p style="color:#666;font-size:14px;margin:0;">CHNCAK Touba - Authentification</p>
     </div>
+
+<!-- Bouton Déconnexion -->
+<div id="logout-button" style="position:fixed;top:15px;right:15px;z-index:999;display:none;">
+  <button onclick="logout()" 
+          style="background:#E74C3C;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(231,76,60,0.3);transition:all 0.3s;"
+          onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(231,76,60,0.4)'"
+          onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(231,76,60,0.3)'">
+    🚪 Déconnexion
+  </button>
+</div>
+
     
     <div id="login-error" style="display:none;background:#FDEAEA;color:#E74C3C;padding:12px;border-radius:6px;margin-bottom:20px;font-size:13px;"></div>
     
@@ -325,7 +336,7 @@ const USERS = {
     password: 'pharma123',
     role: 'pharmacien',
     name: 'Pharmacien',
-    allowedTabs: ['pharmacie', 'stats', 'programme']
+    allowedTabs: ['pharmacie', 'stats', 'preparation']
   },
   admin: {
     password: 'admin123',
@@ -342,14 +353,25 @@ function checkAuth() {
   
   if (savedUser) {
     currentUser = JSON.parse(savedUser);
+    console.log('Session restaurée:', currentUser);
+    
+    // Cacher login
+    document.getElementById('login-screen').style.display = 'none';
+    
+    // Afficher bouton déconnexion
+    const logoutBtn = document.getElementById('logout-button');
+    if (logoutBtn) {
+      logoutBtn.style.display = 'block';
+      console.log('✓ Bouton déconnexion affiché (session)');
+    }
+    
+    // Appliquer permissions
+    console.log('Appel applyUserPermissions (session)...');
     applyUserPermissions();
     applyReadOnlyMode();
-    document.getElementById('login-screen').style.display = 'none';
-    // // Badge utilisateur supprimé
-    // document.getElementById('user-name-display').textContent = currentUser.name + ' (' + currentUser.role + ')';
   } else {
     document.getElementById('login-screen').style.display = 'flex';
-    // Badge utilisateur supprimé
+    console.log('Aucune session - affichage login');
   }
 }
 
@@ -365,10 +387,7 @@ function handleLogin(event) {
     const errorDiv = document.getElementById('login-error');
     errorDiv.textContent = '❌ Nom d\'utilisateur ou mot de passe incorrect';
     errorDiv.style.display = 'block';
-    
-    // Effacer le mot de passe
     document.getElementById('login-password').value = '';
-    
     return false;
   }
   
@@ -380,30 +399,42 @@ function handleLogin(event) {
     allowedTabs: user.allowedTabs
   };
   
+  console.log('Connexion réussie:', currentUser);
+  
   localStorage.setItem('chncak_currentUser', JSON.stringify(currentUser));
   
+  // Cacher écran login
   document.getElementById('login-screen').style.display = 'none';
-  // // Badge utilisateur supprimé
-  // document.getElementById('user-name-display').textContent = currentUser.name + ' (' + currentUser.role + ')';
   
-  applyUserPermissions();
-  applyReadOnlyMode();
-  
-  // Aller sur le premier onglet autorisé
-  const firstTab = currentUser.allowedTabs[0];
-  const tabButton = Array.from(document.querySelectorAll('.tab-btn')).find(btn => 
-    btn.getAttribute('onclick')?.includes(firstTab)
-  );
-  
-  if (tabButton) {
-    tabButton.click();
+  // Afficher bouton déconnexion
+  logoutBtn = document.getElementById('logout-button');
+  if (logoutBtn) {
+    logoutBtn.style.display = 'block';
+    console.log('✓ Bouton déconnexion affiché');
+  } else {
+    console.error('✗ Bouton logout-button non trouvé !');
   }
+  
+  // Appliquer les permissions
+  console.log('Appel applyUserPermissions...');
+  applyUserPermissions();
+  
+  // Mode lecture seule si pharmacien
+  applyReadOnlyMode();
   
   return false;
 }
 
 function applyUserPermissions() {
-  if (!currentUser) return;
+  console.log('=== applyUserPermissions appelé ===');
+  console.log('currentUser:', currentUser);
+  
+  if (!currentUser) {
+    console.log('currentUser est null - abandon');
+    return;
+  }
+  
+  console.log('allowedTabs:', currentUser.allowedTabs);
   
   // Masquer/afficher les onglets selon les permissions
   const allTabs = document.querySelectorAll('.tab-btn');
@@ -422,6 +453,7 @@ function applyUserPermissions() {
       tab.style.display = '';
     } else {
       tab.style.display = 'none';
+      console.log('Onglet masqué:', tabId);
     }
   });
   
@@ -438,18 +470,25 @@ function applyUserPermissions() {
 function applyReadOnlyMode() {
   if (!currentUser || currentUser.role !== 'pharmacien') return;
   
-  // Désactiver tous les boutons dans Stats et Programme
+  // Désactiver tous les boutons dans Stats et Programme SAUF impression
   const statsPage = document.getElementById('page-stats');
   const programmePage = document.getElementById('page-programme');
   
-  [statsPage, programmePage].forEach(page => {
+  [statsPage, programmePage, document.getElementById('page-preparation')].forEach(page => {
     if (!page) return;
     
-    // Désactiver tous les boutons sauf navigation
+    // Désactiver tous les boutons sauf navigation ET impression
     const buttons = page.querySelectorAll('button');
     buttons.forEach(btn => {
       const onclick = btn.getAttribute('onclick');
-      if (onclick && !onclick.includes('showPage')) {
+      if (!onclick) return;
+      
+      // Garder actifs : boutons de navigation et boutons d'impression
+      const isNavigation = onclick.includes('showPage');
+      const isPrint = onclick.includes('print') || onclick.includes('Print') || 
+                      onclick.includes('imprimer') || onclick.includes('Imprimer');
+      
+      if (!isNavigation && !isPrint) {
         btn.disabled = true;
         btn.style.opacity = '0.5';
         btn.style.cursor = 'not-allowed';
@@ -457,11 +496,18 @@ function applyReadOnlyMode() {
       }
     });
     
-    // Désactiver tous les inputs
-    const inputs = page.querySelectorAll('input, select, textarea');
+    // Désactiver tous les inputs sauf ceux liés à l'impression
+    const inputs = page.querySelectorAll('input:not([type="date"]), select:not(.print-select), textarea');
     inputs.forEach(input => {
-      input.disabled = true;
-      input.style.opacity = '0.7';
+      // Ne pas désactiver les inputs dans les zones d'impression
+      const inPrintZone = input.closest('.print-controls') || 
+                          input.closest('[class*="print"]') ||
+                          input.id?.includes('print');
+      
+      if (!inPrintZone) {
+        input.disabled = true;
+        input.style.opacity = '0.7';
+      }
     });
   });
 }
@@ -520,25 +566,14 @@ window.addEventListener('DOMContentLoaded', checkAuth);
 
 <!-- ===== PAGE : PROTOCOLE ===== -->
 <div id="page-protocole" class="page active">
-  <div style="margin:20px 0;text-align:center;padding:15px;background:#f8f9fa;border-radius:8px;">
-    <button onclick="showAddProtocolModal()" 
-            style="background:linear-gradient(135deg,#0B5E3C,#16a085);color:white;border:none;padding:14px 28px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(11,94,60,0.3);transition:all 0.3s;"
-            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px rgba(11,94,60,0.4)'"
-            onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 4px 12px rgba(11,94,60,0.3)'">
-      ➕ Ajouter un nouveau protocole
-    </button>
-    <p style="margin:10px 0 0 0;font-size:12px;color:#666;">Créez votre propre protocole personnalisé</p>
-  </div>
+  
 
 
   <!-- PATIENT -->
   <div class="card">
     <div class="card-header"><div class="card-num">1</div>
     <div style="padding:12px;background:#f8f9fa;border-bottom:1px solid #e0e0e0">
-      <button onclick="showAddProtocoleModal()" 
-              style="background:linear-gradient(135deg,#0B5E3C,#16a085);color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px">
-        ➕ Ajouter un nouveau protocole
-      </button>
+      
     </div><h2>Données du patient</h2></div>
     <div class="card-body">
       <div class="fg g3">
@@ -783,6 +818,13 @@ window.addEventListener('DOMContentLoaded', checkAuth);
       <button class="btn-secondary" onclick="saveToHistory()" id="btn-save">&#128190; Sauvegarder</button>
     </div>
     <p style="text-align:center;font-size:11px;color:var(--gray-mid);margin-top:8px">Format A4 imprimable — Ctrl+P / Cmd+P</p>
+  </div>
+
+  <div style="margin:30px 0;text-align:center;padding:20px;border-top:2px solid #eee;">
+    <button onclick="showAddProtocoleModal()" 
+              style="background:linear-gradient(135deg,#0B5E3C,#16a085);color:white;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px">
+        ➕ Ajouter un nouveau protocole
+      </button>
   </div>
 </div>
 
@@ -1086,7 +1128,23 @@ window.addEventListener('DOMContentLoaded', checkAuth);
 <!-- ===== PAGE : PROGRAMME ===== -->
 <!-- ===== PAGE : PATIENTS ===== -->
 <div id="page-patients" class="page">
-  <div style="max-width:900px;margin:0 auto">
+  
+  <div style="margin:15px 0;padding:15px;background:#f8f9fa;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="font-size:14px;color:#666;">
+      <strong>Gestion des patients</strong> — Ajoutez et gérez vos patients
+    
+      
+</div>
+      <div id="stats-medicaments" style="margin-top:30px"></div>
+
+    <button onclick="showAddPatientModal()" 
+            style="background:linear-gradient(135deg,#0B5E3C,#16a085);color:white;border:none;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(11,94,60,0.3);transition:all 0.3s;"
+            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(11,94,60,0.4)'"
+            onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(11,94,60,0.3)'">
+      ➕ Ajouter un patient
+    </button>
+  </div>
+<div style="max-width:900px;margin:0 auto">
 
     <!-- Header -->
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
@@ -2206,17 +2264,42 @@ function toggleAddMedForm(){
   f.style.display=f.style.display==='none'?'':'none';
 }
 
-function addMedecin(){
-  const name=document.getElementById('med-name-input').value.trim();
-  const grade=document.getElementById('med-grade-input').value.trim();
-  if(!name) return;
-  medecins.push({id:Date.now(),name,grade});
-  saveMedecins();
-  document.getElementById('med-name-input').value='';
-  document.getElementById('med-grade-input').value='';
-  document.getElementById('add-med-form').style.display='none';
-  renderMedecins();
-  populateMedecinSelect();
+function addMedecin() {
+  const nom = prompt('Nom du médecin:');
+  if (!nom) return;
+  
+  const prenom = prompt('Prénom:');
+  if (!prenom) return;
+  
+  const specialite = prompt('Spécialité:');
+  if (!specialite) return;
+  
+  const email = prompt('Email (pour notifications):');
+  if (!email) return;
+  
+  const contact = prompt('Téléphone:');
+  if (!contact) return;
+  
+  const medecins = JSON.parse(localStorage.getItem('chncak_medecins') || '[]');
+  
+  const newMedecin = {
+    id: 'med_' + Date.now(),
+    nom: nom,
+    prenom: prenom,
+    specialite: specialite,
+    email: email,
+    contact: contact,
+    dateAjout: new Date().toISOString()
+  };
+  
+  medecins.push(newMedecin);
+  localStorage.setItem('chncak_medecins', JSON.stringify(medecins));
+  
+  alert('✅ Médecin ajouté avec succès!');
+  
+  if (typeof renderMedecins === 'function') {
+    renderMedecins();
+  }
 }
 
 function deleteMed(i){
@@ -3862,59 +3945,68 @@ function saveDayFromTable(){
   saveProgramme();
 }
 
-function renderProgramme(){
-  const semaine = getSemaineKey();
-  const dates = semaine ? getWeekDates(semaine) : ['','','','',''];
-  const dayDate = dates[currentDay]||'';
-
-  JOURS.forEach((j,i)=>{
-    const btn = document.getElementById('day-btn-'+i);
-    if(btn) btn.textContent = j+(dates[i]?' '+dates[i]:'');
-  });
-
-  const titleEl = document.getElementById('prog-day-title');
-  if(titleEl) titleEl.textContent = JOURS[currentDay]+(dayDate?' — '+dayDate:'');
-
-  const isFriday = currentDay===4;
-  const patients = semaine ? (programmeData[semaine]?.[currentDay]||[]) : [];
-  const tbody = document.getElementById('prog-tbody');
-  if(!tbody) return;
-
-  if(patients.length===0){
-    tbody.innerHTML = `<tr><td colspan="8" style="padding:20px;text-align:center;color:var(--gray-mid);font-size:13px">
-      ${isFriday?'<b>⚠️ VENDREDI — Journée Transfusions Sanguines</b><br><small>Ajoutez des patients si chimiothérapie programmée</small>':'Aucun patient — cliquez <b>+ Ajouter patient</b>'}
-    </td></tr>`;
-  } else {
-    tbody.innerHTML = patients.map((p,i)=>{
-      const chimioColor = CHIMIO_COLORS[p.chimio?.toUpperCase()]||'var(--blue)';
-      return `<tr data-idx="${i}" class="${p.done?'prog-row-done':''}" style="${i%2===0?'background:var(--gray-light)':'background:white'}">
-        <td style="padding:5px 8px;border:1px solid var(--gray-border);text-align:center;font-weight:600;font-size:12px">${i+1}</td>
-        <td style="padding:2px 4px;border:1px solid var(--gray-border)"><input class="prog-input" value="${p.prenom||''}" placeholder="Prénom" oninput="autoSave()" style="text-transform:uppercase;font-weight:600"></td>
-        <td style="padding:2px 4px;border:1px solid var(--gray-border)"><input class="prog-input" value="${p.nom||''}" placeholder="Nom" oninput="autoSave()" style="text-transform:uppercase;font-weight:600"></td>
-        <td style="padding:2px 4px;border:1px solid var(--gray-border)"><input class="prog-input" value="${p.contact||''}" placeholder="Téléphone" oninput="autoSave()"></td>
-        <td style="padding:2px 4px;border:1px solid var(--gray-border)"><input class="prog-input" value="${p.chimio||''}" placeholder="Protocole" oninput="autoSave()" style="font-weight:700;color:${chimioColor};text-transform:uppercase"></td>
-        <td style="padding:2px 4px;border:1px solid var(--gray-border)"><input class="prog-input" value="${p.obs||''}" placeholder="Observations" oninput="autoSave()"></td>
-        <td style="padding:5px;border:1px solid var(--gray-border);text-align:center">
-          <input type="checkbox" ${p.done?'checked':''} onchange="toggleDone(${i},this)" style="width:16px;height:16px;cursor:pointer">
-        </td>
-        <td style="padding:5px;border:1px solid var(--gray-border);text-align:center">
-          <button onclick="deleteRow(${i})" style="background:none;border:none;cursor:pointer;color:var(--red2);font-size:16px">🗑</button>
-          <button onclick="setStatut('${p.id}', 'Terminé')" 
-                  style="background:#E4F5ED;border:1px solid #0B5E3C;color:#0B5E3C;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:11px;margin-left:3px"
-                  title="Marquer comme traité">
-            ✓
-          </button>
-        </td>
-      </tr>`;
-    }).join('');
+function renderProgramme() {
+  const el = document.getElementById('programme-content');
+  if (!el) return;
+  
+  const patients = getPatients();
+  
+  // Patients avec RDV (y compris les patients traités avec prochainRdv)
+  const avecRdv = patients.filter(p => p.prochainRdv);
+  
+  if (!avecRdv.length) {
+    el.innerHTML = `<div style="text-align:center;padding:60px;color:var(--gray-mid)">
+      <div style="font-size:48px;margin-bottom:15px">📅</div>
+      <div style="font-size:16px;font-weight:600">Aucun rendez-vous programmé</div>
+      <div style="font-size:13px;margin-top:8px">Les patients avec RDV apparaîtront ici</div>
+    </div>`;
+    return;
   }
-
-  const total = patients.filter(p=>p.prenom||p.nom).length;
-  const done  = patients.filter(p=>p.done).length;
-  const countEl = document.getElementById('prog-count');
-  if(countEl) countEl.textContent = `${total} patient${total>1?'s':''} — ${done} traité${done>1?'s':''}`;
-
-  renderWeekOverview(semaine, dates);
+  
+  // Trier par date de RDV
+  avecRdv.sort((a,b) => new Date(a.prochainRdv) - new Date(b.prochainRdv));
+  
+  const rows = avecRdv.map((p,i) => {
+    const rdvDate = new Date(p.prochainRdv);
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    const isPast = rdvDate < today;
+    const isToday = rdvDate.toDateString() === today.toDateString();
+    
+    const bgColor = isToday ? '#FFF3CD' : isPast ? '#FFE5E5' : (i%2===0 ? '#FAFBFD' : 'white');
+    
+    return `<tr style="background:${bgColor}">
+      <td style="padding:10px 12px;font-size:13px;font-weight:600">${p.prenom} ${p.nom}</td>
+      <td style="padding:10px 12px;font-size:12px">${p.dossier||'—'}</td>
+      <td style="padding:10px 12px;font-size:12px">${p.protocole?.toUpperCase()||'—'}</td>
+      <td style="padding:10px 12px;font-size:12px;font-weight:600;color:${isPast?'#D32F2F':isToday?'#F57C00':'#0B5E3C'}">
+        ${rdvDate.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'})}
+      </td>
+      <td style="padding:10px 12px;font-size:11px">
+        <span style="background:${p.statut==='Terminé'?'var(--gray-light)':'var(--green-pale)'};color:${p.statut==='Terminé'?'var(--gray-mid)':'var(--green)'};padding:3px 8px;border-radius:4px;font-weight:600">
+          ${p.statut==='Terminé'?'✓ Terminé':'● En cours'}
+        </span>
+      </td>
+    </tr>`;
+  }).join('');
+  
+  el.innerHTML = `
+    <div style="margin-bottom:20px;padding:15px;background:#E3F2FD;border-left:4px solid #1976D2;border-radius:4px">
+      <div style="font-size:14px;font-weight:600;color:#1976D2">📋 ${avecRdv.length} rendez-vous programmé(s)</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr style="background:var(--blue);color:white">
+          <th style="padding:12px;text-align:left;font-size:12px;font-weight:600">Patient</th>
+          <th style="padding:12px;text-align:left;font-size:12px;font-weight:600">Dossier</th>
+          <th style="padding:12px;text-align:left;font-size:12px;font-weight:600">Protocole</th>
+          <th style="padding:12px;text-align:left;font-size:12px;font-weight:600">Prochain RDV</th>
+          <th style="padding:12px;text-align:left;font-size:12px;font-weight:600">Statut</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
 }
 
 let autoSaveTimer = null;
@@ -4370,7 +4462,49 @@ function renderStats(){
 
   el.innerHTML = `
     <!-- Bandeau période -->
-    <div style="background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;border-radius:var(--radius-lg);padding:10px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
+  `;
+  
+    <div style="background:linear-gradient(135deg,var(--blue),var(--blue2));
+  
+  // Statistiques par médicament
+  const medsEl = document.getElementById('stats-medicaments');
+  if (medsEl) {
+    const medCounts = {};
+    
+    patients.forEach(p => {
+      if (p.protocole) {
+        const proto = p.protocole.toUpperCase();
+        medCounts[proto] = (medCounts[proto] || 0) + 1;
+      }
+    });
+    
+    const medEntries = Object.entries(medCounts).sort((a,b) => b[1] - a[1]);
+    
+    if (medEntries.length > 0) {
+      const medRows = medEntries.map(([med, count]) => `
+        <tr style="border-bottom:1px solid #eee">
+          <td style="padding:10px 15px;font-size:13px;font-weight:600;color:var(--blue)">${med}</td>
+          <td style="padding:10px 15px;text-align:center;font-size:18px;font-weight:700;color:var(--green)">${count}</td>
+        </tr>
+      `).join('');
+      
+      medsEl.innerHTML = `
+        <div style="background:white;border-radius:8px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">
+          <h3 style="margin:0 0 15px 0;font-size:16px;color:var(--blue)">💊 Médicaments Utilisés</h3>
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:#f5f5f5;border-bottom:2px solid #ddd">
+                <th style="padding:10px 15px;text-align:left;font-size:12px;font-weight:600">Protocole</th>
+                <th style="padding:10px 15px;text-align:center;font-size:12px;font-weight:600">Nombre</th>
+              </tr>
+            </thead>
+            <tbody>${medRows}</tbody>
+          </table>
+        </div>`;
+    } else {
+      medsEl.innerHTML = `<div style="text-align:center;padding:40px;color:#999">Aucun médicament enregistré</div>`;
+    }
+  }color:white;border-radius:var(--radius-lg);padding:10px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
       <div style="font-size:13px;font-weight:600">&#128200; ${periodLabel(period)}</div>
       <div style="font-size:11px;opacity:0.8">Généré le ${new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})} à ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div>
     </div>
@@ -6691,7 +6825,9 @@ function renderOkChimio() {
             <td style="padding:10px;text-align:center">C${e.cure}</td>
             <td style="padding:10px">${e.medecin}</td>
             <td style="padding:10px;text-align:center">
-              <button onclick="validerOkChimio(${e.id})" style="background:#E4F5ED;border:1px solid #0B5E3C;color:#0B5E3C;padding:6px 12px;border-radius:4px;cursor:pointer;margin-right:4px">✓ Valider</button>
+              <button <button onclick="previewProtocol(${e.id})" style="background:#2196F3;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;margin-right:4px">👁 Aperçu</button>
+              <button onclick="refuserProtocol(${e.id})" style="background:#E74C3C;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;margin-right:4px">✕ Refuser</button>
+              onclick="validerOkChimio(${e.id})" style="background:#E4F5ED;border:1px solid #0B5E3C;color:#0B5E3C;padding:6px 12px;border-radius:4px;cursor:pointer;margin-right:4px">✓ Valider</button>
               <button onclick="refuserOkChimio(${e.id})" style="background:#FDEAEA;border:1px solid #E74C3C;color:#E74C3C;padding:6px 12px;border-radius:4px;cursor:pointer">✕ Refuser</button>
             </td>
           </tr>
@@ -6710,6 +6846,9 @@ function validerOkChimio(id) {
   saveOkChimio(list);
   alert('✅ Protocole validé');
   renderOkChimio();
+
+  // Envoyer notification email
+  notifyProtocolValidation(id);
 }
 
 function refuserOkChimio(id) {
@@ -6779,7 +6918,6 @@ function renderArchive(){
 // ══════════════════════════════════════════════════════════════
 
 function setStatut(patientId, newStatut) {
-  // Version simplifiée et robuste
   const patients = JSON.parse(localStorage.getItem('chncak_patients') || '[]');
   const idx = patients.findIndex(p => p && p.id === patientId);
   
@@ -6791,40 +6929,23 @@ function setStatut(patientId, newStatut) {
   // Modifier le patient
   patients[idx].statut = newStatut;
   
-  if (newStatut === 'Terminé') {
-    patients[idx].dateFin = new Date().toISOString();
+  // TOUJOURS archiver quand on sauvegarde
+  patients[idx].dateFin = new Date().toISOString();
+  
+  // Calculer prochain RDV
+  const proto = patients[idx].protocole;
+  if (proto) {
+    const rythmes = {
+      'folfox4': 14, 'ec100': 21, 'folfiri': 14, 'xeloda': 21, 'xelox': 21,
+      'folfoxiri': 14, 'gemox': 14, 'carbo_taxol': 21, 'ac': 21, 'tac': 21,
+      'tcf': 21, 'tem': 28, 'bep': 21, 'mvac': 28, 'gc': 21, 'xeliri': 21,
+      'herceptin': 21, 'avastin_zometa': 28, 'gem_avastin': 21
+    };
     
-    // Calculer prochain RDV
-    const proto = patients[idx].protocole;
-    if (proto) {
-      // Tableau des rythmes
-      const rythmes = {
-        'folfox4': 14,
-        'ec100': 21,
-        'folfiri': 14,
-        'xeloda': 21,
-        'xelox': 21,
-        'folfoxiri': 14,
-        'gemox': 14,
-        'carbo_taxol': 21,
-        'ac': 21,
-        'tac': 21,
-        'tcf': 21,
-        'tem': 28,
-        'bep': 21,
-        'mvac': 28,
-        'gc': 21,
-        'xeliri': 21,
-        'herceptin': 21,
-        'avastin_zometa': 28,
-        'gem_avastin': 21
-      };
-      
-      const jours = rythmes[proto] || 21; // Par défaut J21
-      const nextDate = new Date();
-      nextDate.setDate(nextDate.getDate() + jours);
-      patients[idx].prochainRdv = nextDate.toISOString().split('T')[0];
-    }
+    const jours = rythmes[proto] || 21;
+    const nextDate = new Date();
+    nextDate.setDate(nextDate.getDate() + jours);
+    patients[idx].prochainRdv = nextDate.toISOString().split('T')[0];
   }
   
   // Sauvegarder
@@ -6832,6 +6953,7 @@ function setStatut(patientId, newStatut) {
   
   // Rafraîchir affichages
   if (typeof renderPatients === 'function') renderPatients();
+  if (typeof renderPatientsList === 'function') renderPatientsList();
   if (typeof renderProgramme === 'function') renderProgramme();
   if (typeof renderArchive === 'function') renderArchive();
 }
@@ -7286,6 +7408,212 @@ function saveNewProtocole() {
     console.log('Erreur chargement protocoles personnalisés:', e);
   }
 })();
+
+
+
+// Fonction pour ajouter un patient
+function showAddPatientModal() {
+
+
+function refuserProtocol(id) {
+  const reason = prompt('Raison du refus (optionnel):');
+  
+  if (reason === null) return; // Annulé
+  
+  const protocols = JSON.parse(localStorage.getItem('chncak_protocols') || '[]');
+  const idx = protocols.findIndex(p => p.id === id);
+  
+  if (idx > -1) {
+    // Marquer comme refusé
+    protocols[idx].statut = 'refusé';
+    protocols[idx].refusedAt = new Date().toISOString();
+    protocols[idx].refusalReason = reason;
+    
+    localStorage.setItem('chncak_protocols', JSON.stringify(protocols));
+    
+    // Envoyer notification
+    notifyProtocolRejection(id, reason);
+    
+    alert('Protocole refusé. Une notification a été envoyée.');
+    
+    renderOkChimio();
+  }
+}
+
+  alert('📋 Fonction d\'ajout de patient\n\n' +
+        'Pour ajouter un patient, utilisez :\n' +
+        '• Le bouton d\'importation Excel\n' +
+        '• Ou contactez l\'administrateur\n\n' +
+        'Cette fonctionnalité sera améliorée prochainement.');
+}
+
+
+
+// Fonction envoi email générique
+function sendEmailNotification(to, subject, message) {
+  // IMPORTANT: Cette fonction simule l'envoi d'email
+  // Pour un envoi réel, vous devez configurer un service backend (PHP, Node.js, etc.)
+  
+  console.log('📧 Email Notification:');
+  console.log('  To:', to);
+  console.log('  Subject:', subject);
+  console.log('  Message:', message);
+  
+  // Simulation: afficher une notification à l'utilisateur
+  const notification = document.createElement('div');
+  notification.style.cssText = 'position:fixed;top:20px;right:20px;background:#4CAF50;color:white;padding:15px 20px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.3);z-index:10001;animation:slideIn 0.3s;';
+  notification.innerHTML = `
+    <div style="font-weight:600;margin-bottom:5px">✉️ Email envoyé</div>
+    <div style="font-size:13px">À: ${to}</div>
+    <div style="font-size:12px;margin-top:5px;opacity:0.9">${subject}</div>
+  `;
+  
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.style.animation = 'slideOut 0.3s';
+    setTimeout(() => notification.remove(), 300);
+  }, 4000);
+  
+  // TODO: Implémenter l'envoi réel via API backend
+  // fetch('/api/send-email', {
+  //   method: 'POST',
+  //   headers: {'Content-Type': 'application/json'},
+  //   body: JSON.stringify({to, subject, message})
+  // });
+}
+
+// Email lors du refus de protocole
+function notifyProtocolRejection(protocolId, reason) {
+  const protocol = JSON.parse(localStorage.getItem('chncak_protocols') || '[]')
+    .find(p => p.id === protocolId);
+  
+  if (protocol) {
+    const subject = `🚫 Protocole refusé - ${protocol.patientName}`;
+    const message = `
+Le médecin a refusé le protocole suivant:
+
+Patient: ${protocol.patientName}
+Dossier: ${protocol.dossier}
+Protocole: ${protocol.protocolName}
+Cure: ${protocol.cureNumber}
+Raison du refus: ${reason || 'Non spécifiée'}
+
+Date: ${new Date().toLocaleString('fr-FR')}
+    `;
+    
+    // Email à l'administrateur ou au pharmacien
+    sendEmailNotification('onco.chn.cak@gmail.com', subject, message);
+  }
+}
+
+// Email lors de la validation de protocole
+function notifyProtocolValidation(protocolId) {
+  const protocol = JSON.parse(localStorage.getItem('chncak_protocols') || '[]')
+    .find(p => p.id === protocolId);
+  
+  if (protocol) {
+    const subject = `✅ Protocole validé - ${protocol.patientName}`;
+    const message = `
+Le protocole suivant a été validé:
+
+Patient: ${protocol.patientName}
+Dossier: ${protocol.dossier}
+Protocole: ${protocol.protocolName}
+Cure: ${protocol.cureNumber}
+Date de validation: ${new Date().toLocaleString('fr-FR')}
+
+Le protocole est prêt pour la préparation.
+    `;
+    
+    // Chercher l'email du médecin
+    let medecinEmail = 'medecin@chncak.sn'; // Défaut
+    
+    if (protocol.medecinId) {
+      const medecins = JSON.parse(localStorage.getItem('chncak_medecins') || '[]');
+      const medecin = medecins.find(m => m.id === protocol.medecinId);
+      
+      if (medecin && medecin.email) {
+        medecinEmail = medecin.email;
+      }
+    }
+    
+    // Envoyer email
+    sendEmailNotification(medecinEmail, subject, message);
+  }
+}
+
+
+
+// Fonction aperçu protocole
+function previewProtocol(protocolId) {
+  const protocols = JSON.parse(localStorage.getItem('chncak_protocols') || '[]');
+  const protocol = protocols.find(p => p.id === protocolId);
+  
+  if (!protocol) {
+    alert('Protocole non trouvé');
+    return;
+  }
+  
+  // Créer modal d'aperçu
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center;';
+  
+  const content = `
+    <div style="background:white;border-radius:12px;padding:30px;max-width:700px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.3)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;border-bottom:2px solid #eee;padding-bottom:15px">
+        <h2 style="margin:0;color:var(--blue);font-size:22px">👁 Aperçu du Protocole</h2>
+        <button onclick="this.closest('div').parentElement.remove()" style="background:#E74C3C;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600">✕ Fermer</button>
+      </div>
+      
+      <div style="background:#f8f9fa;padding:20px;border-radius:8px;margin-bottom:20px">
+        <h3 style="margin:0 0 15px 0;color:var(--blue);font-size:18px">Informations Patient</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px">
+          <div><strong>Patient:</strong> ${protocol.patientName || 'N/A'}</div>
+          <div><strong>Dossier:</strong> ${protocol.dossier || 'N/A'}</div>
+          <div><strong>Surface:</strong> ${protocol.surface || 'N/A'} m²</div>
+          <div><strong>Poids:</strong> ${protocol.poids || 'N/A'} kg</div>
+          <div><strong>Taille:</strong> ${protocol.taille || 'N/A'} cm</div>
+          <div><strong>IMC:</strong> ${protocol.imc || 'N/A'}</div>
+        </div>
+      </div>
+      
+      <div style="background:#E3F2FD;padding:20px;border-radius:8px;margin-bottom:20px">
+        <h3 style="margin:0 0 15px 0;color:#1976D2;font-size:18px">Protocole</h3>
+        <div style="font-size:14px">
+          <div style="margin-bottom:8px"><strong>Nom:</strong> ${protocol.protocolName || 'N/A'}</div>
+          <div style="margin-bottom:8px"><strong>Cure:</strong> ${protocol.cureNumber || 'N/A'}</div>
+          <div><strong>Date:</strong> ${protocol.date ? new Date(protocol.date).toLocaleDateString('fr-FR') : 'N/A'}</div>
+        </div>
+      </div>
+      
+      <div style="background:#FFF3E0;padding:20px;border-radius:8px">
+        <h3 style="margin:0 0 15px 0;color:#F57C00;font-size:18px">Médicaments</h3>
+        <div style="font-size:13px">
+          ${protocol.medicaments ? protocol.medicaments.map(m => `
+            <div style="padding:10px;background:white;border-radius:6px;margin-bottom:8px;border-left:3px solid #F57C00">
+              <strong>${m.nom}</strong>: ${m.dose} ${m.unite || 'mg'}
+            </div>
+          `).join('') : '<div style="color:#999">Aucun médicament</div>'}
+        </div>
+      </div>
+      
+      <div style="margin-top:20px;padding:15px;background:#E8F5E9;border-radius:8px;text-align:center">
+        <div style="font-size:13px;color:#2E7D32">
+          <strong>Note:</strong> Ceci est un aperçu. Cliquez sur "Valider" pour approuver le protocole.
+        </div>
+      </div>
+    </div>
+  `;
+  
+  modal.innerHTML = content;
+  document.body.appendChild(modal);
+  
+  // Fermer en cliquant sur le fond
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.remove();
+  });
+}
 
 </script>
 
