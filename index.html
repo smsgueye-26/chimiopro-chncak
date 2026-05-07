@@ -270,7 +270,7 @@ body.dark-mode .med-item{background:#1E2530;border-color:#2E3A4A}
     </div>
 
 <!-- Bouton Déconnexion -->
-<div id="logout-button" style="position:fixed;top:15px;right:15px;z-index:999;display:none;">
+<div id="logout-button" style="position:fixed;top:20px;right:20px;z-index:99999;display:none;background:#E74C3C;color:white;padding:10px 20px;border-radius:6px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);font-weight:600;font-size:14px;">
   <button onclick="logout()" 
           style="background:#E74C3C;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(231,76,60,0.3);transition:all 0.3s;"
           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(231,76,60,0.4)'"
@@ -301,7 +301,13 @@ body.dark-mode .med-item{background:#1E2530;border-color:#2E3A4A}
               style="width:100%;background:#0B5E3C;color:white;padding:14px;border:none;border-radius:6px;font-size:15px;font-weight:600;cursor:pointer;transition:background 0.3s;">
         Se connecter
       </button>
-    </form>
+    
+        
+        <button type="button" onclick="clearSession()" 
+          style="margin-top:10px;background:#95a5a6;color:white;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;width:100%;font-size:13px;">
+          🗑️ Vider la session (si bloqué)
+        </button>
+</form>
     
     <div style="margin-top:25px;padding-top:20px;border-top:1px solid #eee;">
       <p style="color:#0B5E3C;font-size:13px;margin:0 0 8px 0;font-weight:700;">📧 Contact</p>
@@ -342,14 +348,14 @@ const USERS = {
     password: 'admin123',
     role: 'admin',
     name: 'Administrateur',
-    allowedTabs: ['protocole', 'okchimio', 'medecins', 'historique', 'pharmacie', 'apercu', 'preparation', 'support', 'stats', 'programme', 'patients', 'archive']
+    allowedTabs: ['protocole', 'okchimio', 'medecins', 'stats', 'pharmacie', 'apercu', 'preparation', 'support', 'stats', 'programme', 'patients', 'archive']
   }
 };
 
 let currentUser = null;
 
 function checkAuth() {
-  const savedUser = localStorage.getItem('chncak_currentUser');
+  const savedUser = sessionStorage.getItem('chncak_currentUser');
   
   if (savedUser) {
     currentUser = JSON.parse(savedUser);
@@ -363,6 +369,7 @@ function checkAuth() {
     if (logoutBtn) {
       logoutBtn.style.display = 'block';
       console.log('✓ Bouton déconnexion affiché (session)');
+      createLogoutButton();
     }
     
     // Appliquer permissions
@@ -388,7 +395,7 @@ function handleLogin(event) {
     errorDiv.textContent = '❌ Nom d\'utilisateur ou mot de passe incorrect';
     errorDiv.style.display = 'block';
     document.getElementById('login-password').value = '';
-    return false;
+    window.location.reload(); return false;
   }
   
   // Connexion réussie
@@ -401,7 +408,7 @@ function handleLogin(event) {
   
   console.log('Connexion réussie:', currentUser);
   
-  localStorage.setItem('chncak_currentUser', JSON.stringify(currentUser));
+  sessionStorage.setItem('chncak_currentUser', JSON.stringify(currentUser));
   
   // Cacher écran login
   document.getElementById('login-screen').style.display = 'none';
@@ -411,6 +418,7 @@ function handleLogin(event) {
   if (logoutBtn) {
     logoutBtn.style.display = 'block';
     console.log('✓ Bouton déconnexion affiché');
+    createLogoutButton();
   } else {
     console.error('✗ Bouton logout-button non trouvé !');
   }
@@ -541,7 +549,7 @@ window.addEventListener('DOMContentLoaded', checkAuth);
     <button class="tab-btn active" onclick="showPage('protocole',this)">&#9998; Protocole</button>
     <button class="tab-btn" onclick="showPage('okchimio',this)">✅ OK Chimio</button>
     <button class="tab-btn" onclick="showPage('medecins',this)">&#128100; Médecins</button>
-    <button class="tab-btn" onclick="showPage('historique',this)">&#128196; Historique</button>
+    
     <button class="tab-btn" onclick="showPage('pharmacie',this)">&#128138; Pharmacie Centrale</button>
     <button class="tab-btn" onclick="showPage('apercu',this)">&#128065; Aperçu</button>
     <button class="tab-btn" onclick="showPage('preparation',this)">&#9881; Préparation</button>
@@ -630,7 +638,7 @@ window.addEventListener('DOMContentLoaded', checkAuth);
           </select>
         </div>
         <div class="field"><label>Médecin traitant</label>
-          <select id="medecin-select" onchange="localStorage.setItem('chncak_last_medecin',this.value);update()">
+          <select id="medecin-select" onchange="sessionStorage.setItem('chncak_last_medecin',this.value);update()">
             <option value="">— Choisir un médecin —</option>
           </select>
         </div>
@@ -815,7 +823,7 @@ window.addEventListener('DOMContentLoaded', checkAuth);
       <button class="btn-secondary" onclick="printBonRDV()" style="background:var(--amber-pale);color:var(--amber);border-color:var(--amber2)">
         &#128197; Bon de Rendez-vous
       </button>
-      <button class="btn-secondary" onclick="saveToHistory()" id="btn-save">&#128190; Sauvegarder</button>
+      <button class="btn-secondary" onclick="saveProtocol()" id="btn-save">&#128190; Sauvegarder</button>
     </div>
     <p style="text-align:center;font-size:11px;color:var(--gray-mid);margin-top:8px">Format A4 imprimable — Ctrl+P / Cmd+P</p>
   </div>
@@ -838,11 +846,19 @@ window.addEventListener('DOMContentLoaded', checkAuth);
       <button class="btn-med-add" onclick="toggleAddMedForm()">+ Ajouter un médecin</button>
       <div class="add-form" id="add-med-form" style="display:none">
         <div class="fg g2">
-          <div class="field"><label>Prénom & Nom</label><input id="med-name-input" type="text" placeholder="ex: Dr Aminata Fall"></div>
-          <div class="field"><label>Grade / Titre</label><input id="med-grade-input" type="text" placeholder="ex: Oncologue médicale"></div>
+          <div class="field"><label>Nom</label><input id="med-nom-input" type="text" placeholder="ex: DIOP"></div>
+          <div class="field"><label>Prénom</label><input id="med-prenom-input" type="text" placeholder="ex: Amadou"></div>
+        </div>
+        <div class="fg g2">
+          <div class="field"><label>Spécialité</label><input id="med-specialite-input" type="text" placeholder="ex: Oncologue médicale"></div>
+          <div class="field"><label>Email</label><input id="med-email-input" type="email" placeholder="ex: a.diop@hopital.sn"></div>
+        </div>
+        <div class="fg g2">
+          <div class="field"><label>Téléphone</label><input id="med-contact-input" type="tel" placeholder="ex: +221 77 123 45 67"></div>
+          <div style="flex:1"></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="btn-primary" style="flex:none;width:auto;padding:9px 20px" onclick="addMedecin()">Enregistrer</button>
+          <button class="btn-primary" style="flex:none;width:auto;padding:9px 20px" onclick="addMedecinFromForm()">Enregistrer</button>
           <button class="btn-secondary" onclick="toggleAddMedForm()">Annuler</button>
         </div>
       </div>
@@ -851,7 +867,8 @@ window.addEventListener('DOMContentLoaded', checkAuth);
 </div>
 
 <!-- ===== PAGE : HISTORIQUE ===== -->
-<div id="page-historique" class="page">
+<!-- Page Historique fusionnée dans Stats -->
+<div id="page-historique" class="page" style="display:none">
   <div class="stats-grid" id="stats-grid"></div>
   <div class="card">
     <div class="card-header"><div class="card-num" style="background:#5A4A8A">&#128196;</div><h2>Historique des protocoles</h2></div>
@@ -1098,7 +1115,14 @@ window.addEventListener('DOMContentLoaded', checkAuth);
     <!-- Header avec sélecteur période + bouton imprimer -->
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px">
       <div style="display:flex;align-items:center;gap:10px">
-          <h2 style="font-size:15px;font-weight:600;color:var(--blue)">&#128200; Statistiques du Service</h2>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <h2 style="font-size:15px;font-weight:600;color:var(--blue);margin:0">📊 Statistiques du Service</h2>
+      <div style="display:flex;gap:8px">
+        <button onclick="printStats()" style="background:#0A3D7A;color:white;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">🖨 Imprimer</button>
+        <button onclick="clearHistory()" style="background:#E74C3C;color:white;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600">🗑 Effacer</button>
+      </div>
+    </div>
+    
           <button onclick="clearAllHistory()" style="padding:5px 12px;background:var(--red-pale);color:var(--red2);border:1px solid #F5AAAA;border-radius:var(--radius);font-size:11px;font-weight:600;cursor:pointer" title="Effacer tout l'historique">
             🗑 Effacer historique
           </button>
@@ -1135,7 +1159,7 @@ window.addEventListener('DOMContentLoaded', checkAuth);
     
       
 </div>
-      <div id="stats-medicaments" style="margin-top:30px"></div>
+      
 
     <button onclick="showAddPatientModal()" 
             style="background:linear-gradient(135deg,#0B5E3C,#16a085);color:white;border:none;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(11,94,60,0.3);transition:all 0.3s;"
@@ -1239,6 +1263,8 @@ window.addEventListener('DOMContentLoaded', checkAuth);
 </div>
 
 <div id="page-programme" class="page">
+<div id="patients-rdv-list" style="margin:20px auto;max-width:900px"></div>
+
   <div style="max-width:900px;margin:0 auto">
 
     <!-- Header -->
@@ -1833,8 +1859,8 @@ const PROTOCOLS = [
 ============================================================ */
 const LOGO_B64 = 'data:image/jpeg;base64,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';
 let selId = null, sc = 0, poids = 0;
-let medecins = JSON.parse(localStorage.getItem('chncak_medecins')||'[]');
-let historique = JSON.parse(localStorage.getItem('chncak_historique')||'[]');
+let medecins = JSON.parse(sessionStorage.getItem('chncak_medecins')||'[]');
+let historique = JSON.parse(sessionStorage.getItem('chncak_historique')||'[]');
 let selHistIdx = null;
 
 if(!medecins.length){
@@ -1849,8 +1875,8 @@ if(!medecins.length){
   saveMedecins();
 }
 
-function saveMedecins(){localStorage.setItem('chncak_medecins',JSON.stringify(medecins));}
-function saveHistorique(){localStorage.setItem('chncak_historique',JSON.stringify(historique));}
+function saveMedecins(){sessionStorage.setItem('chncak_medecins',JSON.stringify(medecins));}
+function saveHistorique(){sessionStorage.setItem('chncak_historique',JSON.stringify(historique));}
 
 /* ============================================================
    NAVIGATION
@@ -1868,12 +1894,7 @@ function showPage(id,btn){
   if(id==='support') renderSupport();
   if(id==='stats') renderStats();
   if(id==='programme'){
-    initProgramme();
     renderProgramme();
-    // Force the page visible BEFORE rendering the RDV list
-    const progPage = document.getElementById('page-programme');
-    if(progPage) progPage.style.display = 'block';
-    renderRdvList();
   }
   if(id==='patients'){setTimeout(renderPatientsList,50);}
   if(id==='okchimio'){ renderOkChimio(); }
@@ -2233,22 +2254,35 @@ function renderCapeTable(proto){
 ============================================================ */
 function populateMedecinSelect(){
   const sel=document.getElementById('medecin-select');
-  const cur=sel.value||localStorage.getItem('chncak_last_medecin')||'';
+  if (!sel) return;
+  
+  const cur=sel.value||sessionStorage.getItem('chncak_last_medecin')||'';
+  const medecins = JSON.parse(sessionStorage.getItem('chncak_medecins') || '[]');
+  
   sel.innerHTML='<option value="">— Choisir un médecin —</option>'+
-    medecins.map(m=>`<option value="${m.name}"${cur===m.name?' selected':''}>${m.name}${m.grade?' ('+m.grade+')':''}</option>`).join('');
+    medecins.map(m => {
+      const fullName = `Dr ${m.prenom} ${m.nom}`;
+      const display = `${fullName}${m.specialite ? ' (' + m.specialite + ')' : ''}`;
+      return `<option value="${fullName}"${cur===fullName?' selected':''}>${display}</option>`;
+    }).join('');
+  
   if(cur) sel.value=cur;
 }
 
 function renderMedecins(){
   populateMedecinSelect();
+  const medecins = JSON.parse(sessionStorage.getItem('chncak_medecins') || '[]');
   document.getElementById('med-list').innerHTML=medecins.length?
     medecins.map((m,i)=>`
       <div class="med-item">
         <div class="med-info">
-          <div class="med-avatar">${m.name.split(' ').filter(w=>w.match(/[A-Z]/)).map(w=>w[0]).slice(0,2).join('')||m.name.substring(0,2).toUpperCase()}</div>
+          <div class="med-avatar">${(m.prenom?.[0]||'')+(m.nom?.[0]||'')}</div>
           <div>
-            <div class="med-name">${m.name}</div>
-            <div class="med-grade">${m.grade||'—'}</div>
+            <div class="med-name">Dr ${m.prenom || ''} ${m.nom || ''}</div>
+            <div class="med-grade">${m.specialite||'—'}</div>
+            <div style="font-size:11px;color:#666;margin-top:4px">
+              ${m.email ? '✉ ' + m.email : ''} ${m.email && m.contact ? ' • ' : ''} ${m.contact ? '☎ ' + m.contact : ''}
+            </div>
           </div>
         </div>
         <div class="med-actions">
@@ -2280,7 +2314,7 @@ function addMedecin() {
   const contact = prompt('Téléphone:');
   if (!contact) return;
   
-  const medecins = JSON.parse(localStorage.getItem('chncak_medecins') || '[]');
+  const medecins = JSON.parse(sessionStorage.getItem('chncak_medecins') || '[]');
   
   const newMedecin = {
     id: 'med_' + Date.now(),
@@ -2293,7 +2327,7 @@ function addMedecin() {
   };
   
   medecins.push(newMedecin);
-  localStorage.setItem('chncak_medecins', JSON.stringify(medecins));
+  sessionStorage.setItem('chncak_medecins', JSON.stringify(medecins));
   
   alert('✅ Médecin ajouté avec succès!');
   
@@ -3025,7 +3059,7 @@ Cela déduira les flacons utilisés du stock.`)) return;
     updated++;
   });
 
-  localStorage.setItem('chncak_catalog', JSON.stringify(catalog));
+  sessionStorage.setItem('chncak_catalog', JSON.stringify(catalog));
 
   // Log to historique
   const entry = {
@@ -3041,9 +3075,9 @@ Cela déduira les flacons utilisés du stock.`)) return;
       return calc?`${d.name}: ${calc.nbFlacons} flacon(s)`:null;
     }).filter(Boolean).join(', ')
   };
-  const sorties = JSON.parse(localStorage.getItem('chncak_sorties')||'[]');
+  const sorties = JSON.parse(sessionStorage.getItem('chncak_sorties')||'[]');
   sorties.unshift(entry);
-  localStorage.setItem('chncak_sorties', JSON.stringify(sorties));
+  sessionStorage.setItem('chncak_sorties', JSON.stringify(sorties));
 
   let msg = '\u2705 Stock mis \u00e0 jour pour ' + updated + ' m\u00e9dicament(s).';
   if(warnings.length) msg += '\n\nAvertissements :\n' + warnings.join('\n');
@@ -3857,8 +3891,8 @@ function printPostChimio(){
 /* ============================================================
    PROGRAMME HEBDOMADAIRE — Fonctions principales
 ============================================================ */
-let programmeData = JSON.parse(localStorage.getItem('chncak_programme')||'{}');
-let progConfig = JSON.parse(localStorage.getItem('chncak_prog_config')||'{"resp1":"FATOUMATA FAYE","resp2":"BINTA SOW","salle":"SALLE CHIMIO"}');
+let programmeData = JSON.parse(sessionStorage.getItem('chncak_programme')||'{}');
+let progConfig = JSON.parse(sessionStorage.getItem('chncak_prog_config')||'{"resp1":"FATOUMATA FAYE","resp2":"BINTA SOW","salle":"SALLE CHIMIO"}');
 let currentDay = 0;
 
 const JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi'];
@@ -3873,11 +3907,11 @@ function saveProgrammeConfig(){
   progConfig.resp1 = document.getElementById('prog-resp1').value;
   progConfig.resp2 = document.getElementById('prog-resp2').value;
   progConfig.salle = document.getElementById('prog-salle').value;
-  localStorage.setItem('chncak_prog_config', JSON.stringify(progConfig));
+  sessionStorage.setItem('chncak_prog_config', JSON.stringify(progConfig));
 }
 
 function saveProgramme(){
-  localStorage.setItem('chncak_programme', JSON.stringify(programmeData));
+  sessionStorage.setItem('chncak_programme', JSON.stringify(programmeData));
 }
 
 function getSemaineKey(){
@@ -3946,10 +3980,10 @@ function saveDayFromTable(){
 }
 
 function renderProgramme() {
-  const el = document.getElementById('programme-content');
+  const el = document.getElementById('patients-rdv-list');
   if (!el) return;
   
-  const patients = getPatients();
+  const patients = JSON.parse(sessionStorage.getItem('chncak_patients') || '[]');
   
   // Patients avec RDV (y compris les patients traités avec prochainRdv)
   const avecRdv = patients.filter(p => p.prochainRdv);
@@ -3984,9 +4018,12 @@ function renderProgramme() {
         ${rdvDate.toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'})}
       </td>
       <td style="padding:10px 12px;font-size:11px">
-        <span style="background:${p.statut==='Terminé'?'var(--gray-light)':'var(--green-pale)'};color:${p.statut==='Terminé'?'var(--gray-mid)':'var(--green)'};padding:3px 8px;border-radius:4px;font-weight:600">
-          ${p.statut==='Terminé'?'✓ Terminé':'● En cours'}
+        <span style="background:${p.statut==='Terminé' || p.statut==='Traité'?'var(--gray-light)':'var(--green-pale)'};color:${p.statut==='Terminé' || p.statut==='Traité'?'var(--gray-mid)':'var(--green)'};padding:3px 8px;border-radius:4px;font-weight:600">
+          ${p.statut==='Terminé' || p.statut==='Traité'?'✓ Terminé':'● En cours'}
         </span>
+      </td>
+      <td style="padding:10px 12px;text-align:center">
+        ${p.statut !== 'Terminé' && p.statut !== 'Traité' ? `<button onclick="setStatut('${p.id}', 'Traité')" style="background:#27AE60;color:white;border:none;padding:6px 14px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600">✓ Traité</button>` : '—'}
       </td>
     </tr>`;
   }).join('');
@@ -4386,335 +4423,121 @@ function periodLabel(period){
   return 'Rapport global — Toutes périodes';
 }
 
-function renderStats(){
-  const period  = getStatsPeriod();
-  const allHist = historique;
-  const allSorties = JSON.parse(localStorage.getItem('chncak_sorties')||'[]');
-  const hist    = filterByPeriod(allHist, period);
-  const sorties = filterByPeriod(allSorties, period);
-  const el      = document.getElementById('stats-content');
-
-  if(!hist.length && !sorties.length){
-    el.innerHTML = `<div style="background:white;border:1px solid var(--gray-border);border-radius:var(--radius-lg);padding:60px;text-align:center;color:var(--gray-mid)">
-      <div style="font-size:40px;margin-bottom:12px">📊</div>
-      <div style="font-size:14px;font-weight:500">Aucune donnée disponible</div>
-      <div style="font-size:13px;margin-top:6px">Commencez à enregistrer des protocoles et à valider des préparations.</div>
-    </div>`;
-    return;
-  }
-
-  // ── KPIs ──
-  const total      = hist.length;
-  const patients   = new Set(hist.map(h=>h.nom+h.prenom)).size;
-  const thisMonth  = hist.filter(h=>{ const d=new Date(h.dateTs); const n=new Date(); return d.getMonth()===n.getMonth()&&d.getFullYear()===n.getFullYear(); }).length;
-  const nbSorties  = sorties.length;
-
-  // ── Protocol counts ──
-  const protoCount={}, medecinCount={}, indicCount={}, monthCount={};
-  hist.forEach(h=>{
-    protoCount[h.protoName]  = (protoCount[h.protoName]||0)+1;
-    if(h.medecin) medecinCount[h.medecin]=(medecinCount[h.medecin]||0)+1;
-    if(h.indication){
-      const ind=h.indication.replace('Chimiothérapie ','');
-      indicCount[ind]=(indicCount[ind]||0)+1;
-    }
-    const d=new Date(h.dateTs);
-    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-    monthCount[key]=(monthCount[key]||0)+1;
-  });
-
-  // ── Molecule usage from sorties ──
-  const molCount={}, molFlacons={};
-  sorties.forEach(s=>{
-    if(s.details){
-      s.details.split(', ').forEach(detail=>{
-        const m = detail.match(/^(.+?):\s*(\d+)\s*flacon/);
-        if(m){
-          const mol=m[1].trim(), fl=parseInt(m[2]);
-          molCount[mol]   = (molCount[mol]||0)+1;
-          molFlacons[mol] = (molFlacons[mol]||0)+fl;
-        }
-      });
-    }
-  });
-  // Fallback: count molecule usage from historique protocol drugs
-  if(!Object.keys(molCount).length){
-    hist.forEach(h=>{
-      const proto = PROTOCOLS.find(p=>p.id===h.protoId||p.name===h.protoName);
-      if(!proto) return;
-      proto.drugs.filter(d=>d.name&&!d.t).forEach(d=>{
-        molCount[d.name] = (molCount[d.name]||0)+1;
-      });
-    });
-  }
-
-  const topProtos   = Object.entries(protoCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  const topMedecins = Object.entries(medecinCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  const topIndics   = Object.entries(indicCount).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const months      = Object.entries(monthCount).sort((a,b)=>a[0].localeCompare(b[0])).slice(-6);
-  const topMols     = Object.entries(molCount).sort((a,b)=>b[1]-a[1]);
-  const maxMonth    = Math.max(...months.map(m=>m[1]),1);
-  const maxProto    = Math.max(...topProtos.map(p=>p[1]),1);
-  const maxMol      = Math.max(...topMols.map(m=>m[1]),1);
-
-  // Colors for molecules
-  const MOL_COLORS = ['#0A3D7A','#0B5E3C','#6B3FA0','#8B1A1A','#7A4B00','#185FA5','#C0392B','#2E86AB','#A23B72','#16A085'];
-
-  el.innerHTML = `
-    <!-- Bandeau période -->
-  `;
+function renderStats() {
+  // Récupérer données
+  const protocols = JSON.parse(sessionStorage.getItem('chncak_protocols') || '[]');
+  const patients = JSON.parse(sessionStorage.getItem('chncak_patients') || '[]');
+  const medecins = JSON.parse(sessionStorage.getItem('chncak_medecins') || '[]');
   
-    <div style="background:linear-gradient(135deg,var(--blue),var(--blue2));
+  // Calculer statistiques
+  const stats = {
+    protocoles: protocols.length,
+    protocolesValides: protocols.filter(p => p.statut === 'Validé' || p.statut === 'En attente').length,
+    patientsTotal: patients.length,
+    patientsTraites: patients.filter(p => p.statut === 'Traité' || p.statut === 'Terminé').length,
+    patientsEnCours: patients.filter(p => p.statut === 'En cours').length,
+    medecins: medecins.length,
+    
+    // Protocoles par type
+    typesProtocoles: {},
+    
+    // Médecins prescripteurs
+    medecinsPrescripteurs: {}
+  };
   
-  // Statistiques par médicament
-  const medsEl = document.getElementById('stats-medicaments');
-  if (medsEl) {
-    const medCounts = {};
-    
-    patients.forEach(p => {
-      if (p.protocole) {
-        const proto = p.protocole.toUpperCase();
-        medCounts[proto] = (medCounts[proto] || 0) + 1;
-      }
-    });
-    
-    const medEntries = Object.entries(medCounts).sort((a,b) => b[1] - a[1]);
-    
-    if (medEntries.length > 0) {
-      const medRows = medEntries.map(([med, count]) => `
-        <tr style="border-bottom:1px solid #eee">
-          <td style="padding:10px 15px;font-size:13px;font-weight:600;color:var(--blue)">${med}</td>
-          <td style="padding:10px 15px;text-align:center;font-size:18px;font-weight:700;color:var(--green)">${count}</td>
-        </tr>
-      `).join('');
+  // Compter types de protocoles
+  protocols.forEach(p => {
+    const proto = p.protocole || 'Non spécifié';
+    stats.typesProtocoles[proto] = (stats.typesProtocoles[proto] || 0) + 1;
+  });
+  
+  // Compter médecins prescripteurs
+  protocols.forEach(p => {
+    const med = p.medecin || 'Non assigné';
+    stats.medecinsPrescripteurs[med] = (stats.medecinsPrescripteurs[med] || 0) + 1;
+  });
+  
+  // Afficher
+  const container = document.querySelector('#page-stats .card-body') || document.getElementById('page-stats');
+  
+  if (container) {
+    container.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px">
+        <div style="background:#EEF4FD;padding:16px;border-radius:8px">
+          <div style="font-size:28px;font-weight:700;color:#0A3D7A">${stats.protocoles}</div>
+          <div style="font-size:13px;color:#666;margin-top:4px">Protocoles total</div>
+        </div>
+        <div style="background:#E4F5ED;padding:16px;border-radius:8px">
+          <div style="font-size:28px;font-weight:700;color:#0B5E3C">${stats.patientsTotal}</div>
+          <div style="font-size:13px;color:#666;margin-top:4px">Patients total</div>
+        </div>
+        <div style="background:#FFF3CD;padding:16px;border-radius:8px">
+          <div style="font-size:28px;font-weight:700;color:#856404">${stats.patientsEnCours}</div>
+          <div style="font-size:13px;color:#666;margin-top:4px">Patients en cours</div>
+        </div>
+        <div style="background:#E5E7EB;padding:16px;border-radius:8px">
+          <div style="font-size:28px;font-weight:700;color:#374151">${stats.patientsTraites}</div>
+          <div style="font-size:13px;color:#666;margin-top:4px">Patients traités</div>
+        </div>
+      </div>
       
-      medsEl.innerHTML = `
-        <div style="background:white;border-radius:8px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.1)">
-          <h3 style="margin:0 0 15px 0;font-size:16px;color:var(--blue)">💊 Médicaments Utilisés</h3>
-          <table style="width:100%;border-collapse:collapse">
-            <thead>
-              <tr style="background:#f5f5f5;border-bottom:2px solid #ddd">
-                <th style="padding:10px 15px;text-align:left;font-size:12px;font-weight:600">Protocole</th>
-                <th style="padding:10px 15px;text-align:center;font-size:12px;font-weight:600">Nombre</th>
-              </tr>
-            </thead>
-            <tbody>${medRows}</tbody>
-          </table>
-        </div>`;
-    } else {
-      medsEl.innerHTML = `<div style="text-align:center;padding:40px;color:#999">Aucun médicament enregistré</div>`;
-    }
-  }color:white;border-radius:var(--radius-lg);padding:10px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">
-      <div style="font-size:13px;font-weight:600">&#128200; ${periodLabel(period)}</div>
-      <div style="font-size:11px;opacity:0.8">Généré le ${new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'})} à ${new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div>
-    </div>
-    <!-- KPI Cards -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
-      <div class="stat-card" style="border-left:4px solid var(--blue)">
-        <div class="stat-val">${total}</div>
-        <div class="stat-label">Protocoles total</div>
-      </div>
-      <div class="stat-card" style="border-left:4px solid var(--green2)">
-        <div class="stat-val">${patients}</div>
-        <div class="stat-label">Patients uniques</div>
-      </div>
-      <div class="stat-card" style="border-left:4px solid var(--amber2)">
-        <div class="stat-val">${thisMonth}</div>
-        <div class="stat-label">Ce mois-ci</div>
-      </div>
-      <div class="stat-card" style="border-left:4px solid #6B3FA0">
-        <div class="stat-val">${nbSorties}</div>
-        <div class="stat-label">Préparations validées</div>
-      </div>
-    </div>
-
-    <!-- Molécules utilisées -->
-    ${topMols.length ? `
-    <div class="card" style="margin-bottom:14px;border-left:4px solid #6B3FA0">
-      <div class="card-header" style="background:#F5F0FF">
-        <div class="card-num" style="background:#6B3FA0">💊</div>
-        <h2 style="color:#4A2A80">Utilisation des molécules (sorties stock validées)</h2>
-      </div>
-      <div class="card-body" style="padding:14px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-          <!-- Left col: bar chart -->
-          <div>
-            <div style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;margin-bottom:8px">Nombre de préparations par molécule</div>
-            ${topMols.map(([mol,n],i)=>`
-              <div style="margin-bottom:7px">
-                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
-                  <span style="font-weight:600;color:${MOL_COLORS[i%MOL_COLORS.length]}">${mol}</span>
-                  <span style="font-weight:700;color:${MOL_COLORS[i%MOL_COLORS.length]}">${n} prépa.</span>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:14px;font-weight:600">Types de chimiothérapie</h3></div>
+          <div class="card-body">
+            ${Object.keys(stats.typesProtocoles).length > 0 ? 
+              Object.entries(stats.typesProtocoles).map(([type, count]) => `
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee">
+                  <span style="font-size:13px">${type}</span>
+                  <span style="font-weight:600;color:#0A3D7A">${count}</span>
                 </div>
-                <div style="background:var(--gray-border);border-radius:4px;height:10px;overflow:hidden">
-                  <div style="background:${MOL_COLORS[i%MOL_COLORS.length]};height:100%;width:${Math.round(n/maxMol*100)}%;border-radius:4px"></div>
-                </div>
-              </div>`).join('')}
-          </div>
-          <!-- Right col: flacons table -->
-          <div>
-            <div style="font-size:11px;font-weight:600;color:var(--gray-mid);text-transform:uppercase;margin-bottom:8px">Flacons consommés au total</div>
-            <table style="width:100%;border-collapse:collapse;font-size:12px">
-              <thead><tr style="background:#F5F0FF">
-                <th style="padding:6px 10px;text-align:left;font-size:11px;color:#4A2A80;border-bottom:2px solid #D0C0F0">Molécule</th>
-                <th style="padding:6px 10px;text-align:center;font-size:11px;color:#4A2A80;border-bottom:2px solid #D0C0F0">Prépas</th>
-                <th style="padding:6px 10px;text-align:center;font-size:11px;color:#4A2A80;border-bottom:2px solid #D0C0F0">Flacons</th>
-                <th style="padding:6px 10px;text-align:center;font-size:11px;color:#4A2A80;border-bottom:2px solid #D0C0F0">Moy/prépa</th>
-              </tr></thead>
-              <tbody>
-                ${topMols.map(([mol,n],i)=>{
-                  const fl = molFlacons[mol]||0;
-                  const moy = fl>0 ? (fl/n).toFixed(1) : '—';
-                  return `<tr style="${i%2===0?'background:var(--gray-light)':''}">
-                    <td style="padding:5px 10px;border-bottom:1px solid var(--gray-border);font-weight:600;font-size:11px;color:${MOL_COLORS[i%MOL_COLORS.length]}">${mol}</td>
-                    <td style="padding:5px 10px;border-bottom:1px solid var(--gray-border);text-align:center;font-weight:700">${n}</td>
-                    <td style="padding:5px 10px;border-bottom:1px solid var(--gray-border);text-align:center">
-                      <span style="background:#F5F0FF;color:#6B3FA0;border-radius:4px;padding:2px 8px;font-weight:700">${fl}</span>
-                    </td>
-                    <td style="padding:5px 10px;border-bottom:1px solid var(--gray-border);text-align:center;color:var(--gray-mid)">${moy}</td>
-                  </tr>`;
-                }).join('')}
-              </tbody>
-            </table>
+              `).join('') : 
+              '<div style="text-align:center;color:#999;padding:20px">Aucun protocole</div>'
+            }
           </div>
         </div>
-      </div>
-    </div>` : `
-    <div style="background:var(--amber-pale);border:1px solid #F0C060;border-radius:var(--radius-lg);padding:14px;margin-bottom:14px;font-size:13px;color:var(--amber)">
-      ⚠ Aucune préparation validée pour le moment. Utilisez le bouton <b>"Valider sortie stock"</b> dans l'onglet <b>Préparation</b> pour alimenter ces statistiques.
-    </div>`}
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-      <!-- Top Protocoles -->
-      <div class="card">
-        <div class="card-header"><div class="card-num">📊</div><h2>Protocoles les plus utilisés</h2></div>
-        <div class="card-body" style="padding:12px">
-          ${topProtos.map(([name,n])=>`
-            <div style="margin-bottom:8px">
-              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
-                <span style="font-weight:600">${name}</span>
-                <span style="color:var(--blue);font-weight:700">${n} cure${n>1?'s':''}</span>
-              </div>
-              <div style="background:var(--gray-border);border-radius:4px;height:8px;overflow:hidden">
-                <div style="background:var(--blue);height:100%;width:${Math.round(n/maxProto*100)}%;border-radius:4px"></div>
-              </div>
-            </div>`).join('')}
+        
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:14px;font-weight:600">Médecins prescripteurs</h3></div>
+          <div class="card-body">
+            ${Object.keys(stats.medecinsPrescripteurs).length > 0 ? 
+              Object.entries(stats.medecinsPrescripteurs).map(([med, count]) => `
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee">
+                  <span style="font-size:13px">${med}</span>
+                  <span style="font-weight:600;color:#0B5E3C">${count}</span>
+                </div>
+              `).join('') : 
+              '<div style="text-align:center;color:#999;padding:20px">Aucun médecin</div>'
+            }
+          </div>
         </div>
-      </div>
-
-      <!-- Activité mensuelle -->
-      <div class="card">
-        <div class="card-header"><div class="card-num">📅</div><h2>Activité mensuelle</h2></div>
-        <div class="card-body" style="padding:12px">
-          ${months.map(([m,n])=>`
-            <div style="margin-bottom:8px">
-              <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
-                <span style="font-weight:600">${m}</span>
-                <span style="color:var(--green2);font-weight:700">${n}</span>
-              </div>
-              <div style="background:var(--gray-border);border-radius:4px;height:8px;overflow:hidden">
-                <div style="background:var(--green2);height:100%;width:${Math.round(n/maxMonth*100)}%;border-radius:4px"></div>
-              </div>
-            </div>`).join('')}
+      
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:14px;font-weight:600">Médicaments utilisés</h3></div>
+          <div class="card-body">
+            <div style="text-align:center;color:#999;padding:20px;font-size:12px">
+              À venir : Liste des médicaments selon protocoles
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
-      <!-- Top Médecins -->
-      <div class="card">
-        <div class="card-header"><div class="card-num">👨‍⚕️</div><h2>Prescriptions par médecin</h2></div>
-        <div class="card-body" style="padding:12px">
-          ${topMedecins.length ? topMedecins.map(([name,n])=>`
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-border)">
-              <span style="font-size:12px;font-weight:500">${name}</span>
-              <span style="background:var(--blue-pale);color:var(--blue);border-radius:10px;padding:2px 10px;font-size:11px;font-weight:600">${n}</span>
-            </div>`).join('')
-          : '<p style="color:var(--gray-mid);font-size:12px">Aucun médecin enregistré.</p>'}
+        
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:14px;font-weight:600">Nombre de préparations</h3></div>
+          <div class="card-body">
+            <div style="text-align:center;padding:20px">
+              <div style="font-size:32px;font-weight:700;color:#0A3D7A">${stats.protocoles}</div>
+              <div style="font-size:12px;color:#666;margin-top:4px">Préparations total</div>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <!-- Indications -->
-      <div class="card">
-        <div class="card-header"><div class="card-num">🏥</div><h2>Types de chimiothérapie</h2></div>
-        <div class="card-body" style="padding:12px">
-          ${topIndics.map(([name,n])=>`
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--gray-border)">
-              <span style="font-size:12px;font-weight:500">${name}</span>
-              <span style="background:var(--green-pale);color:var(--green);border-radius:10px;padding:2px 10px;font-size:11px;font-weight:600">${n}</span>
-            </div>`).join('')}
-        </div>
-      </div>
-    </div>
-
-    <!-- Historique sorties récentes -->
-    ${sorties.length ? `
-    <div class="card" style="margin-bottom:14px">
-      <div class="card-header"><div class="card-num">📦</div><h2>Dernières sorties stock validées</h2></div>
-      <div class="card-body" style="padding:0;overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:12px">
-          <thead><tr style="background:var(--gray-light)">
-            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Date</th>
-            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Patient</th>
-            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Protocole</th>
-            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Médicaments sortis</th>
-          </tr></thead>
-          <tbody>
-            ${sorties.slice(0,10).map((s,i)=>`<tr style="${i%2===0?'background:var(--gray-light)':''}">
-              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);color:var(--gray-mid)">${s.date}</td>
-              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);font-weight:600">${s.patient}</td>
-              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border)">
-                <span style="background:var(--blue-pale);color:var(--blue);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600">${s.protocole}</span>
-              </td>
-              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);font-size:11px;color:var(--gray-mid)">${s.details||'—'}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>` : ''}
-
-    <!-- 10 derniers protocoles -->
-    <div class="card">
-      <div class="card-header"><div class="card-num">🕐</div><h2>10 derniers protocoles enregistrés</h2></div>
-      <div class="card-body" style="padding:0;overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:500px">
-          <thead><tr style="background:var(--gray-light)">
-            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Patient</th>
-            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Protocole</th>
-            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Médecin</th>
-            <th style="padding:8px 12px;text-align:left;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Date</th>
-            <th style="padding:8px 12px;text-align:center;font-size:11px;color:var(--gray-mid);border-bottom:1px solid var(--gray-border)">Cure</th>
-          </tr></thead>
-          <tbody>
-            ${hist.slice(0,10).map((h,i)=>`<tr style="${i%2===0?'background:var(--gray-light)':''}">
-              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);font-weight:600">${h.prenom} ${h.nom}</td>
-              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border)">
-                <span style="background:var(--blue-pale);color:var(--blue);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600">${h.protoName}</span>
-              </td>
-              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);color:var(--gray-mid)">${h.medecin||'—'}</td>
-              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);color:var(--gray-mid)">${h.date}</td>
-              <td style="padding:7px 12px;border-bottom:1px solid var(--gray-border);text-align:center">
-                ${h.cureNum?`<span style="background:var(--green-pale);color:var(--green);border-radius:10px;padding:2px 8px;font-size:11px;font-weight:600">N°${h.cureNum}</span>`:'—'}
-              </td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  `;
+      </div></div>
+    `;
+  }
 }
 
-/* ============================================================
-   GESTION RENDEZ-VOUS
-============================================================ */
-// RDV storage: [{id, prenom, nom, age, dossier, proto, medecin, dateRdv, dateProto, cureNum}]
-/* ============================================================
-   GESTION PATIENTS EN COURS DE TRAITEMENT
-============================================================ */
-let patientsFilter = 'tous';
 
-function getPatients(){ return JSON.parse(localStorage.getItem('chncak_patients')||'[]'); }
-function savePatients(list){ localStorage.setItem('chncak_patients', JSON.stringify(list)); }
 
 function showAddPatientModal(editId){
   const modal = document.getElementById('patient-modal');
@@ -5158,8 +4981,8 @@ function clearAllHistory(){
    GESTION RENDEZ-VOUS
 ============================================================ */
 // RDV storage: [{id, prenom, nom, age, dossier, proto, medecin, dateRdv, dateProto, cureNum}]
-function getRdvList(){ return JSON.parse(localStorage.getItem('chncak_rdv')||'[]'); }
-function saveRdvList(list){ localStorage.setItem('chncak_rdv', JSON.stringify(list)); }
+function getRdvList(){ return JSON.parse(sessionStorage.getItem('chncak_rdv')||'[]'); }
+function saveRdvList(list){ sessionStorage.setItem('chncak_rdv', JSON.stringify(list)); }
 
 function calcRdvAuto(){
   const proto = PROTOCOLS.find(p=>p.id===selId);
@@ -5327,7 +5150,7 @@ function validateStockFromRdv(id){
     catalog[catIdx].qteStock = Math.max(0, stockActuel - flaconsUsed);
 
     // Record sortie
-    const sorties = JSON.parse(localStorage.getItem('chncak_sorties')||'[]');
+    const sorties = JSON.parse(sessionStorage.getItem('chncak_sorties')||'[]');
     sorties.push({
       date:    rdv.dateRdv,
       dateTs:  new Date(rdv.dateRdv+'T00:00:00').getTime(),
@@ -5338,14 +5161,14 @@ function validateStockFromRdv(id){
       flacons: flaconsUsed,
       mol:     drugName,
     });
-    localStorage.setItem('chncak_sorties', JSON.stringify(sorties));
+    sessionStorage.setItem('chncak_sorties', JSON.stringify(sorties));
     updated++;
   });
 
   saveCatalog();
 
   // ── Auto-add/update patient dans la liste Patients ──
-  const patients = getPatients();
+  const patients = JSON.parse(sessionStorage.getItem('chncak_patients') || '[]');
   const pIdx = patients.findIndex(p=>
     (p.dossier&&p.dossier===rdv.dossier&&rdv.dossier)||(p.prenom===rdv.prenom&&p.nom===rdv.nom)
   );
@@ -5638,7 +5461,7 @@ function printBonRDV(){
 function printRapport(){
   const period   = getStatsPeriod();
   const allHist  = historique;
-  const allSorties = JSON.parse(localStorage.getItem('chncak_sorties')||'[]');
+  const allSorties = JSON.parse(sessionStorage.getItem('chncak_sorties')||'[]');
   const hist     = filterByPeriod(allHist, period);
   const sorties  = filterByPeriod(allSorties, period);
   const label    = periodLabel(period);
@@ -6228,10 +6051,10 @@ const DEFAULT_CATALOG = [
   {name:'ACIDE ZOLÉDRONIQUE',      dci:'Acide zolédronique',  dosages:[4],           forme:'Injectable', cond:'B1',  qteStock:50,  prixUnit:45000},
 ];
 
-let catalog = JSON.parse(localStorage.getItem('chncak_catalog') || 'null') || DEFAULT_CATALOG;
+let catalog = JSON.parse(sessionStorage.getItem('chncak_catalog') || 'null') || DEFAULT_CATALOG;
 
 function saveCatalog(){
-  localStorage.setItem('chncak_catalog', JSON.stringify(catalog));
+  sessionStorage.setItem('chncak_catalog', JSON.stringify(catalog));
   const msg = document.getElementById('catalog-save-msg');
   msg.style.display='inline';
   setTimeout(()=>msg.style.display='none', 2000);
@@ -6477,7 +6300,7 @@ function renderCatalogTable(){
 function updateCatalogField(idx, field, val){
   if(!catalog[idx]) return;
   catalog[idx][field] = parseFloat(val)||0;
-  localStorage.setItem('chncak_catalog', JSON.stringify(catalog));
+  sessionStorage.setItem('chncak_catalog', JSON.stringify(catalog));
   // Silently refresh pharma calc if visible
   if(document.getElementById('page-pharmacie').classList.contains('active')) renderPharmacie();
 }
@@ -6627,7 +6450,7 @@ function scrollToCatalog(){
 function toggleDarkMode(){
   const isDark = document.body.classList.toggle('dark-mode');
   document.getElementById('dark-btn').textContent = isDark ? '☀️' : '🌙';
-  localStorage.setItem('chncak_dark', isDark ? '1' : '0');
+  sessionStorage.setItem('chncak_dark', isDark ? '1' : '0');
 }
 
 /* ============================================================
@@ -6745,7 +6568,7 @@ window.showPage = function(id, btn){
    INIT
 ============================================================ */
 // Restore dark mode preference
-if(localStorage.getItem('chncak_dark') === '1'){
+if(sessionStorage.getItem('chncak_dark') === '1'){
   document.body.classList.add('dark-mode');
   const btn = document.getElementById('dark-btn');
   if(btn) btn.textContent = '☀️';
@@ -6769,11 +6592,11 @@ updateProgress();
 // ══════════════════════════════════════════════════════════════
 
 function getOkChimio() {
-  return JSON.parse(localStorage.getItem('chncak_okchimio') || '[]');
+  return JSON.parse(sessionStorage.getItem('chncak_protocols') || '[]');
 }
 
 function saveOkChimio(data) {
-  localStorage.setItem('chncak_okchimio', JSON.stringify(data));
+  sessionStorage.setItem('chncak_protocols', JSON.stringify(data));
 }
 
 function renderOkChimio() {
@@ -6825,10 +6648,9 @@ function renderOkChimio() {
             <td style="padding:10px;text-align:center">C${e.cure}</td>
             <td style="padding:10px">${e.medecin}</td>
             <td style="padding:10px;text-align:center">
-              <button <button onclick="previewProtocol(${e.id})" style="background:#2196F3;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;margin-right:4px">👁 Aperçu</button>
+              <button onclick="previewProtocol(${e.id})" style="background:#2196F3;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;margin-right:4px">👁 Aperçu</button>
               <button onclick="refuserProtocol(${e.id})" style="background:#E74C3C;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;margin-right:4px">✕ Refuser</button>
-              onclick="validerOkChimio(${e.id})" style="background:#E4F5ED;border:1px solid #0B5E3C;color:#0B5E3C;padding:6px 12px;border-radius:4px;cursor:pointer;margin-right:4px">✓ Valider</button>
-              <button onclick="refuserOkChimio(${e.id})" style="background:#FDEAEA;border:1px solid #E74C3C;color:#E74C3C;padding:6px 12px;border-radius:4px;cursor:pointer">✕ Refuser</button>
+              <button onclick="validerOkChimio(${e.id})" style="background:#27AE60;color:white;border:none;padding:6px 12px;border-radius:4px;cursor:pointer;margin-right:4px">✓ Valider</button>
             </td>
           </tr>
         `).join('')}
@@ -6869,15 +6691,23 @@ function refuserOkChimio(id) {
 // ══════════════════════════════════════════════════════════════
 
 function getHistorique() {
-  return JSON.parse(localStorage.getItem('chncak_historique') || '[]');
+  return JSON.parse(sessionStorage.getItem('chncak_historique') || '[]');
 }
 
 function renderArchive(){
+  console.log('=== renderArchive appelée ===');
   const list = document.getElementById('archive-list');
-  if(!list) return;
+  if(!list) {
+    console.log('❌ Element archive-list NON TROUVÉ');
+    return;
+  }
   
-  const patients = getPatients();
-  const terminated = patients.filter(p => p.statut === 'Terminé' || p.statut === 'termine');
+  const patients = JSON.parse(sessionStorage.getItem('chncak_patients') || '[]');
+  console.log('Total patients:', patients.length);
+  patients.forEach(p => console.log(`  ${p.nom}: ${p.statut}`));
+  
+  const terminated = patients.filter(p => p.statut === 'Terminé' || p.statut === 'termine' || p.statut === 'Traité');
+  console.log('Patients terminés:', terminated.length);
   
   if(terminated.length === 0){
     list.innerHTML = '<div style="text-align:center;padding:40px;color:#999;"><p style="font-size:16px;">📦 Aucun patient archivé</p><p style="font-size:13px;margin-top:8px;">Les patients marqués comme "Traité" apparaîtront ici</p></div>';
@@ -6917,45 +6747,58 @@ function renderArchive(){
 // FONCTION CHANGER STATUT PATIENT
 // ══════════════════════════════════════════════════════════════
 
-function setStatut(patientId, newStatut) {
-  const patients = JSON.parse(localStorage.getItem('chncak_patients') || '[]');
-  const idx = patients.findIndex(p => p && p.id === patientId);
+function setStatut(patientId, statut) {
+  const patients = JSON.parse(sessionStorage.getItem('chncak_patients') || '[]');
+  const idx = patients.findIndex(p => p.id === patientId);
   
   if (idx === -1) {
     alert('Patient non trouvé');
     return;
   }
   
-  // Modifier le patient
-  patients[idx].statut = newStatut;
+  patients[idx].statut = statut;
+  if (statut === 'Traité') {
+    // Archiver le patient
+    const archivedPatients = JSON.parse(sessionStorage.getItem('chncak_archived_patients') || '[]');
+    archivedPatients.push({...patients[idx]});
+    sessionStorage.setItem('chncak_archived_patients', JSON.stringify(archivedPatients));
+  }
+
   
-  // TOUJOURS archiver quand on sauvegarde
-  patients[idx].dateFin = new Date().toISOString();
-  
-  // Calculer prochain RDV
-  const proto = patients[idx].protocole;
-  if (proto) {
-    const rythmes = {
-      'folfox4': 14, 'ec100': 21, 'folfiri': 14, 'xeloda': 21, 'xelox': 21,
-      'folfoxiri': 14, 'gemox': 14, 'carbo_taxol': 21, 'ac': 21, 'tac': 21,
-      'tcf': 21, 'tem': 28, 'bep': 21, 'mvac': 28, 'gc': 21, 'xeliri': 21,
-      'herceptin': 21, 'avastin_zometa': 28, 'gem_avastin': 21
-    };
+  if (statut === 'Traité') {
+    // Marquer date de fin
+    patients[idx].dateFin = new Date().toISOString();
     
-    const jours = rythmes[proto] || 21;
-    const nextDate = new Date();
-    nextDate.setDate(nextDate.getDate() + jours);
-    patients[idx].prochainRdv = nextDate.toISOString().split('T')[0];
+    // Calculer prochain RDV selon protocole
+    const proto = (patients[idx].protocole || '').toUpperCase();
+    let joursRdv = 21; // Par défaut 3 semaines
+    
+    if (proto.includes('FOLFOX') || proto.includes('FOLFIRI') || proto.includes('GEMOX')) {
+      joursRdv = 14; // 2 semaines
+    } else if (proto.includes('EC') || proto.includes('XELODA')) {
+      joursRdv = 21; // 3 semaines
+    } else if (proto.includes('TEM') || proto.includes('MVAC')) {
+      joursRdv = 28; // 4 semaines
+    }
+    
+    // Calculer date
+    const nextRdv = new Date();
+    nextRdv.setDate(nextRdv.getDate() + joursRdv);
+    patients[idx].prochainRdv = nextRdv.toISOString().split('T')[0];
+    
+    console.log(`✓ Patient ${patients[idx].nom} traité - Prochain RDV: ${patients[idx].prochainRdv}`);
   }
   
   // Sauvegarder
-  localStorage.setItem('chncak_patients', JSON.stringify(patients));
+  sessionStorage.setItem('chncak_patients', JSON.stringify(patients));
+  if (typeof renderArchivedPatients === 'function') renderArchivedPatients();
   
   // Rafraîchir affichages
-  if (typeof renderPatients === 'function') renderPatients();
-  if (typeof renderPatientsList === 'function') renderPatientsList();
   if (typeof renderProgramme === 'function') renderProgramme();
   if (typeof renderArchive === 'function') renderArchive();
+  if (typeof renderPatients === 'function') renderPatients();
+  
+  alert(`✅ Statut mis à jour: ${statut}`);
 }
 
 </script>
@@ -7230,9 +7073,9 @@ function saveNewProtocol(event) {
   
   // Sauvegarder dans localStorage pour persistance
   try {
-    const customProtocols = JSON.parse(localStorage.getItem('chncak_custom_protocols') || '[]');
+    const customProtocols = JSON.parse(sessionStorage.getItem('chncak_custom_protocols') || '[]');
     customProtocols.push(newProtocol);
-    localStorage.setItem('chncak_custom_protocols', JSON.stringify(customProtocols));
+    sessionStorage.setItem('chncak_custom_protocols', JSON.stringify(customProtocols));
   } catch(e) {
     console.error('Erreur sauvegarde:', e);
   }
@@ -7250,7 +7093,7 @@ function saveNewProtocol(event) {
 // Charger les protocoles personnalisés au démarrage
 window.addEventListener('DOMContentLoaded', function() {
   try {
-    const customProtocols = JSON.parse(localStorage.getItem('chncak_custom_protocols') || '[]');
+    const customProtocols = JSON.parse(sessionStorage.getItem('chncak_custom_protocols') || '[]');
     customProtocols.forEach(proto => {
       // Vérifier si pas déjà dans PROTOCOLS
       if (!PROTOCOLS.find(p => p.id === proto.id)) {
@@ -7371,7 +7214,7 @@ function saveNewProtocole() {
   
   // Sauvegarder dans localStorage
   try {
-    localStorage.setItem('chncak_custom_protocols', JSON.stringify(PROTOCOLS.filter(p => 
+    sessionStorage.setItem('chncak_custom_protocols', JSON.stringify(PROTOCOLS.filter(p => 
       ['ec100', 'xeliri', 'herceptin', 'avastin_zometa', 'gem_avastin', id].includes(p.id)
     )));
   } catch(e) {
@@ -7393,7 +7236,7 @@ function saveNewProtocole() {
 // Charger les protocoles personnalisés au démarrage
 (function() {
   try {
-    const saved = localStorage.getItem('chncak_custom_protocols');
+    const saved = sessionStorage.getItem('chncak_custom_protocols');
     if (saved) {
       const custom = JSON.parse(saved);
       // Fusionner avec PROTOCOLS existants (éviter doublons)
@@ -7420,7 +7263,7 @@ function refuserProtocol(id) {
   
   if (reason === null) return; // Annulé
   
-  const protocols = JSON.parse(localStorage.getItem('chncak_protocols') || '[]');
+  const protocols = JSON.parse(sessionStorage.getItem('chncak_protocols') || '[]');
   const idx = protocols.findIndex(p => p.id === id);
   
   if (idx > -1) {
@@ -7429,7 +7272,7 @@ function refuserProtocol(id) {
     protocols[idx].refusedAt = new Date().toISOString();
     protocols[idx].refusalReason = reason;
     
-    localStorage.setItem('chncak_protocols', JSON.stringify(protocols));
+    sessionStorage.setItem('chncak_protocols', JSON.stringify(protocols));
     
     // Envoyer notification
     notifyProtocolRejection(id, reason);
@@ -7485,7 +7328,7 @@ function sendEmailNotification(to, subject, message) {
 
 // Email lors du refus de protocole
 function notifyProtocolRejection(protocolId, reason) {
-  const protocol = JSON.parse(localStorage.getItem('chncak_protocols') || '[]')
+  const protocol = JSON.parse(sessionStorage.getItem('chncak_protocols') || '[]')
     .find(p => p.id === protocolId);
   
   if (protocol) {
@@ -7509,7 +7352,7 @@ Date: ${new Date().toLocaleString('fr-FR')}
 
 // Email lors de la validation de protocole
 function notifyProtocolValidation(protocolId) {
-  const protocol = JSON.parse(localStorage.getItem('chncak_protocols') || '[]')
+  const protocol = JSON.parse(sessionStorage.getItem('chncak_protocols') || '[]')
     .find(p => p.id === protocolId);
   
   if (protocol) {
@@ -7530,7 +7373,7 @@ Le protocole est prêt pour la préparation.
     let medecinEmail = 'medecin@chncak.sn'; // Défaut
     
     if (protocol.medecinId) {
-      const medecins = JSON.parse(localStorage.getItem('chncak_medecins') || '[]');
+      const medecins = JSON.parse(sessionStorage.getItem('chncak_medecins') || '[]');
       const medecin = medecins.find(m => m.id === protocol.medecinId);
       
       if (medecin && medecin.email) {
@@ -7547,7 +7390,7 @@ Le protocole est prêt pour la préparation.
 
 // Fonction aperçu protocole
 function previewProtocol(protocolId) {
-  const protocols = JSON.parse(localStorage.getItem('chncak_protocols') || '[]');
+  const protocols = JSON.parse(sessionStorage.getItem('chncak_protocols') || '[]');
   const protocol = protocols.find(p => p.id === protocolId);
   
   if (!protocol) {
@@ -7613,6 +7456,339 @@ function previewProtocol(protocolId) {
   modal.addEventListener('click', (e) => {
     if (e.target === modal) modal.remove();
   });
+}
+
+
+
+// Fonction pour sauvegarder un protocole dans OK Chimio
+function saveProtocol() {
+  // Récupérer données du formulaire (vrais IDs)
+  const nom = document.getElementById('nom')?.value || '';
+  const prenom = document.getElementById('prenom')?.value || '';
+  const dossier = document.getElementById('dossier')?.value || '';
+  const poids = document.getElementById('poids')?.value || '';
+  const taille = document.getElementById('taille')?.value || '';
+  const dateProto = document.getElementById('date-protocole')?.value || '';
+  
+  // Protocole sélectionné (chercher dans différents endroits possibles)
+  let protocolName = '';
+  const protoSelect = document.getElementById('protocol-select') || 
+                      document.getElementById('ligne-traitement') ||
+                      document.querySelector('[name="protocole"]');
+  
+  if (protoSelect) {
+    protocolName = protoSelect.value || protoSelect.textContent || '';
+  }
+  
+  // Nom complet patient
+  const patientName = (prenom + ' ' + nom).trim();
+  
+  // Validation
+  if (!patientName || !dossier) {
+    alert('❌ Veuillez remplir au minimum: Nom/Prénom et Dossier');
+    return;
+  }
+  
+  // Calculer surface corporelle si poids et taille disponibles
+  let surface = 0;
+  if (poids && taille) {
+    const p = parseFloat(poids);
+    const t = parseFloat(taille) / 100; // cm → m
+    surface = Math.sqrt((p * t) / 3600);
+    surface = Math.round(surface * 100) / 100; // 2 décimales
+  }
+  
+  // Créer objet protocole (structure compatible renderOkChimio)
+  const newProtocol = {
+    id: Date.now(),
+    patient: {
+      nom: nom,
+      prenom: prenom,
+      dossier: dossier
+    },
+    protocole: protocolName || 'À définir',
+    cure: '1',
+    date: dateProto || new Date().toISOString().split('T')[0],
+    surface: surface,
+    poids: parseFloat(poids) || 0,
+    taille: parseFloat(taille) || 0,
+    medecin: 'À assigner',
+    medicaments: [],
+    statut: 'En attente',
+    dateCreation: new Date().toISOString()
+  };
+  
+  // Sauvegarder dans localStorage
+  const protocols = JSON.parse(sessionStorage.getItem('chncak_protocols') || '[]');
+  protocols.push(newProtocol);
+  sessionStorage.setItem('chncak_protocols', JSON.stringify(protocols));
+  
+  console.log('✓ Protocole sauvegardé:', newProtocol);
+  
+  
+  
+  // Envoyer email au médecin si renseigné
+  const medecinEmail = document.getElementById('medecin-email')?.value?.trim();
+  if (medecinEmail && medecinEmail.includes('@')) {
+    sendEmailNotification(
+      medecinEmail,
+      'Nouveau protocole de chimiothérapie',
+      `Un nouveau protocole a été créé pour ${patientName} (${dossier}).\n\nProtocole: ${protocolName}\nDate: ${dateProto}\n\nCordialement,\nService Oncologie CHNCAK`
+    );
+    console.log('✓ Email envoyé au médecin:', medecinEmail);
+  }alert('✅ Protocole sauvegardé avec succès !\n\nPatient: ' + patientName + '\nDossier: ' + dossier + '\n\nIl apparaît maintenant dans OK Chimio.');
+  
+  // Rafraîchir OK Chimio si la fonction existe
+  if (typeof renderOkChimio === 'function') {
+    renderOkChimio();
+  }
+}
+
+
+
+// Fonction pour vider la session (utile si l'écran login saute)
+function clearSession() {
+  localStorage.removeItem('chncak_currentUser');
+  alert('Session vidée ! La page va se recharger.');
+  location.reload();
+}
+
+
+// Ajouter médecin depuis formulaire (sans prompts)
+function addMedecinFromForm() {
+  const nom = document.getElementById('med-nom-input')?.value?.trim();
+  const prenom = document.getElementById('med-prenom-input')?.value?.trim();
+  const specialite = document.getElementById('med-specialite-input')?.value?.trim();
+  const email = document.getElementById('med-email-input')?.value?.trim();
+  const contact = document.getElementById('med-contact-input')?.value?.trim();
+  
+  if (!nom || !prenom) {
+    alert('❌ Veuillez remplir au minimum le nom et le prénom');
+    return;
+  }
+  
+  const medecins = JSON.parse(sessionStorage.getItem('chncak_medecins') || '[]');
+  
+  const newMedecin = {
+    id: 'med_' + Date.now(),
+    nom: nom,
+    prenom: prenom,
+    specialite: specialite || 'Non spécifié',
+    email: email || '',
+    contact: contact || '',
+    dateAjout: new Date().toISOString()
+  };
+  
+  medecins.push(newMedecin);
+  sessionStorage.setItem('chncak_medecins', JSON.stringify(medecins));
+  
+  console.log('✓ Médecin ajouté:', newMedecin);
+  
+  alert('✅ Médecin ajouté avec succès !');
+  
+  // Vider formulaire
+  document.getElementById('med-nom-input').value = '';
+  document.getElementById('med-prenom-input').value = '';
+  document.getElementById('med-specialite-input').value = '';
+  document.getElementById('med-email-input').value = '';
+  document.getElementById('med-contact-input').value = '';
+  
+  toggleAddMedForm();
+  
+  if (typeof renderMedecins === 'function') {
+    renderMedecins();
+  }
+}
+
+
+// Imprimer rapport statistiques
+function printStats() {
+  const protocols = JSON.parse(sessionStorage.getItem('chncak_protocols') || '[]');
+  const patients = JSON.parse(sessionStorage.getItem('chncak_patients') || '[]');
+  const medecins = JSON.parse(sessionStorage.getItem('chncak_medecins') || '[]');
+  
+  const stats = {
+    protocoles: protocols.length,
+    patientsTotal: patients.length,
+    patientsTraites: patients.filter(p => p.statut === 'Traité' || p.statut === 'Terminé').length,
+    patientsEnCours: patients.filter(p => p.statut === 'En cours').length,
+    medecins: medecins.length
+  };
+  
+  const typesProtocoles = {};
+  protocols.forEach(p => {
+    const proto = p.protocole || 'Non spécifié';
+    typesProtocoles[proto] = (typesProtocoles[proto] || 0) + 1;
+  });
+  
+  const printWindow = window.open('', '', 'width=800,height=600');
+  printWindow.document.write(`
+    <html>
+    <head>
+      <title>Rapport Statistiques - CHNCAK</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1 { color: #0A3D7A; border-bottom: 3px solid #0A3D7A; padding-bottom: 10px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0; }
+        .stat-card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-value { font-size: 32px; font-weight: bold; color: #0A3D7A; }
+        .stat-label { font-size: 14px; color: #666; margin-top: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #0A3D7A; color: white; }
+        .footer { margin-top: 30px; text-align: center; color: #999; font-size: 12px; }
+      </style>
+    </head>
+    <body>
+      <h1>📊 Rapport Statistiques Service Oncologie</h1>
+      <p><strong>CHNCAK Touba</strong> • Date: ${new Date().toLocaleDateString('fr-FR')}</p>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">${stats.protocoles}</div>
+          <div class="stat-label">Protocoles</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.patientsTotal}</div>
+          <div class="stat-label">Patients total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.patientsEnCours}</div>
+          <div class="stat-label">En cours</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${stats.patientsTraites}</div>
+          <div class="stat-label">Traités</div>
+        </div>
+      </div>
+      
+      <h2>Types de Chimiothérapie</h2>
+      <table>
+        <thead>
+          <tr><th>Protocole</th><th>Nombre</th></tr>
+        </thead>
+        <tbody>
+          ${Object.entries(typesProtocoles).map(([type, count]) => 
+            `<tr><td>${type}</td><td>${count}</td></tr>`
+          ).join('')}
+        </tbody>
+      </table>
+      
+      <div class="footer">
+        ChimioPro v3 - Service Oncologie-Radiothérapie CHNCAK
+      </div>
+      
+      <script>
+        window.onload = () => window.print();
+      <\/script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+// Effacer historique
+function clearHistory() {
+  if (confirm('⚠️ Voulez-vous vraiment effacer tout l\'historique ?\n\nCette action est irréversible.')) {
+    localStorage.removeItem('chncak_historique');
+    alert('✅ Historique effacé');
+    
+    // Rafraîchir Stats si visible
+    if (typeof renderStats === 'function') {
+      renderStats();
+    }
+  }
+}
+
+
+// Effacer historique
+function clearHistory() {
+  if (!confirm('⚠️ Êtes-vous sûr de vouloir effacer tout l\'historique ?\n\nCette action est irréversible !')) {
+    return;
+  }
+  
+  // Effacer localStorage
+  const keysToKeep = ['chncak_user', 'chncak_medecins', 'chncak_patients', 'chncak_protocols'];
+  const allKeys = Object.keys(localStorage);
+  
+  allKeys.forEach(key => {
+    if (!keysToKeep.includes(key)) {
+      localStorage.removeItem(key);
+    }
+  });
+  
+  alert('✅ Historique effacé avec succès !');
+  
+  // Rafraîchir Stats
+  if (typeof renderStats === 'function') {
+    renderStats();
+  }
+}
+
+
+// Forcer affichage bouton déconnexion
+setInterval(() => {
+  const user = sessionStorage.getItem('chncak_user');
+  const logoutBtn = document.getElementById('logout-button');
+  const loginScreen = document.getElementById('login-screen');
+  
+  if (user && logoutBtn && loginScreen) {
+    const loginVisible = window.getComputedStyle(loginScreen).display !== 'none';
+    
+    if (!loginVisible) {
+      // Utilisateur connecté
+      logoutBtn.style.display = 'block';
+      logoutBtn.style.visibility = 'visible';
+      logoutBtn.style.opacity = '1';
+    }
+  }
+}, 500);
+
+
+// Créer bouton déconnexion visible GARANTI
+function createLogoutButton() {
+  // Supprimer ancien si existe
+  const old = document.getElementById('logout-btn-forced');
+  if (old) old.remove();
+  
+  // Créer nouveau bouton
+  const btn = document.createElement('button');
+  btn.id = 'logout-btn-forced';
+  btn.textContent = '🚪 Déconnexion';
+  btn.onclick = logout;
+  
+  // Style GARANTI visible
+  btn.style.position = 'fixed';
+  btn.style.top = '20px';
+  btn.style.right = '20px';
+  btn.style.zIndex = '999999';
+  btn.style.background = '#E74C3C';
+  btn.style.color = 'white';
+  btn.style.border = 'none';
+  btn.style.padding = '12px 24px';
+  btn.style.borderRadius = '6px';
+  btn.style.cursor = 'pointer';
+  btn.style.fontWeight = '700';
+  btn.style.fontSize = '14px';
+  btn.style.boxShadow = '0 4px 12px rgba(231,76,60,0.4)';
+  btn.style.transition = 'all 0.2s';
+  
+  // Effet hover
+  btn.onmouseover = () => {
+    btn.style.background = '#C0392B';
+    btn.style.transform = 'translateY(-2px)';
+    btn.style.boxShadow = '0 6px 16px rgba(231,76,60,0.5)';
+  };
+  btn.onmouseout = () => {
+    btn.style.background = '#E74C3C';
+    btn.style.transform = 'translateY(0)';
+    btn.style.boxShadow = '0 4px 12px rgba(231,76,60,0.4)';
+  };
+  
+  // Ajouter au body
+  document.body.appendChild(btn);
+  
+  console.log('✅ Bouton déconnexion créé et ajouté au DOM');
 }
 
 </script>
@@ -7756,3 +7932,32 @@ NaCl 0.9% 250ml | ml | fix | 250"
 </div>
 
 
+
+    // Fonction pour afficher les patients archivés
+    function renderArchivedPatients() {
+      const archivedPatients = JSON.parse(sessionStorage.getItem('chncak_archived_patients') || '[]');
+      const container = document.getElementById('archivedPatientsList');
+      
+      if (!container) return;
+      
+      if (archivedPatients.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:#666;">Aucun patient archivé.</p>';
+        return;
+      }
+      
+      container.innerHTML = archivedPatients.map(p => `
+        <div style="border:1px solid #ddd;padding:10px;margin-bottom:10px;border-radius:4px;background:#f9f9f9;">
+          <strong>${p.nom || 'Inconnu'}</strong> (ID: ${p.id})<br>
+          <small>Statut: ${p.statut}</small><br>
+          <small>Date de fin: ${p.dateFin ? new Date(p.dateFin).toLocaleDateString() : 'N/A'}</small>
+        </div>
+      `).join('');
+    }
+    
+
+    <!-- Section pour les patients archivés -->
+    <div id="archivedPatientsSection" style="margin-top: 20px;">
+      <h3>📦 Patients Archivés</h3>
+      <div id="archivedPatientsList"></div>
+    </div>
+    
